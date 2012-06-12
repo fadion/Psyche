@@ -21,7 +21,7 @@ PHP Framework is FLOSS software licensed under the GPL License.
 ### PHP Framework Credits
 
 PHP Framework is developed by:
-	Fadion Dasho at [Laboratori.al](http://laboratori.al/)
+	Fadion Dasho at [Laboratori.al](http://laboratori.al/ "Web Developer and Designer from Tirana, Albania")
 	Baki Goxhaj at [WPlancer.Com](http://wplancer.com/ "WordPress Freelancer").
 
 

@@ -237,17 +237,17 @@ class Router {
 	
 	private static function make_reroute () {
 		$routes = static::$routes;
-		$pieces = static::$pieces;
 		$real_route = null;
 		
 		foreach ($routes as $key=>$val) {
 			$reroute = $val;
 			$route = explode('/', trim($key, ' /'));
+			$pieces = static::$pieces;
 			
 			$i = 0;
 			$make_reroute = false;
 			foreach ($route as $val) {
-				if ($val == $pieces[$i] or (static::parse_params($val, $pieces[$i]) and $pieces[$i] != null)) {
+				if (isset($pieces[$i]) and ($val == $pieces[$i] or (static::parse_params($val, $pieces[$i]) and $pieces[$i] != null))) {
 					$make_reroute = true;
 					$real_route = $reroute;
 					unset($pieces[$i]);
@@ -259,10 +259,10 @@ class Router {
 				
 				$i++;
 			}
-		}
-		
-		if ($make_reroute) {
-			return array_merge(explode('/', $real_route), $pieces);
+
+			if ($make_reroute) {
+				return array_merge(explode('/', $real_route), $pieces);
+			}
 		}
 		
 		return false;

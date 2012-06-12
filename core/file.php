@@ -26,14 +26,9 @@ class File {
 	}
 
 	public static function prepend ($file, $contents) {
-		$return = false;
 		$file_contents = static::read($file);
 
-		if ($file_contents) {
-			$return = static::write($file, $contents . $file_contents);
-		}
-
-		return $return;
+		return static::write($file, $contents . $file_contents);
 	}
 
 	public static function extension ($file) {

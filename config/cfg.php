@@ -26,4 +26,6 @@ class Cfg {
 	const DEFAULT_CONTROLLER = 'index';
 	const DEFAULT_METHOD = 'index';
 
+	const LOG_FILE = 'log.txt';
+
 }

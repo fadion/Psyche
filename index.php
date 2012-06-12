@@ -4,7 +4,8 @@ session_start();
 $loadable_classes = array(
 	'core' => array(
 				'error', 'loader', 'router', 'response', 'db', 'localizer', 'view', 'uri',
-				'request', 'file', 'cookie', 'session', 'asset', 'validator', 'input', 'form'
+				'request', 'file', 'cookie', 'session', 'asset', 'validator', 'input', 'form',
+				'image', 'log'
 			  ),
 	'config' => array('cfg')
 );
