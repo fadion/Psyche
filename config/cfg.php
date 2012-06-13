@@ -2,7 +2,7 @@
 class Cfg {
 
 
-	//Localhost-Ready MySQL Database Connection
+	//Localhost-Ready MySQL Database Connection - just create a database with "fw" as name.
 	const DB_HOST = 'localhost';
 	const DB_USER = 'root';
 	const DB_PASSWORD = '';
@@ -10,6 +10,8 @@ class Cfg {
 	
 	const BASE_LOCALE = 'en';
 	const ROLLBACK_LOCALE = 'en';
+	
+	const KEY = 'Very long random letters and numbers'	
 	
 	const DEBUG = 1;
 	
