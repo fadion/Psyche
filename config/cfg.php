@@ -1,10 +1,12 @@
 <?php
 class Cfg {
 
+
+	//Localhost-Ready MySQL Database Connection
 	const DB_HOST = 'localhost';
 	const DB_USER = 'root';
-	const DB_PASSWORD = 'password';
-	const DB_NAME = 'test';
+	const DB_PASSWORD = '';
+	const DB_NAME = 'fw';
 	
 	const BASE_LOCALE = 'en';
 	const ROLLBACK_LOCALE = 'en';
