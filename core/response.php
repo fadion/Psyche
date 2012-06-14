@@ -1,4 +1,7 @@
 <?php
+namespace FW\Core;
+use FW\Core\CFG as CFG;
+
 class Response {
 
 	private static $output = '';

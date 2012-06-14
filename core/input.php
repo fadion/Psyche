@@ -1,4 +1,7 @@
 <?php
+namespace FW\Core;
+use FW\Core\DB as DB;
+
 class Input {
 
 	public static function val ($val, $default = null, $id = null) {

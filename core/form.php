@@ -1,4 +1,6 @@
 <?php
+namespace FW\Core;
+
 class Form {
 
 	public static function open ($request_type = 'post') {

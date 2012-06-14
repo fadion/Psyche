@@ -1,4 +1,6 @@
 <?php
+namespace FW\Core;
+
 class Cookie {
 
 	public static function set ($name, $value, $expire = 0, $path = '/', $domain = null, $secure = false, $httponly = false) {

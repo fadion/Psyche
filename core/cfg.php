@@ -1,4 +1,6 @@
 <?php
+namespace FW\Core;
+
 class Cfg {
 
 	const DB_HOST = 'localhost';

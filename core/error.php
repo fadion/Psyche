@@ -1,4 +1,6 @@
 <?php
+namespace FW\Core;
+
 class Error {
 
 	public function __construct () {

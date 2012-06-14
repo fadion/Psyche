@@ -1,4 +1,9 @@
 <?php
+namespace FW\Core;
+use FW\Core\Request as Request;
+use FW\Core\DB as DB;
+use FW\Core\File as File;
+
 class Validator {
 
 	private static $extra = '';

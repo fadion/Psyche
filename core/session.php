@@ -1,4 +1,6 @@
 <?php
+namespace FW\Core;
+
 class Session {
 
 	public static function set ($name, $value) {

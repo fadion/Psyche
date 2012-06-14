@@ -1,4 +1,7 @@
 <?php
+namespace FW\Core;
+use FW\Core\File as File;
+
 class Image {
 
 	private $image;

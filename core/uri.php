@@ -1,4 +1,7 @@
 <?php
+namespace FW\Core;
+use FW\Core\CFG as CFG;
+
 class Uri {
 
 	public static function current () {
@@ -77,7 +80,7 @@ class Uri {
 		if (count($url) == count($search) or in_array('*', $search) and count($url) >= count($search)) {
 			$i = 0;
 			foreach ($search as $val) {
-				if ($val == $url[$i] or $val == '*') {
+				if ($val == $url[$i] or $val == '-any') {
 					$return = true;
 				} else {
 					$return = false;

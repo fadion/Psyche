@@ -1,4 +1,6 @@
 <?php
+namespace FW\Core;
+
 class DB {
 
 	private static $results;

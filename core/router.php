@@ -1,4 +1,8 @@
 <?php
+namespace FW\Core;
+use FW\Core\Response as Response;
+use FW\Core\CFG as CFG;
+
 class Router {
 
 	private static $pieces = array();
@@ -29,7 +33,7 @@ class Router {
 	}
 
 	private static function run () {
-		static::$path = Loader::get_controller_path();
+		static::$path = CFG::CONTROLLERS_PATH;
 
 		if (static::check_reroutes()) {
 			$reroute = static::make_reroute();
@@ -42,8 +46,6 @@ class Router {
 		$params = $pieces;
 		$show_error = true;
 		$blocked_methods = array('route', 'before', 'after');
-		
-		Loader::set_controller_path(static::$path_extra);
 
 		$controller = CFG::DEFAULT_CONTROLLER;
 		if (count($pieces)) {
@@ -51,11 +53,12 @@ class Router {
 			unset($params[0]);
 		}
 
-		$controller = Loader::controller($controller);
+		$controller_path = static::$path.static::$path_extra.$controller.'.php';
 		$method = 'action_'.CFG::DEFAULT_METHOD;
 
-		if (!$controller) {
-			$controller = Loader::controller(CFG::DEFAULT_CONTROLLER);
+		if (!file_exists($controller_path)) {
+			$controller = CFG::DEFAULT_CONTROLLER;
+			$controller_path = static::$path.static::$path_extra.$controller.'.php';
 
 			if (isset($pieces[0])) {
 				$method = 'action_'.$pieces[0];
@@ -69,42 +72,49 @@ class Router {
 
 		$params = array_values($params);
 
-		if (is_object($controller)) {
-			if (!in_array($method, $blocked_methods)) {
-				if (method_exists($controller, 'route')) {
-					$method = 'route';
-				}
+		if (file_exists($controller_path)) {
+			require_once $controller_path;
 
-				if (method_exists($controller, $method)) {
-					$reflection = new ReflectionMethod($controller, $method);
-					$method_parameters = $reflection->getParameters();
-					$parameters = null;
-
-					if (count($method_parameters)) {
-						$i = 0;
-						foreach ($method_parameters as $p) {
-							if (isset($params[$i])) {
-								$param_value = $params[$i];
-							} else {
-								$param_value = null;
-							}
-
-							$parameters[] = $param_value;
-						    $i++;
-						}
+			$controller = 'FW\\Controllers\\'.$controller;
+			$controller = new $controller;
+		
+			if (is_object($controller)) {
+				if (!in_array($method, $blocked_methods)) {
+					if (method_exists($controller, 'route')) {
+						$method = 'route';
 					}
 
-					if ($reflection->isPublic()) {
-						$show_error = false;
+					if (method_exists($controller, $method)) {
+						$reflection = new \ReflectionMethod($controller, $method);
+						$method_parameters = $reflection->getParameters();
+						$parameters = null;
 
-						if (method_exists($controller, 'before')) {
-							Response::write($controller, 'before');
+						if (count($method_parameters)) {
+							$i = 0;
+							foreach ($method_parameters as $p) {
+								if (isset($params[$i])) {
+									$param_value = $params[$i];
+								} else {
+									$param_value = null;
+								}
+
+								$parameters[] = $param_value;
+							    $i++;
+							}
 						}
 
-						Response::write($controller, $method, $parameters);
+						if ($reflection->isPublic()) {
+							$show_error = false;
 
-						if (method_exists($controller, 'after')) {
-							Response::write($controller, 'after');
+							if (method_exists($controller, 'before')) {
+								Response::write($controller, 'before');
+							}
+
+							Response::write($controller, $method, $parameters);
+
+							if (method_exists($controller, 'after')) {
+								Response::write($controller, 'after');
+							}
 						}
 					}
 				}
@@ -121,8 +131,8 @@ class Router {
 		$real_pieces = array();
 		
 		foreach ($pieces as $piece) {
-			if (is_dir(static::$path . $piece)) {
-				static::$path_extra .= $piece . '/';
+			if (is_dir(static::$path.static::$path_extra.$piece)) {
+				static::$path_extra .= $piece.'/';
 			} else {
 				$real_pieces[] = $piece;
 			}

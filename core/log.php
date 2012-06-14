@@ -1,4 +1,9 @@
 <?php
+namespace FW\Core;
+
+use FW\Core\File as File;
+use FW\Core\CFG as CFG;
+
 class Log {
 
 	public static function write ($message, $type = null) {
