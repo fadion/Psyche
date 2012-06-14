@@ -1,6 +1,5 @@
 <?php
 namespace FW\Core;
-use FW\Core\File;
 
 class Image
 {
@@ -181,7 +180,7 @@ class Image
 
 	private function create ($image)
 	{
-		$extension = File::extension($image);
+		$extension = pathinfo($image, PATHINFO_EXTENSION);
 
 		switch($extension)
 		{

@@ -1,6 +1,5 @@
 <?php
 namespace FW\Core;
-use FW\Core\CFG;
 
 class Uri
 {
@@ -23,13 +22,13 @@ class Uri
 		if (is_array($url))
 		{
 			$url = implode('/', $url);
-			return CFG::PATH . $url;
+			return config('path') . $url;
 		}
 	}
 
 	public static function path ()
 	{
-		return CFG::PATH;
+		return config('path');
 	}
 
 	public static function segment ($loc = 1)

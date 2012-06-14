@@ -1,6 +1,5 @@
 <?php
 namespace FW\Core;
-use FW\Core\CFG;
 use FW\Core\Response;
 
 class View
@@ -13,7 +12,7 @@ class View
 
 	public function __construct ($file, $vars)
 	{
-		$file = CFG::VIEWS_PATH . "$file.php";
+		$file = config('views path') . "$file.php";
 
 		if (!file_exists($file))
 		{
@@ -90,7 +89,7 @@ class View
 
 	public function exists ($file)
 	{
-		$file = CFG::VIEWS_PATH . "$file.php";
+		$file = config('views path') . "$file.php";
 		if (file_exists($file))
 		{
 			return true;
@@ -101,8 +100,8 @@ class View
 
 	private function tpl_constants ()
 	{
-		$this->tpl_constants['path'] = CFG::PATH;
-		$this->tpl_constants['locale'] = CFG::BASE_LOCALE;
+		$this->tpl_constants['path'] = config('path');
+		$this->tpl_constants['locale'] = config('base locale');
 	}
 
 	private function custom_tpl_constants ()

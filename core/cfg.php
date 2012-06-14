@@ -4,33 +4,46 @@ namespace FW\Core;
 class Cfg
 {
 
-	const DB_HOST = 'localhost';
-	const DB_USER = 'root';
-	const DB_PASSWORD = 'password';
-	const DB_NAME = 'fw';
-	
-	const BASE_LOCALE = 'en';
-	const ROLLBACK_LOCALE = 'en';
-	
-	const KEY = 'Very long random letters and numbers';
-	
-	const DEBUG = 1;
-	
-	const PATH = BASE_URL;
+	private static $keys;
 
-	const CONTROLLERS_PATH = 'app/controllers/';
-	const MODELS_PATH = 'app/models/';
-	const VIEWS_PATH = 'app/views/';
-	const LOCALE_PATH = 'locale/';
-	
-	const ASSETS_PATH = 'app/assets/';
-	const JS_PATH = 'js/';
-	const CSS_PATH = 'css/';
-	const IMG_PATH = 'img/';
-	
-	const DEFAULT_CONTROLLER = 'index';
-	const DEFAULT_METHOD = 'index';
+	public static function get ($key = null)
+	{
+		static::open_file();
+		static::auto_path();
 
-	const LOG_FILE = 'log.txt';
+		if (isset(static::$keys[$key]))
+		{
+			return static::$keys[$key];
+		}
+	}
+
+	private static function open_file ()
+	{
+		if (empty(static::$keys))
+		{
+			$file = 'config/config.php';
+
+			if (file_exists($file))
+			{
+				static::$keys = require_once 'config/config.php';
+			}
+			else
+			{
+				trigger_error('Config file not found. Please be sure it exists and is correctly formatted', FATAL);
+			}
+		}
+	}
+
+	private static function auto_path () {
+		if (isset(static::$keys['path']) and static::$keys['path'] == 'auto')
+		{
+			static::$keys['path'] = 'http://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['SCRIPT_NAME']) . '/';
+		}
+
+		if (isset(static::$keys['absolute path']) and static::$keys['absolute path'] == 'auto')
+		{
+			static::$keys['absolute path'] = realpath('.') . '/';
+		}
+	}
 
 }

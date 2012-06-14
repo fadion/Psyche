@@ -1,8 +1,6 @@
 <?php
 namespace FW\Core;
-use FW\Core\Request;
 use FW\Core\DB;
-use FW\Core\File;
 
 class Validator
 {
@@ -318,7 +316,7 @@ class Validator
 	{
 		$field = static::$extra;
 
-		if (!Request::post($field) and $value != Request::post($field))
+		if (!isset($_POST[$field]) and $value != $_POST[$field])
 		{
 			static::add_error(__('should match the confirmation field'));
 			return false;
@@ -331,7 +329,7 @@ class Validator
 	{
 		$field = static::$extra;
 
-		if (!Request::post($field) and $value == Request::post($field))
+		if (!isset($_POST[$field]) and $value == $_POST[$field])
 		{
 			static::add_error(__('should not match the confirmation field'));
 			return false;
@@ -450,7 +448,7 @@ class Validator
 	{
 		$types = static::$extra;
 		$types = explode(';', $types);
-		$ext = File::extension($value);
+		$ext = pathinfo($value, PATHINFO_EXTENSION);
 
 		if (!in_array($ext, $types))
 		{

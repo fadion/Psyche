@@ -1,7 +1,6 @@
 <?php
 namespace FW\Core;
 use FW\Core\Response;
-use FW\Core\CFG;
 
 class Router
 {
@@ -39,7 +38,7 @@ class Router
 
 	private static function run ()
 	{
-		static::$path = CFG::CONTROLLERS_PATH;
+		static::$path = config('controllers path');
 
 		if (static::check_reroutes())
 		{
@@ -55,7 +54,7 @@ class Router
 		$show_error = true;
 		$blocked_methods = array('route', 'before', 'after');
 
-		$controller = CFG::DEFAULT_CONTROLLER;
+		$controller = config('default controller');
 		if (count($pieces))
 		{
 			$controller = $pieces[0];
@@ -63,11 +62,11 @@ class Router
 		}
 
 		$controller_path = static::$path.static::$path_extra.$controller.'.php';
-		$method = 'action_'.CFG::DEFAULT_METHOD;
+		$method = 'action_'.config('default method');
 
 		if (!file_exists($controller_path))
 		{
-			$controller = CFG::DEFAULT_CONTROLLER;
+			$controller = config('default controller');
 			$controller_path = static::$path.static::$path_extra.$controller.'.php';
 
 			if (isset($pieces[0]))

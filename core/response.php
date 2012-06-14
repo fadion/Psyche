@@ -1,6 +1,5 @@
 <?php
 namespace FW\Core;
-use FW\Core\CFG;
 
 class Response
 {
@@ -34,7 +33,7 @@ class Response
 	{
 		if ((bool) strpos($url, 'http://') == false and (bool) strpos($url, 'https://') == false)
 		{
-			$url = CFG::PATH . $url . '/';
+			$url = config('path') . $url . '/';
 		}
 
 		if (!is_null($delay))

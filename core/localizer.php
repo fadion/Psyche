@@ -1,24 +1,25 @@
 <?php
 namespace FW\Core;
-use FW\Core\CFG;
 
 class Localizer
 {
 
-	private static $path = CFG::LOCALE_PATH;
+	private static $path;
 	private static $cache;
 	private static $rollback_cache;
 
 	public static function get ()
 	{
+		static::$path = config('locale path');
+
 		$params = func_get_args();
 		$params = $params[0];
 		
 		$text = $params[0];
 		$vars = array();
 
-		$lang = CFG::BASE_LOCALE;
-		$rollback = CFG::ROLLBACK_LOCALE;
+		$lang = config('base locale');
+		$rollback = config('rollback locale');
 
 		static::read_language_file($lang);
 

@@ -1,6 +1,5 @@
 <?php
 namespace FW\Core;
-use FW\Core\CFG;
 
 class Autoload
 {
@@ -22,7 +21,7 @@ class Autoload
 		$path = $this->clean($class);
 
 		if (strpos($path, 'models/') !== false) {
-			$path = str_replace('models/', CFG::MODELS_PATH, $path);
+			$path = str_replace('models/', config('models path'), $path);
 		}
 
 		if (file_exists($path))

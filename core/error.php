@@ -15,10 +15,10 @@ class Error
 		{
 			return;
 		}
+
+		$debug = (bool) config('debug');
 		
-		$cfg = Repo::load('config');
-	
-		if ($cfg->debug)
+		if ($debug)
 		{
 			$file_lines = file($file);
 			@$error_line = $file_lines[$line - 2] . '<div style="background:#f0c0c0; color:#853f3f;">' . $file_lines[$line - 1] . '</div>' . $file_lines[$line];
@@ -28,7 +28,7 @@ class Error
 		switch ($code)
 		{
 			case FATAL:
-				switch ($cfg->debug)
+				switch ($debug)
 				{
 					case 0:
 						echo 'An error ocurred. Please try again later.';
@@ -40,7 +40,7 @@ class Error
 						exit;
 				}
 			case ERROR:
-				switch ($cfg->debug)
+				switch ($debug)
 				{
 					case 0:
 						echo 'An error ocurred. Please try again later.';
@@ -53,7 +53,7 @@ class Error
 				}
 				break;
 			case WARNING:
-				switch ($cfg->debug)
+				switch ($debug)
 				{
 					case 0:
 						echo 'A small error ocurred, but the application will continue working.';

@@ -1,14 +1,12 @@
 <?php
 namespace FW\Core;
-use FW\Core\File;
-use FW\Core\CFG;
 
 class Log
 {
 
 	public static function write ($message, $type = null)
 	{
-		$file = CFG::LOG_FILE;
+		$file = config('log file');
 
 		$time = date('Y-m-d H:i:s');
 
@@ -19,13 +17,14 @@ class Log
 			$message = '@'.strtoupper($type).': '.$message;
 		}
 
-		if (!File::exists($file))
+		if (!file_exists($file))
 		{
-			File::write($file, $message);
+			file_put_contents($file, $message);
 		}
 		else
 		{
-			File::prepend($file, $message);
+			$contents = file_get_contents($file);
+			file_put_contents($file, $message.$contents);
 		}
 	}
 
