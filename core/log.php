@@ -1,8 +1,7 @@
 <?php
 namespace FW\Core;
-
-use FW\Core\File as File;
-use FW\Core\CFG as CFG;
+use FW\Core\File;
+use FW\Core\CFG;
 
 class Log {
 

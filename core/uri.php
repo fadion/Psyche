@@ -1,6 +1,6 @@
 <?php
 namespace FW\Core;
-use FW\Core\CFG as CFG;
+use FW\Core\CFG;
 
 class Uri {
 

@@ -1,4 +1,12 @@
 <?php
+/**
+ * 
+ * Legacy Loader. The autoloader does a much better job, is safier and less resource hungry.
+ * However I'm not deleting this file as long as we've tested namespaces and the autoloader.
+ * 
+ * TO BE DELETED
+ * 
+ */
 class Loader {
 	
 	private static $controllers_path = CFG::CONTROLLERS_PATH;

@@ -3,17 +3,15 @@ namespace FW\Core;
 
 class Cfg {
 
-
-	//Localhost-Ready MySQL Database Connection - just create a database with "fw" as name.
 	const DB_HOST = 'localhost';
 	const DB_USER = 'root';
-	const DB_PASSWORD = '';
+	const DB_PASSWORD = 'password';
 	const DB_NAME = 'fw';
 	
 	const BASE_LOCALE = 'en';
 	const ROLLBACK_LOCALE = 'en';
 	
-	const KEY = 'Very long random letters and numbers'	
+	const KEY = 'Very long random letters and numbers';
 	
 	const DEBUG = 1;
 	

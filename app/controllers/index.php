@@ -3,27 +3,36 @@ namespace FW\Controllers;
 use \FW\Core;
 use \FW\Models;
 
-<<<<<<< HEAD
 class Index
 {
 
 	public function action_index ()
 	{
-		echo Models\Users_Users::get();
-=======
-	public function action_index () {
-		
-		//M_Index Should Autoload here		
-		
-		$content = array(
-			'title' => 'Wokrs!', 
-			'content' => 'This framework is build to work.'
-		);
+		$errors = null;
+		$success = '';
 
-		
-		View::set( $content )->output('index');
+		if (Core\Request::post()) {
+			$inputs = Core\Request::all();
+			$rules = array(
+				'name, Your Name' => 'required',
+				'email, Your Email' => 'required, email',
+				'department' => 'required, in:Support;Marketing;Technical',
+				'about, About Yourself' => 'between:20;200'
+			);
 
->>>>>>> d6f1858a058d63ce703b8b27225b76dd0ccc294f
+			if (Core\Validator::run($inputs, $rules)) {
+				$success = __('The form was submited successfully');
+			} else {
+				$errors = Core\Validator::errors();
+			}
+		}
+
+		Core\View::set(array(
+			'title' => 'Framework',
+			'version' => 'v1.0',
+			'errors' => $errors,
+			'success' => $success
+		))->output('index');	
 	}
 
 }

@@ -1,6 +1,6 @@
 <?php
 namespace FW\Core;
-use FW\Core\DB as DB;
+use FW\Core\DB;
 
 class Input {
 

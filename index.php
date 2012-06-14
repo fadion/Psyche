@@ -6,7 +6,7 @@ define('ERROR', E_USER_WARNING);
 define('WARNING', E_USER_NOTICE);
 define('BASE_URL', 'http://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['SCRIPT_NAME']) . '/');
 
-require('core/autoload.php');
+require_once 'core/autoload.php';
 use FW\Core\Autoload;
 Autoload::start();
 

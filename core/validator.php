@@ -1,8 +1,8 @@
 <?php
 namespace FW\Core;
-use FW\Core\Request as Request;
-use FW\Core\DB as DB;
-use FW\Core\File as File;
+use FW\Core\Request;
+use FW\Core\DB;
+use FW\Core\File;
 
 class Validator {
 
@@ -63,7 +63,7 @@ class Validator {
 				if (!in_array('required', $rules) and $value == '') {
 					$return = false;
 				} else {
-					if (method_exists('Validator', $method)) {
+					if (method_exists('\FW\Core\Validator', $method)) {
 						$return = static::$method($value);
 					}
 				}

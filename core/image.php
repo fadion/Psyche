@@ -1,6 +1,6 @@
 <?php
 namespace FW\Core;
-use FW\Core\File as File;
+use FW\Core\File;
 
 class Image {
 

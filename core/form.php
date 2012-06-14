@@ -55,7 +55,7 @@ class Form {
 		$output = '<input type="checkbox" name="'.htmlspecialchars($name).'" id="control_'.htmlspecialchars($name).'" '.$checked.' '.$parameters.'>';
 
 		if (!is_null($label)) {
-			$output .= '<label for="control_'.htmlspecialchars($name).'"><span>'.htmlspecialchars($label).'</span></label>';
+			$output .= '<label for="control_'.htmlspecialchars($name).'">'.htmlspecialchars($label).'</label>';
 		}
 
 		return $output;
@@ -92,7 +92,7 @@ class Form {
 			$id = $name.rand(11111, 99991);
 
 			$output .= '<input type="checkbox" name="'.htmlspecialchars($new_name).'" id="control_'.htmlspecialchars($id).'" value="'.htmlspecialchars($value).'" '.$checked.' '.$parameters.'>';
-			$output .= '<label for="control_'.htmlspecialchars($id).'"><span>'.htmlspecialchars($label).'</span></label>';
+			$output .= '<label for="control_'.htmlspecialchars($id).'">'.htmlspecialchars($label).'</label>';
 		}
 
 		return $output;
@@ -108,7 +108,7 @@ class Form {
 		$output = '<input type="radio" name="'.htmlspecialchars($name).'" id="control_'.htmlspecialchars($name).'" '.$checked.' '.$parameters.'>';
 
 		if (!is_null($label)) {
-			$output .= $output .= '<label for="control_'.htmlspecialchars($name).'"><span>'.htmlspecialchars($label).'</span></label>';
+			$output .= $output .= '<label for="control_'.htmlspecialchars($name).'">'.htmlspecialchars($label).'</label>';
 		}
 
 		return $output;
@@ -145,7 +145,7 @@ class Form {
 			$id = $name.rand(11111, 99991);
 
 			$output .= '<input type="radio" name="'.htmlspecialchars($new_name).'" id="control_'.htmlspecialchars($id).'" value="'.htmlspecialchars($value).'" '.$checked.' '.$parameters.'>';
-			$output .= '<label for="control_'.htmlspecialchars($id).'"><span>'.htmlspecialchars($label).'</span></label>';
+			$output .= '<label for="control_'.htmlspecialchars($id).'">'.htmlspecialchars($label).'</label>';
 		}
 
 		return $output;
@@ -163,15 +163,23 @@ class Form {
 		foreach ($data as $key => $val) {
 			$selected = '';
 
-			if ((bool) strpos($key, '|')) {
-				list($key, $selected) = explode('|', $key);
+			if (!is_int($key)) {
+				$label = $val;
+				$value = $key;
+			} else {
+				$value = $val;
+				$label = &$value;
+			}
+
+			if ((bool) strpos($value, '|')) {
+				list($value, $selected) = explode('|', $value);
 			}
 
 			if ($selected) {
 				$selected = 'selected="selected"';
 			}
 
-			$output .= '<option value="'.htmlspecialchars($key).'" '.$selected.'>'.htmlspecialchars($val).'</option>';
+			$output .= '<option value="'.htmlspecialchars($value).'" '.$selected.'>'.htmlspecialchars($label).'</option>';
 		}
 		$output .= '</select>';
 

@@ -1,7 +1,7 @@
 <?php
 namespace FW\Core;
-use FW\Core\CFG as CFG;
-use FW\Core\Response as Response;
+use FW\Core\CFG;
+use FW\Core\Response;
 
 class View {
 

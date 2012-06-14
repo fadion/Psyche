@@ -1,0 +1,29 @@
+body {
+	font: 14px Helvetica, Arial, sans-serif;
+	color: #333;
+}
+
+body > div {
+	width: 980px;
+	margin: 0 auto;
+}
+
+h1 {
+	font-family: Georgia;
+}
+
+h2 {
+	font-size: 15px;
+	color: #3a6d9b;
+}
+
+input.fancy,
+textarea.fancy {
+	padding: 5px;
+	border: 1px solid #aaa;
+	border-radius: 5px;
+}
+
+label > span {
+	display: block;
+}
