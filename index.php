@@ -11,7 +11,7 @@ Autoload::start();
 
 use FW\Core\Localizer;
 use FW\Core\DB;
-use FW\Core\CFG;
+use FW\Core\Config;
 use FW\Core\Router;
 use FW\Core\Response;
 use FW\Core\Error;
@@ -23,7 +23,7 @@ function __ ()
 
 function config ($key)
 {
-	return CFG::get($key);
+	return Config::get($key);
 }
 
 if (config('debug') == 1)

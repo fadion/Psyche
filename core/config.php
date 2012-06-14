@@ -1,7 +1,7 @@
 <?php
 namespace FW\Core;
 
-class Cfg
+class Config
 {
 
 	private static $keys;
