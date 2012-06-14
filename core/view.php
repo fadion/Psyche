@@ -6,9 +6,40 @@ use FW\Core\Response;
 class View
 {
 
-	private static $output, $file, $keys, $cache, $tpl_constants;
-	
-	public static function set ()
+	private $vars;
+	private $file;
+	private $cache;
+	private $tpl_constants;
+
+	public function __construct ($file, $vars)
+	{
+		$file = CFG::VIEWS_PATH . "$file.php";
+
+		if (!file_exists($file))
+		{
+			trigger_error('View file not found', ERROR);
+			return false;
+		}
+
+		$this->file = $file;
+
+		if (!is_null($vars))
+		{
+			$this->vars = $vars;
+		}
+	}
+
+	public static function open ($file, $vars = null)
+	{
+		return new static($file, $vars);
+	}
+
+	public function __set ($name, $value)
+	{
+		$this->vars[$name] = $value;
+	}
+
+	public function set ()
 	{
 		if (func_num_args())
 		{
@@ -20,75 +51,55 @@ class View
 			{
 				foreach ($arg1 as $key=>$val)
 				{
-					static::$keys[$key] = $val;
+					$this->vars[$key] = $val;
 				}
 			}
 			else
 			{
 				if (!empty($arg1))
 				{
-					static::$keys[$arg1] = $arg2;
+					$this->vars[$arg1] = $arg2;
 				}
 			}
 		}
-		
-		return new static;
 	}
-	
-	public static function output ($file)
+
+	public function render ()
 	{
-		$path = CFG::VIEWS_PATH . "$file.php";
+		$this->tpl_constants();
+		$this->custom_tpl_constants();
 		
-		if (!file_exists($path))
+		if (is_array($this->vars))
 		{
-			return false;
+			extract($this->vars, EXTR_SKIP);
 		}
 
-		static::tpl_constants();
-		static::custom_tpl_constants();
-		
-		static::$file = $path;
-		unset($path);
-
-		if (is_array(static::$keys))
+		if (is_array($this->tpl_constants))
 		{
-			extract(static::$keys, EXTR_SKIP);
-		}
-
-		if (is_array(static::$tpl_constants))
-		{
-			extract(static::$tpl_constants, EXTR_SKIP);
+			extract($this->tpl_constants, EXTR_SKIP);
 		}
 
 		ob_start();
-		include(static::$file);
+		include($this->file);
 		$output = ob_get_clean();
 		
 		Response::write($output);
 	}
 
-	private static function tpl_constants ()
+	private function tpl_constants ()
 	{
-		static::$tpl_constants['path'] = CFG::PATH;
-		static::$tpl_constants['locale'] = CFG::BASE_LOCALE;
+		$this->tpl_constants['path'] = CFG::PATH;
+		$this->tpl_constants['locale'] = CFG::BASE_LOCALE;
 	}
 
-	private static function custom_tpl_constants ()
+	private function custom_tpl_constants ()
 	{
 		$constants = include('config/constants.php');
 
 		if (count($constants))
 		{
-			static::$tpl_constants = array_merge(static::$tpl_constants, $constants);
+			$this->tpl_constants = array_merge($this->tpl_constants, $constants);
 		}
-	}
-
-	private static function fix_includes ($contents)
-	{
-		$path = CFG::VIEWS_PATH;
-		$contents = str_replace("include('", "include('$path", $contents);
-
-		return $contents;
 	}
 	
 }

@@ -27,12 +27,31 @@ class Index
 			}
 		}
 
-		Core\View::set(array(
-			'title' => 'Framework',
-			'version' => 'v1.0',
-			'errors' => $errors,
-			'success' => $success
-		))->output('index');	
+		$view = Core\View::open('index');
+
+		$view->title = 'Framework';
+		$view->version = 'v1.0';
+		$view->errors = $errors;
+		$view->success = $success;
+
+		$view->render();
+
+		/*
+		 * Second Method: template variables passed as second argument of the open() method 
+		 *
+		$view = Core\View::open('index', array(
+			'title'=>'Framework', 'version'=>'v1.0', 'errors'=>$errors, 'success'=>$success
+		))->render();
+		*/
+		
+		/*
+		 * Third Method: template variabled passed as array on the set() method.
+		 * The set() method supports single template variables too, ex: $view->set('title', 'Framework');
+		 *
+		$view = Core\View::open('index');
+		$view->set(array('title'=>'Framework', 'version'=>'v1.0', 'errors'=>$errors, 'success'=>$success));
+		$view->render();
+		*/
 	}
 
 }
