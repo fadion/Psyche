@@ -3,18 +3,22 @@ namespace FW\Core;
 use FW\Core\Response;
 use FW\Core\CFG;
 
-class Router {
+class Router
+{
 
 	private static $pieces = array();
 	private static $path;
 	private static $path_extra;
 	private static $routes;
 
-	public static function start () {
-		if (isset($_GET['s'])) {
+	public static function start ()
+	{
+		if (isset($_GET['s']))
+		{
 			$url = rtrim($_GET['s'], ' /');
 
-			if ($url != '') {
+			if ($url != '')
+			{
 				static::$pieces = explode('/', $url);
 			}
 		}
@@ -22,7 +26,8 @@ class Router {
 		static::run();
 	}
 
-	public static function reroute ($controller) {
+	public static function reroute ($controller)
+	{
 		if (empty($controller)) return false;
 		
 		$pieces = explode('/', $controller);
@@ -32,12 +37,15 @@ class Router {
 		static::run();
 	}
 
-	private static function run () {
+	private static function run ()
+	{
 		static::$path = CFG::CONTROLLERS_PATH;
 
-		if (static::check_reroutes()) {
+		if (static::check_reroutes())
+		{
 			$reroute = static::make_reroute();
-			if ($reroute) {
+			if ($reroute)
+			{
 				static::$pieces = $reroute;
 			}
 		}
@@ -48,7 +56,8 @@ class Router {
 		$blocked_methods = array('route', 'before', 'after');
 
 		$controller = CFG::DEFAULT_CONTROLLER;
-		if (count($pieces)) {
+		if (count($pieces))
+		{
 			$controller = $pieces[0];
 			unset($params[0]);
 		}
@@ -56,15 +65,20 @@ class Router {
 		$controller_path = static::$path.static::$path_extra.$controller.'.php';
 		$method = 'action_'.CFG::DEFAULT_METHOD;
 
-		if (!file_exists($controller_path)) {
+		if (!file_exists($controller_path))
+		{
 			$controller = CFG::DEFAULT_CONTROLLER;
 			$controller_path = static::$path.static::$path_extra.$controller.'.php';
 
-			if (isset($pieces[0])) {
+			if (isset($pieces[0]))
+			{
 				$method = 'action_'.$pieces[0];
 			}
-		} else {
-			if (isset($pieces[1])) {
+		}
+		else
+		{
+			if (isset($pieces[1]))
+			{
 				$method = 'action_'.$pieces[1];
 				unset($params[1]);
 			}
@@ -72,29 +86,39 @@ class Router {
 
 		$params = array_values($params);
 
-		if (file_exists($controller_path)) {
+		if (file_exists($controller_path))
+		{
 			require_once $controller_path;
 
 			$controller = 'FW\\Controllers\\'.$controller;
 			$controller = new $controller;
 		
-			if (is_object($controller)) {
-				if (!in_array($method, $blocked_methods)) {
-					if (method_exists($controller, 'route')) {
+			if (is_object($controller))
+			{
+				if (!in_array($method, $blocked_methods))
+				{
+					if (method_exists($controller, 'route'))
+					{
 						$method = 'route';
 					}
 
-					if (method_exists($controller, $method)) {
+					if (method_exists($controller, $method))
+					{
 						$reflection = new \ReflectionMethod($controller, $method);
 						$method_parameters = $reflection->getParameters();
 						$parameters = null;
 
-						if (count($method_parameters)) {
+						if (count($method_parameters))
+						{
 							$i = 0;
-							foreach ($method_parameters as $p) {
-								if (isset($params[$i])) {
+							foreach ($method_parameters as $p)
+							{
+								if (isset($params[$i]))
+								{
 									$param_value = $params[$i];
-								} else {
+								}
+								else
+								{
 									$param_value = null;
 								}
 
@@ -103,16 +127,19 @@ class Router {
 							}
 						}
 
-						if ($reflection->isPublic()) {
+						if ($reflection->isPublic())
+						{
 							$show_error = false;
 
-							if (method_exists($controller, 'before')) {
+							if (method_exists($controller, 'before'))
+							{
 								Response::write($controller, 'before');
 							}
 
 							Response::write($controller, $method, $parameters);
 
-							if (method_exists($controller, 'after')) {
+							if (method_exists($controller, 'after'))
+							{
 								Response::write($controller, 'after');
 							}
 						}
@@ -121,19 +148,25 @@ class Router {
 			}
 		}
 
-		if ($show_error) {
+		if ($show_error)
+		{
 			Response::error();
 		}
 	}
 
-	private static function find_directories () {
+	private static function find_directories ()
+	{
 		$pieces = static::$pieces;
 		$real_pieces = array();
 		
-		foreach ($pieces as $piece) {
-			if (is_dir(static::$path.static::$path_extra.$piece)) {
+		foreach ($pieces as $piece)
+		{
+			if (is_dir(static::$path.static::$path_extra.$piece))
+			{
 				static::$path_extra .= $piece.'/';
-			} else {
+			}
+			else
+			{
 				$real_pieces[] = $piece;
 			}
 		}
@@ -141,23 +174,28 @@ class Router {
 		return $real_pieces;
 	}
 
-	public static function get ($route, $function) {
+	public static function get ($route, $function)
+	{
 		static::manual_route($route, $function, array('GET'));
 	}
 
-	public static function post ($route, $function) {
+	public static function post ($route, $function)
+	{
 		static::manual_route($route, $function, array('POST'));
 	}
 
-	public static function put ($route, $function) {
+	public static function put ($route, $function)
+	{
 		static::manual_route($route, $function, array('PUT'));
 	}
 
-	public static function any ($route, $function) {
+	public static function any ($route, $function)
+	{
 		static::manual_route($route, $function);
 	}
 
-	private static function manual_route ($route, $function, $request_type = array('GET', 'POST', 'PUT')) {
+	private static function manual_route ($route, $function, $request_type = array('GET', 'POST', 'PUT'))
+	{
 		if (empty($route)) return false;
 
 		if (!in_array($_SERVER['REQUEST_METHOD'], $request_type)) return false;
@@ -170,14 +208,20 @@ class Router {
 		$params = array();
 		$i = 0;
 
-		if (count($routes) == count($pieces)) {
-			foreach ($routes as $route) {
-				if ($route == $pieces[$i] or (static::parse_params($route, $pieces[$i]) and !is_null($pieces[$i]))) {
-					if (static::parse_params($route, $pieces[$i])) {
+		if (count($routes) == count($pieces))
+		{
+			foreach ($routes as $route)
+			{
+				if ($route == $pieces[$i] or (static::parse_params($route, $pieces[$i]) and !is_null($pieces[$i])))
+				{
+					if (static::parse_params($route, $pieces[$i]))
+					{
 						$params[] = $pieces[$i];
 					}
 					$make_reroute = true;
-				} else {
+				}
+				else
+				{
 					$make_reroute = false;
 					break;
 				}
@@ -186,21 +230,28 @@ class Router {
 			}
 		}
 
-		if ($make_reroute) {
+		if ($make_reroute)
+		{
 			call_user_func_array($function, $params);
 		}
 	}
 
-	private static function analyze_manual_route ($routes) {
-		if ($routes[0] == '-self' or $routes[0] == '-this') {
+	private static function analyze_manual_route ($routes)
+	{
+		if ($routes[0] == '-self' or $routes[0] == '-this')
+		{
 			$pieces = static::$pieces;
 			$to_add = array();
 			$real_pieces = array();
 
-			foreach ($pieces as $piece) {
-				if (is_dir(static::$path . $piece)) {
+			foreach ($pieces as $piece)
+			{
+				if (is_dir(static::$path . $piece))
+				{
 					$to_add[] = $piece;
-				} else {
+				}
+				else
+				{
 					$real_pieces[] = $piece;
 				}
 			}
@@ -212,15 +263,23 @@ class Router {
 		return $routes;
 	}
 
-	private static function parse_params ($param, $value) {
-		if ($param == '-any') {
+	private static function parse_params ($param, $value)
+	{
+		if ($param == '-any')
+		{
 			return true;
-		} elseif ($param == '-num') {
-			if (is_numeric($value)) {
+		}
+		elseif ($param == '-num')
+		{
+			if (is_numeric($value)) 
+			{
 				return true;
 			}
-		} elseif ($param == '-int') {
-			if (filter_var($value, FILTER_VALIDATE_INT)) {
+		}
+		elseif ($param == '-int')
+		{
+			if (filter_var($value, FILTER_VALIDATE_INT))
+			{
 				return true;
 			}
 		}
@@ -228,15 +287,18 @@ class Router {
 		return false;
 	}
 	
-	private static function check_reroutes () {
+	private static function check_reroutes ()
+	{
 		$routes = 'config/routes.php';
 		$routes = include($routes);
 
-		if (!count($routes)) {
+		if (!count($routes))
+		{
 			return false;
 		}
 		
-		if (!count(self::$pieces)) {
+		if (!count(self::$pieces))
+		{
 			return false;
 		}
 		
@@ -245,23 +307,29 @@ class Router {
 		return true;
 	}
 	
-	private static function make_reroute () {
+	private static function make_reroute ()
+	{
 		$routes = static::$routes;
 		$real_route = null;
 		
-		foreach ($routes as $key=>$val) {
+		foreach ($routes as $key=>$val)
+		{
 			$reroute = $val;
 			$route = explode('/', trim($key, ' /'));
 			$pieces = static::$pieces;
 			
 			$i = 0;
 			$make_reroute = false;
-			foreach ($route as $val) {
-				if (isset($pieces[$i]) and ($val == $pieces[$i] or (static::parse_params($val, $pieces[$i]) and $pieces[$i] != null))) {
+			foreach ($route as $val)
+			{
+				if (isset($pieces[$i]) and ($val == $pieces[$i] or (static::parse_params($val, $pieces[$i]) and $pieces[$i] != null)))
+				{
 					$make_reroute = true;
 					$real_route = $reroute;
 					unset($pieces[$i]);
-				} else {
+				}
+				else
+				{
 					$make_reroute = false;
 					$real_route = null;
 					break;
@@ -270,7 +338,8 @@ class Router {
 				$i++;
 			}
 
-			if ($make_reroute) {
+			if ($make_reroute)
+			{
 				return array_merge(explode('/', $real_route), $pieces);
 			}
 		}

@@ -2,31 +2,38 @@
 namespace FW\Core;
 use FW\Core\CFG;
 
-class Uri {
+class Uri
+{
 
-	public static function current () {
+	public static function current ()
+	{
 		$url = static::parse_url();
 
-		if (is_array($url)) {
+		if (is_array($url))
+		{
 			$url = implode('/', $url);
 			return $url;
 		}
 	}
 
-	public static function full () {
+	public static function full ()
+	{
 		$url = static::parse_url();
 
-		if (is_array($url)) {
+		if (is_array($url))
+		{
 			$url = implode('/', $url);
 			return CFG::PATH . $url;
 		}
 	}
 
-	public static function path () {
+	public static function path ()
+	{
 		return CFG::PATH;
 	}
 
-	public static function segment ($loc = 1) {
+	public static function segment ($loc = 1)
+	{
 		$url = static::parse_url();
 		$loc -= 1;
 		
@@ -37,7 +44,8 @@ class Uri {
 		return $url[$loc];
 	}
 	
-	public static function rsegment ($loc = 1) {
+	public static function rsegment ($loc = 1)
+	{
 		$url = static::parse_url();
 		$loc -= 1;
 		
@@ -50,7 +58,8 @@ class Uri {
 		return $url[$loc];
 	}
 	
-	public static function to_array () {
+	public static function to_array ()
+	{
 		$url = static::parse_url();
 		
 		if (!count($url)) return false;
@@ -59,8 +68,10 @@ class Uri {
 		$assoc = array();
 		$i = 0;
 		
-		foreach ($url as $val) {
-			if ($i % 2 == 0) {
+		foreach ($url as $val)
+		{
+			if ($i % 2 == 0)
+			{
 				$assoc[$val] = $url[$i+1];
 			}
 			
@@ -72,17 +83,23 @@ class Uri {
 		return $assoc;
 	}
 
-	public static function is ($search) {
+	public static function is ($search)
+	{
 		$url = static::parse_url();
 		$search = explode('/', $search);
 		$return = false;
 
-		if (count($url) == count($search) or in_array('*', $search) and count($url) >= count($search)) {
+		if (count($url) == count($search) or in_array('*', $search) and count($url) >= count($search))
+		{
 			$i = 0;
-			foreach ($search as $val) {
-				if ($val == $url[$i] or $val == '-any') {
+			foreach ($search as $val)
+			{
+				if ($val == $url[$i] or $val == '-any')
+				{
 					$return = true;
-				} else {
+				}
+				else
+				{
 					$return = false;
 					break;
 				}
@@ -94,7 +111,8 @@ class Uri {
 		return $return;
 	}
 
-	public static function sef ($url, $spaces = '-') {
+	public static function sef ($url, $spaces = '-')
+	{
 		$url = strtolower($url);
 		$url = preg_replace('|[^a-z0-9]|', $spaces, $url);
 		$url = preg_replace('|-+|', $spaces, $url);
@@ -102,13 +120,18 @@ class Uri {
 		return $url;
 	}
 	
-	private static function parse_url () {
-		if (isset($_GET['s'])) {
+	private static function parse_url ()
+	{
+		if (isset($_GET['s']))
+		{
 			$url = rtrim($_GET['s'], ' /');
 			
-			if ($url != '') {
+			if ($url != '')
+			{
 				$url = explode('/', $url);
-			} else {
+			}
+			else
+			{
 				$url = array();
 			}
 

@@ -2,50 +2,68 @@
 namespace FW\Core;
 use FW\Core\File;
 
-class Image {
+class Image
+{
 
 	private $image;
 
-	public function __construct ($image) {
+	public function __construct ($image)
+	{
 		$image_r = $this->create($image);
 
-		if ($image_r) {
+		if ($image_r)
+		{
 			$this->image = $image_r;
-		} else {
+		}
+		else
+		{
 			trigger_errors('Not a valid image type', ERROR);
 		}
 	}
 
-	public function __descruct () {
+	public function __descruct ()
+	{
 		imagedestroy($this->image);
 	}
 
-	public static function open ($image) {
+	public static function open ($image)
+	{
 		return new static($image);
 	}
 
-	public function resize ($width, $height = null, $ratio = 'auto') {
+	public function resize ($width, $height = null, $ratio = 'auto')
+	{
 		list($o_width, $o_height) = $this->dimensions($this->image);
 
-		if ($height == null) {
+		if ($height == null)
+		{
 			$new_width = round($o_width * ($width / 100));
 			$new_height = round($o_height * ($width / 100));
-		} else {
+		}
+		else
+		{
 			$w_aspect = $width / $o_width;
 			$h_aspect = $height / $o_height;
 
-			if ($ratio == 'auto') {
+			if ($ratio == 'auto')
+			{
 				$aspect = min($w_aspect, $h_aspect);
 
 				$new_width = round($o_width * $aspect);
 				$new_height = round($o_height * $aspect);
-			} elseif ($ratio == 'width') {
+			}
+			elseif ($ratio == 'width')
+			{
 				$new_width = $width;
 				$new_height = round($o_height * $w_aspect);
-			} elseif ($ratio == 'height') {
+			}
+			elseif ($ratio == 'height')
+			{
 				$new_width = round($o_width * $h_aspect);
 				$new_height = $height;
-			} else {
+			}
+			else
+			{
 				$new_width = $width;
 				$new_height = $height;
 			}
@@ -63,7 +81,8 @@ class Image {
 		return $this;
 	}
 
-	public function crop ($width, $height, $x = 0, $y = 0) {
+	public function crop ($width, $height, $x = 0, $y = 0)
+	{
 		list($o_width, $o_height) = $this->dimensions($this->image);
 
 		$crop = imagecreatetruecolor($width, $height);
@@ -79,7 +98,8 @@ class Image {
 		return $this;
 	}
 
-	public function rotate ($angle) {
+	public function rotate ($angle)
+	{
 		list($o_width, $o_height) = $this->dimensions($this->image);
 
 		$transparent = imagecolorallocatealpha($this->image, 0, 0, 0, 127);
@@ -89,8 +109,10 @@ class Image {
 		return $this;
 	}
 
-	public function watermark ($file, $position = null, $opacity = 100) {
-		if (!file_exists($file)) {
+	public function watermark ($file, $position = null, $opacity = 100)
+	{
+		if (!file_exists($file))
+		{
 			trigger_error('Watemark image file was not found', ERROR);
 			return false;
 		}
@@ -100,7 +122,8 @@ class Image {
 		list($w_width, $w_height) = $this->dimensions($watermark);
 		list($o_width, $o_height) = $this->dimensions($this->image);
 
-		if ($opacity > 100 or $opacity < 0) {
+		if ($opacity > 100 or $opacity < 0)
+		{
 			$opacity = 100;
 		}
 
@@ -110,10 +133,14 @@ class Image {
 		imagelayereffect($watermark, IMG_EFFECT_OVERLAY);
 		imagefilledrectangle($watermark, 0, 0, $w_width, $w_height, $transparent);	
 
-		if (is_array($position) and count($position) == 2) {
+		if (is_array($position) and count($position) == 2)
+		{
 			list($x, $y) = $position;
-		} else {
-			switch ($position) {
+		}
+		else
+		{
+			switch ($position)
+			{
 				case 'top right':
 				case 'tr':
 					$x = $o_width - $w_width;
@@ -147,14 +174,17 @@ class Image {
 		return $this;
 	}
 
-	private function dimensions ($image) {
+	private function dimensions ($image)
+	{
 		return array(imagesx($image), imagesy($image));
 	}
 
-	private function create ($image) {
+	private function create ($image)
+	{
 		$extension = File::extension($image);
 
-		switch($extension) {
+		switch($extension)
+		{
 			case 'jpg':
 			case 'jpeg':
 				$img = @imagecreatefromjpeg($image);
@@ -173,16 +203,19 @@ class Image {
 		return $img;
 	}
 
-	public function save ($file, $quality = 80) {
+	public function save ($file, $quality = 80)
+	{
 		$dir = pathinfo($file, PATHINFO_DIRNAME);
 		$extension = pathinfo($file, PATHINFO_EXTENSION);
 
-		if (!is_writable($dir)) {
+		if (!is_writable($dir))
+		{
 			trigger_error('Directory is not writable', ERROR);
 			return false;
 		}
 
-		switch($extension) {
+		switch($extension)
+		{
 			case 'jpg':
 			case 'jpeg':
 				imagejpeg($this->image, $file, $quality);

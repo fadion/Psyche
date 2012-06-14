@@ -16,7 +16,8 @@ use FW\Core\CFG;
 use FW\Core\Router;
 use FW\Core\Response;
 
-function __ () {
+function __ ()
+{
 	return Localizer::get(func_get_args());
 }
 

@@ -1,7 +1,8 @@
 <?php
 namespace FW\Core;
 
-class Cfg {
+class Cfg
+{
 
 	const DB_HOST = 'localhost';
 	const DB_USER = 'root';

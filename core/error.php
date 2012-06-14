@@ -1,28 +1,35 @@
 <?php
 namespace FW\Core;
 
-class Error {
+class Error
+{
 
-	public function __construct () {
+	public function __construct ()
+	{
 		set_error_handler(array($this, 'error_handler'));	
 	}
 	
-	function error_handler ($code, $string, $file, $line) {
-		if (!(error_reporting() & $code)) {
+	function error_handler ($code, $string, $file, $line)
+	{
+		if (!(error_reporting() & $code))
+		{
 			return;
 		}
 		
 		$cfg = Repo::load('config');
 	
-		if ($cfg->debug) {
+		if ($cfg->debug)
+		{
 			$file_lines = file($file);
 			@$error_line = $file_lines[$line - 2] . '<div style="background:#f0c0c0; color:#853f3f;">' . $file_lines[$line - 1] . '</div>' . $file_lines[$line];
 			@$error_line = trim($error_line, PHP_EOL);
 		}
 	
-		switch ($code) {
+		switch ($code)
+		{
 			case FATAL:
-				switch ($cfg->debug) {
+				switch ($cfg->debug)
+				{
 					case 0:
 						echo 'An error ocurred. Please try again later.';
 						exit;
@@ -33,7 +40,8 @@ class Error {
 						exit;
 				}
 			case ERROR:
-				switch ($cfg->debug) {
+				switch ($cfg->debug)
+				{
 					case 0:
 						echo 'An error ocurred. Please try again later.';
 						break;
@@ -45,7 +53,8 @@ class Error {
 				}
 				break;
 			case WARNING:
-				switch ($cfg->debug) {
+				switch ($cfg->debug)
+				{
 					case 0:
 						echo 'A small error ocurred, but the application will continue working.';
 						break;
