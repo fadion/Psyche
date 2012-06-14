@@ -62,6 +62,8 @@ class View
 				}
 			}
 		}
+
+		return $this;
 	}
 
 	public function render ()
@@ -84,6 +86,17 @@ class View
 		$output = ob_get_clean();
 		
 		Response::write($output);
+	}
+
+	public function exists ($file)
+	{
+		$file = CFG::VIEWS_PATH . "$file.php";
+		if (file_exists($file))
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	private function tpl_constants ()
