@@ -109,15 +109,6 @@ class Uri
 
 		return $return;
 	}
-
-	public static function sef ($url, $spaces = '-')
-	{
-		$url = strtolower($url);
-		$url = preg_replace('|[^a-z0-9]|', $spaces, $url);
-		$url = preg_replace('|-+|', $spaces, $url);
-		
-		return $url;
-	}
 	
 	private static function parse_url ()
 	{
