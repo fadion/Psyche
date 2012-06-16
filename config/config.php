@@ -35,14 +35,13 @@ return array(
 	'css path' => 'css/',
 	'img path' => 'img/',
 	
+	'log path' => 'stash/logs/',
+	
 	/* Default controller and method */
 	/* The default controller will be executed in sub-folders too */
 	/* The default method shouldn't be one of the reserved: route, before or after. action_ will be appended automatically */
 	'default controller' => 'index',
 	'default method' => 'index',
-
-	/* Relative path from the main index to the file-based logger */
-	'log file' => 'log.txt',
 
 	/* Randomly generated SALT (for passwords) and TOKEN (for anything else) */
 	'salt' => '$0R[Q4Cf6w$b?Ote+~RWu(u*n[gT#',

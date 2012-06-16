@@ -2,21 +2,52 @@
 namespace FW\Core;
 use FW\Core\Response;
 
+/**
+ * View Engine
+ * 
+ * A class that makes working with PHP view files as easy as with template engines.
+ * Basically, it provides the options to open a template file and assign its variables.
+ * Files are outputed as pure PHP, so there is absolutely no overhead.
+ *
+ * @package FW\Core\View
+ * @author Fadion Dashi
+ * @version 1.0
+ * @since 1.0
+ */
 class View
 {
 
-	private $vars;
-	private $file;
-	private $cache;
-	private $tpl_constants;
+	/**
+	 * @var array Keeps assigned template variables
+	 */
+	protected $vars;
 
+	/**
+	 * @var string Path of the opened template
+	 */
+	protected $file;
+
+	/**
+	 * @var array Built-in and external template constants
+	 */
+	protected $tpl_constants;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @return void
+	 */
 	public function __construct ($file, $vars)
 	{
-		$file = config('views path') . "$file.php";
+		$file = config('views path').$file;
+		if (pathinfo($file, PATHINFO_EXTENSION) == '')
+		{
+			$file .= '.php';
+		}
 
 		if (!file_exists($file))
 		{
-			trigger_error('View file not found', ERROR);
+			trigger_error('View file not found', FATAL);
 			return false;
 		}
 
@@ -28,16 +59,39 @@ class View
 		}
 	}
 
+	/**
+	 * Factory static method. It allows for an easier initiation of the
+	 * View class.
+	 * 
+	 * @param string $file Template filename
+	 * @param array $vars Template variables to assign
+	 * 
+	 * @return object
+	 */
 	public static function open ($file, $vars = null)
 	{
 		return new static($file, $vars);
 	}
 
+	/**
+	 * Magic method. Assigns template variables.
+	 * 
+	 * @param string $name Variable name
+	 * @param mixed $value Variable value
+	 * 
+	 * @return void
+	 */
 	public function __set ($name, $value)
 	{
 		$this->vars[$name] = $value;
 	}
 
+	/**
+	 * Assings template variables. Parameters are dynamic and can be
+	 * either a single pair of name and value, or an associative array.
+	 * 
+	 * @return object
+	 */
 	public function set ()
 	{
 		if (func_num_args())
@@ -65,11 +119,19 @@ class View
 		return $this;
 	}
 
+	/**
+	 * The PHP template file is included and the buffered output is passed
+	 * into a variable. The Response class takes further responsability.
+	 * 
+	 * @return void
+	 */
 	public function render ()
 	{
 		$this->tpl_constants();
 		$this->custom_tpl_constants();
 		
+		// Extracts assigned template variables into the current scope,
+		// so the included file can access them.
 		if (is_array($this->vars))
 		{
 			extract($this->vars, EXTR_SKIP);
@@ -87,6 +149,12 @@ class View
 		Response::write($output);
 	}
 
+	/**
+	 * Checks if a template file exists.
+	 * 
+	 * @param string $file Template file
+	 * @return bool
+	 */
 	public function exists ($file)
 	{
 		$file = config('views path') . "$file.php";
@@ -98,13 +166,25 @@ class View
 		return false;
 	}
 
-	private function tpl_constants ()
+	/**
+	 * Defines built-in template constants. These can be used directly,
+	 * without assigning.
+	 * 
+	 * @return void
+	 */
+	protected function tpl_constants ()
 	{
-		$this->tpl_constants['path'] = config('path');
-		$this->tpl_constants['locale'] = config('base locale');
+		$this->tpl_constants['_path'] = config('path');
+		$this->tpl_constants['_locale'] = config('base locale');
 	}
 
-	private function custom_tpl_constants ()
+	/**
+	 * Defines external template constants, read from a config file.
+	 * As with the built-ins, these can be used without prio assigning.
+	 * 
+	 * @return void
+	 */
+	protected function custom_tpl_constants ()
 	{
 		$constants = include('config/constants.php');
 

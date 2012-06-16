@@ -9,7 +9,6 @@
 	</head>
 
 	<body>
-
 		<div>
 			<h1><?= $title; ?> <?= $version; ?></h1>
 			<h2>Forms</h2>

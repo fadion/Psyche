@@ -6,9 +6,10 @@ class Log
 
 	public static function write ($message, $type = null)
 	{
-		$file = config('log file');
-
+		$date = date('Y-m-d');
 		$time = date('Y-m-d H:i:s');
+
+		$file = config('log path').$date.'.txt';
 
 		$message = "$time: $message\r\n";
 
