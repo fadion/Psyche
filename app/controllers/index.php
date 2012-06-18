@@ -27,14 +27,21 @@ class Index
 			}
 		}
 
-		$view = Core\Psyc::open('test.php');
+		try
+		{
+			$view = Core\View::open('test');
 
-		$view->title = 'Framework';
-		$view->version = 'v1.0';
-		$view->errors = $errors;
-		$view->success = $success;
+			$view->title = 'Framework';
+			$view->version = 'v1.0';
+			$view->errors = $errors;
+			$view->success = $success;
 
-		$view->render();
+			$view->render();
+		}
+		catch (\Exception $e)
+		{
+			echo $e->getMessage();
+		}
 	}
 
 }

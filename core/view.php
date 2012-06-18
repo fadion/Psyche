@@ -1,6 +1,7 @@
 <?php
 namespace FW\Core;
 use FW\Core\Response;
+use FW\Core\Psyc;
 
 /**
  * View Engine
@@ -28,6 +29,11 @@ class View
 	protected $file;
 
 	/**
+	 * @var string Filename of the template file without the path or extension
+	 */
+	protected $filename;
+
+	/**
 	 * @var array Built-in and external template constants
 	 */
 	protected $tpl_constants;
@@ -35,27 +41,57 @@ class View
 	/**
 	 * Constructor.
 	 * 
+	 * @param string $file Template filename
+	 * @param array $vars Template variables to assign
+	 * 
 	 * @return void
 	 */
 	public function __construct ($file, $vars)
 	{
+		$this->filename = $file;
+
 		$file = config('views path').$file;
-		if (pathinfo($file, PATHINFO_EXTENSION) == '')
+		$ext = pathinfo($file, PATHINFO_EXTENSION);
+		$exists = true;
+
+		if ($ext == '')
 		{
-			$file .= '.php';
+			if (file_exists($file.'.php'))
+			{
+				$file .= '.php';
+			}
+			elseif (file_exists($file.'.psy'))
+			{
+				$file .= '.psy';
+			}
+			else
+			{
+				$exists = false;
+			}
+		}
+		else
+		{
+			if (!file_exists($file))
+			{
+				$exists = false;
+			}
 		}
 
-		if (!file_exists($file))
+		if (!$exists)
 		{
-			trigger_error('View file not found', FATAL);
-			return false;
+			throw new \Exception(sprintf("View %s doesn't exist", $file));
 		}
-
-		$this->file = $file;
 
 		if (!is_null($vars))
 		{
 			$this->vars = $vars;
+		}
+
+		$this->file = $file;
+
+		if (pathinfo($file, PATHINFO_EXTENSION) == 'psy')
+		{
+			$this->file = Psyc::run($file);
 		}
 	}
 
@@ -153,6 +189,7 @@ class View
 	 * Checks if a template file exists.
 	 * 
 	 * @param string $file Template file
+	 * 
 	 * @return bool
 	 */
 	public function exists ($file)

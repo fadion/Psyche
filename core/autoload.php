@@ -1,26 +1,56 @@
 <?php
 namespace FW\Core;
 
+/**
+ * Class Autoloader
+ * 
+ * Attempts to load namespaced classes. It is psr-0 compliant, meaning
+ * that the class namespace and underscore in it's name are translated
+ * to folders.
+ *
+ * @package FW\Core\Autoload
+ * @author Fadion Dashi
+ * @version 1.0
+ * @since 1.0
+ */
 class Autoload
 {
 
-	private $classes = array();
-
+	/**
+	 * Constructor. Registers the autoload method.
+	 * 
+	 * @return void
+	 */
 	public function __construct ()
 	{
 		spl_autoload_register(array($this, 'load'));
 	}
 
+	/**
+	 * Factory static method.
+	 * 
+	 * @return object
+	 */
 	public static function start ()
 	{
 		return new static;
 	}
 
+	/**
+	 * Tries to include the class file.
+	 * 
+	 * @param string $class Class name
+	 * 
+	 * @return void
+	 */
 	private function load ($class)
 	{
 		$path = $this->clean($class);
 
-		if (strpos($path, 'models/') !== false) {
+		// Models' path can't be translated from it's napespace. The correct
+		// path is set.
+		if (strpos($path, 'models/') !== false)
+		{
 			$path = str_replace('models/', config('models path'), $path);
 		}
 
@@ -30,10 +60,18 @@ class Autoload
 		}
 		else {
 			trigger_error("Class $class not found", FATAL);
-			return false;
+			return;
 		}
 	}
 
+	/**
+	 * Class names with a full qualified namespace and/or underscores in their names
+	 * are translated into directories.
+	 * 
+	 * @param string $class Class name
+	 * 
+	 * @return string
+	 */
 	private function clean ($class) {
 		$class = strtolower(trim($class, '\\'));
 		$class_name = substr($class, strrpos($class, '\\') + 1);

@@ -6,6 +6,14 @@ class Image
 
 	private $image;
 
+	const AUTO = 'auto';
+	const WIDTH = 'width';
+	const HEIGHT = 'height';
+	const TOP_RIGHT = 'top right';
+	const BOTTOM_RIGHT = 'bottom right';
+	const BOTTOM_LEFT = 'bottom left';
+	const CENTER =  'center';
+
 	public function __construct ($image)
 	{
 		$image_r = $this->create($image);
@@ -16,7 +24,7 @@ class Image
 		}
 		else
 		{
-			trigger_errors('Not a valid image type', ERROR);
+			trigger_error('Not a valid image type', ERROR);
 		}
 	}
 
@@ -30,7 +38,7 @@ class Image
 		return new static($image);
 	}
 
-	public function resize ($width, $height = null, $ratio = 'auto')
+	public function resize ($width, $height = null, $ratio = self::AUTO)
 	{
 		list($o_width, $o_height) = $this->dimensions($this->image);
 
@@ -44,19 +52,19 @@ class Image
 			$w_aspect = $width / $o_width;
 			$h_aspect = $height / $o_height;
 
-			if ($ratio == 'auto')
+			if ($ratio == self::AUTO)
 			{
 				$aspect = min($w_aspect, $h_aspect);
 
 				$new_width = round($o_width * $aspect);
 				$new_height = round($o_height * $aspect);
 			}
-			elseif ($ratio == 'width')
+			elseif ($ratio == self::WIDTH)
 			{
 				$new_width = $width;
 				$new_height = round($o_height * $w_aspect);
 			}
-			elseif ($ratio == 'height')
+			elseif ($ratio == self::HEIGHT)
 			{
 				$new_width = round($o_width * $h_aspect);
 				$new_height = $height;
@@ -140,23 +148,19 @@ class Image
 		{
 			switch ($position)
 			{
-				case 'top right':
-				case 'tr':
+				case self::TOP_RIGHT:
 					$x = $o_width - $w_width;
 					$y = 0;
 					break;
-				case 'bottom left':
-				case 'bl':
+				case self::BOTTOM_LEFT:
 					$x = 0;
 					$y = $o_height - $w_height;
 					break;
-				case 'bottom right':
-				case 'bt':
+				case self::BOTTOM_RIGHT:
 					$x = $o_width - $w_width;
 					$y = $o_height - $w_height;
 					break;
-				case 'center':
-				case 'c':
+				case self::CENTER:
 					$x = ($o_width / 2) - ($w_width / 2);
 					$y = ($o_height / 2) - ($w_height / 2);
 					break;

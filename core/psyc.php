@@ -7,79 +7,87 @@ use FW\Core\Response;
  * 
  * A simple, efficient and easy to use pseudo-code parser that compiles templates
  * into native PHP code. In addition to variable echoing, conditionals and iterators,
- * it has some nice inheritance capabilities. It depends on FW\Core\View for
- * template variables assigning and rendering.
+ * it has some nice inheritance capabilities. Files are compiled once and served from
+ * cache until the original template file is changed. Overhead is minimal, even when
+ * compile happens, as there are only a few simple regular expressions that parse
+ * Psyc syntax. It isn't supposed to be called directly, but will be run by FW\Core\View
+ * when '.psy' template files are found.
  *
  * @package FW\Core\Psyc
- * @see FW\Core\View
  * @author Fadion Dashi
- * @version 1.0
+ * @version 1.0.3
  * @since 1.0
  */
-class Psyc extends \FW\Core\View
+class Psyc
 {
 
 	/**
 	 * @var string Filename of the template file without the path or extension.
 	 */
-	protected $filename;
+	protected static $filename;
+
+	/**
+	 * @var string Path of the template file.
+	 */
+	protected static $file;
 
 	/**
 	 * @var string Contents of the template file.
 	 */
-	protected $contents;
+	protected static $contents;
 
 	/**
 	 * @var string Path of the parent if inheritance is detected.
 	 */
-	protected $parent;
+	protected static $parent;
 
 	/**
 	 * @var string Name of the parent without the path or extension.
 	 */
-	protected $use;
+	protected static $use;
 
 	/**
 	 * @var array List of available parses. Each one will call a class method.
 	 */
-	protected $parsers = array(
-		'use', 'partials', 'comments', 'core', 'echo', 'if', 'foreach', 'for', 'includes', 'generics'
+	protected static $parsers = array(
+		'use', 'partials', 'comments', 'core', 'echo', 'if', 'foreach', 'for', 'while', 'includes', 'others', 'generics'
 	);
 
 	/**
-	 * Class constructor. Inherits parent constructor for a few, shared operations.
+	 * Starts the Psyc Engine.
 	 * 
 	 * @param string $file Template filename
-	 * @param mixed $vars Template variables
-	 * @return void
+	 * 
+	 * @return string
 	 */
-	public function __construct ($file, $vars)
+	public static function run ($file)
 	{
-		$this->filename = $file;
-		
-		parent::__construct($file, $vars);
+		static::$filename = pathinfo($file, PATHINFO_BASENAME);
+		static::$file = $file;
 
-		$this->contents = file_get_contents($this->file);
+		static::$contents = file_get_contents(static::$file);
 
 		// Matches the {use 'file'} syntax to check for any defined inheritance.
 		// From the returned matches, the parent's name and path are set.
-		if (preg_match("|\{\s*use\s+'(.+)'\s*\}|i", $this->contents, $matches))
+		if (preg_match("|\{\s*use\s+'(.+?)'\s*\}|i", static::$contents, $matches))
 		{
-			$this->use = $matches[1];
-			$this->parent = config('views path').$matches[1];
-			if (pathinfo($this->parent, PATHINFO_EXTENSION) == '')
+			static::$use = $matches[1];
+			static::$parent = config('views path').$matches[1];
+			if (pathinfo(static::$parent, PATHINFO_EXTENSION) == '')
 			{
-				$this->parent .= '.php';
+				static::$parent .= '.psy';
 			}
 		}
 
 		// Will only parse the template if it hasn't expired yet. Otherwise
 		// the existing, compiled file will be used.
-		if ($this->expired())
+		if (static::expired())
 		{
-			$this->parse();
-			$this->save();
+			static::parse();
+			static::save();
 		}
+
+		return static::$file;
 	}
 
 	/**
@@ -87,15 +95,12 @@ class Psyc extends \FW\Core\View
 	 * 
 	 * @return void
 	 */
-	protected function parse ()
+	protected static function parse ()
 	{
-		foreach ($this->parsers as $parser)
+		foreach (static::$parsers as $parser)
 		{
 			$method = 'parse_'.$parser;
-			if (method_exists($this, $method))
-			{
-				$this->$method();
-			}
+			static::$method();
 		}
 	}
 
@@ -104,31 +109,31 @@ class Psyc extends \FW\Core\View
 	 * 
 	 * @return null|void
 	 */
-	protected function parse_use ()
+	protected static function parse_use ()
 	{
 		// If @var $parent wasn't set in the constructore, no parent was specified.
-		if (!isset($this->parent))
+		if (!isset(static::$parent))
 		{
 			return;
 		}
 
-		$this->contents = preg_replace("|\{\s*use\s+'".$this->use."'\s*\}\n*|i", file_get_contents($this->parent), $this->contents);
+		static::$contents = preg_replace("|\{\s*use\s+'".static::$use."'\s*\}\n*|i", file_get_contents(static::$parent), static::$contents);
 	}
 
 	/**
 	 * Parses {partial 'name'} syntax for defining inheritance blocks.
-	 * The found instances will be put into their corresponding parent blocks.
+	 * The found instances will be put into their corresponding {reserve 'name'} blocks.
 	 * 
 	 * @return null|void
 	 */
-	protected function parse_partials ()
+	protected static function parse_partials ()
 	{
-		if (!isset($this->parent))
+		if (!isset(static::$parent))
 		{
 			return;
 		}
 
-		preg_match_all("|\{\s*partial\s+'(.+)'\s*\}\n*(.+)\n*\{\s*/partial\s*\}\n*|i", $this->contents, $matches);
+		preg_match_all("|\{\s*partial\s+'(.+?)'\s*\}\n*(.+?)\n*\{\s*/partial\s*\}\n*|i", static::$contents, $matches);
 
 		$find = $matches[0];
 		$partials = $matches[1];
@@ -141,10 +146,10 @@ class Psyc extends \FW\Core\View
 			{
 				// Each partial is confronted with a {reserve} of the same name. If it exists,
 				// the partial content will be insterted into the parent.
-				if (preg_match("|\{\s*reserve\s+'".$partial."'\s*\}|i", $this->contents, $matches))
+				if (preg_match("|\{\s*reserve\s+'".$partial."'\s*\}|i", static::$contents, $matches))
 				{
-					$this->contents = preg_replace("|\{\s*reserve\s+'".$partial."'\s*\}|", $inner[$i], $this->contents);
-					$this->contents = str_replace($find[$i], '', $this->contents);
+					static::$contents = preg_replace("|\{\s*reserve\s+'".$partial."'\s*\}|", $inner[$i], static::$contents);
+					static::$contents = str_replace($find[$i], '', static::$contents);
 				}
 
 				$i++;
@@ -157,9 +162,9 @@ class Psyc extends \FW\Core\View
 	 * 
 	 * @return void
 	 */
-	protected function parse_echo ()
+	protected static function parse_echo ()
 	{
-		$this->contents = preg_replace('|\{\{\s*(.+?)\s*\}\}|', "<?= $1; ?>", $this->contents);
+		static::$contents = preg_replace('|\{\{\s*(.+?)\s*\}\}|', "<?= $1; ?>", static::$contents);
 	}
 
 	/**
@@ -167,12 +172,12 @@ class Psyc extends \FW\Core\View
 	 * 
 	 * @return void
 	 */
-	protected function parse_if ()
+	protected static function parse_if ()
 	{
-		$this->contents = preg_replace('|\{\s*if\s+(.+)\s*\}|i', "<?php if ($1): ?>", $this->contents);
-		$this->contents = preg_replace('|\{\s*elseif\s+(.+)\s*\}|i', "<?php elseif ($1): ?>", $this->contents);
-		$this->contents = preg_replace('|\{\s*else\s*\}|i', "<?php else: ?>", $this->contents);
-		$this->contents = preg_replace("|\{\s*/if\s*\}|i", "<?php endif; ?>", $this->contents);
+		static::$contents = preg_replace('|\{\s*if\s+(.+?)\s*\}|i', "<?php if ($1): ?>", static::$contents);
+		static::$contents = preg_replace('|\{\s*elseif\s+(.+?)\s*\}|i', "<?php elseif ($1): ?>", static::$contents);
+		static::$contents = preg_replace('|\{\s*else\s*\}|i', "<?php else: ?>", static::$contents);
+		static::$contents = preg_replace("|\{\s*/if\s*\}|i", "<?php endif; ?>", static::$contents);
 	}
 
 	/**
@@ -180,10 +185,10 @@ class Psyc extends \FW\Core\View
 	 * 
 	 * @return void
 	 */
-	protected function parse_foreach ()
+	protected static function parse_foreach ()
 	{
-		$this->contents = preg_replace('|\{\s*foreach\s+(.+)\s*\}|i', "<?php foreach ($1): ?>", $this->contents);
-		$this->contents = preg_replace("|\{\s*/foreach\s*\}|i", "<?php endforeach; ?>", $this->contents);
+		static::$contents = preg_replace('|\{\s*foreach\s+(.+?)\s*\}|i', "<?php foreach ($1): ?>", static::$contents);
+		static::$contents = preg_replace("|\{\s*/foreach\s*\}|i", "<?php endforeach; ?>", static::$contents);
 	}
 
 	/**
@@ -191,10 +196,21 @@ class Psyc extends \FW\Core\View
 	 * 
 	 * @return void
 	 */
-	protected function parse_for ()
+	protected static function parse_for ()
 	{
-		$this->contents = preg_replace('|\{\s*for\s+(.+)\s*\}|i', "<?php for ($1): ?>", $this->contents);
-		$this->contents = preg_replace("|\{\s*/for\s*\}|i", "<?php endfor; ?>", $this->contents);
+		static::$contents = preg_replace('|\{\s*for\s+(.+?)\s*\}|i', "<?php for ($1): ?>", static::$contents);
+		static::$contents = preg_replace("|\{\s*/for\s*\}|i", "<?php endfor; ?>", static::$contents);
+	}
+
+	/**
+	 * Parses {while} and {/while}.
+	 * 
+	 * @return void
+	 */
+	protected static function parse_while ()
+	{
+		static::$contents = preg_replace('|\{\s*while\s+(.+?)\s*\}|i', "<?php while ($1): ?>", static::$contents);
+		static::$contents = preg_replace("|\{\s*/while\s*\}|i", "<?php endfor; ?>", static::$contents);
 	}
 
 	/**
@@ -204,10 +220,10 @@ class Psyc extends \FW\Core\View
 	 * 
 	 * @return void
 	 */
-	protected function parse_core ()
+	protected static function parse_core ()
 	{
-		$this->contents = preg_replace('|\{\{%\s+(.+)::(.+)\s+%\}\}|', '<?= FW\Core\\\$1::$2; ?>', $this->contents);
-		$this->contents = preg_replace('|\{%\s+(.+)::(.+)\s+%\}|', 'FW\Core\\\$1::$2', $this->contents);
+		static::$contents = preg_replace('|\{\{%\s+(.+?)::(.+?)\s+%\}\}|', '<?= FW\Core\\\$1::$2; ?>', static::$contents);
+		static::$contents = preg_replace('|\{%\s+(.+?)::(.+?)\s+%\}|', 'FW\Core\\\$1::$2', static::$contents);
 	}
 
 	/**
@@ -216,9 +232,9 @@ class Psyc extends \FW\Core\View
 	 * 
 	 * @return void
 	 */
-	protected function parse_includes ()
+	protected static function parse_includes ()
 	{
-		$this->contents = preg_replace("|\{\s*include\s+'(.+)'\s*\}|i", "<?php include('".config('views path')."$1'); ?>", $this->contents);
+		static::$contents = preg_replace("|\{\s*include\s+'(.+?)'\s*\}|i", "<?php include('".config('views path')."$1'); ?>", static::$contents);
 	}
 
 	/**
@@ -227,9 +243,20 @@ class Psyc extends \FW\Core\View
 	 * 
 	 * @return void
 	 */
-	protected function parse_comments ()
+	protected static function parse_comments ()
 	{
-		$this->contents = preg_replace('|\{\s*\*(.+)\*\s*\}|', "<?php //$1; ?>", $this->contents);
+		static::$contents = preg_replace('|\{\s*\*(.+?)\*\s*\}|', "<?php //$1; ?>", static::$contents);
+	}
+
+	/**
+	 * Parses some other, uncategorized control structures.
+	 * 
+	 * @return void
+	 */
+	protected static function parse_others ()
+	{
+		static::$contents = preg_replace('|\{\s*continue\s*\}|', "<?php continue; ?>", static::$contents);
+		static::$contents = preg_replace('|\{\s*beak\s*\}|', "<?php break; ?>", static::$contents);
 	}
 
 	/**
@@ -240,9 +267,9 @@ class Psyc extends \FW\Core\View
 	 * 
 	 * @return void
 	 */
-	protected function parse_generics ()
+	protected static function parse_generics ()
 	{
-		$this->contents = preg_replace('|\{\s*\$(.+)\s*\}|', "<?php $$1; ?>", $this->contents);
+		static::$contents = preg_replace('|\{\s*\$(.+?)\s*\}|', "<?php $$1; ?>", static::$contents);
 	}
 
 	/**
@@ -252,21 +279,21 @@ class Psyc extends \FW\Core\View
 	 * 
 	 * @return bool
 	 */
-	protected function expired ()
+	protected static function expired ()
 	{
 		$return = false;
-		$original = $this->file;
+		$original = static::$file;
 
-		$this->file = 'stash/views/'.md5($this->filename).'.php';
+		static::$file = 'stash/views/'.md5(static::$filename).'.php';
 
 		// If the compiled template's modification time is lower then the original's, it
 		// means that it needs to be recompiled. In the elseif() part, the original's
 		// modification time is checked with the parent template (if it exists).
-		if (filemtime($this->file) < filemtime($original))
+		if (filemtime(static::$file) < filemtime($original))
 		{
 			$return = true;
 		}
-		elseif (isset($this->parent) and filemtime($this->file) < filemtime($this->parent))
+		elseif (isset(static::$parent) and filemtime(static::$file) < filemtime(static::$parent))
 		{
 			$return = true;
 		}
@@ -279,9 +306,9 @@ class Psyc extends \FW\Core\View
 	 * 
 	 * @return void
 	 */
-	protected function save ()
+	protected static function save ()
 	{
-		file_put_contents($this->file, $this->contents);
+		file_put_contents(static::$file, static::$contents);
 	}
 	
 }

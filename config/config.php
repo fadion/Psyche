@@ -1,13 +1,6 @@
 <?php
-return array(
+return array (
 
-	/* Database credentials */
-	/* Leave the host and user empty for database-less application */
-	'db host' => 'localhost',
-	'db user' => 'root',
-	'db password' => 'password',
-	'db name' => 'fw',
-	
 	/* Default and rollback locales */
 	/* The rollback will be used when a key is not found */
 	'base locale' => 'en',

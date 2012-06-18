@@ -1,14 +1,39 @@
 <?php
 namespace FW\Core;
 
+/**
+ * Helper for working with files
+ * 
+ * Provide some nice functions for file handling, information and upload.
+ *
+ * @package FW\Core\Psyc
+ * @see FW\Core\View
+ * @author Fadion Dashi
+ * @version 1.0
+ * @since 1.0
+ */
 class File
 {
 
+	/**
+	 * Checks if a file exists.
+	 * 
+	 * @param string $file File path
+	 * 
+	 * @return bool
+	 */
 	public static function exists ($file)
 	{
 		return file_exists($file);
 	}
 
+	/**
+	 * Reads a file if it exists.
+	 * 
+	 * @param string $file File path
+	 * 
+	 * @return bool|string
+	 */
 	public static function read ($file)
 	{
 		$return = false;
@@ -21,18 +46,40 @@ class File
 		return $return;
 	}
 
+	/**
+	 * Writes contents to a file. Will create it if it doesn't exist.
+	 * 
+	 * @param string $file File path
+	 * @param strint $contents The contents to be written
+	 * 
+	 * @return bool|int file_put_contents() returns boolen FALSE on failure
+	 */
 	public static function write ($file, $contents = '')
 	{
 		return file_put_contents($file, $contents);
 	}
 
-	public static function append ($file, $contents = '')
+	/**
+	 * Appends contents to a file. Will create it if it doesn't exist.
+	 * 
+	 * @param string $file File path
+	 * @param string $contents The contents to be written
+	 * 
+	 * @return bool|int
+	 */
+	public static function append ($file, $contents)
 	{
-		$file = file_put_contents($file, $contents, FILE_APPEND);
-		
-		return $file;
+		return file_put_contents($file, $contents, FILE_APPEND);
 	}
 
+	/**
+	 * Prepends contents to a file. Will create it if it doesn't exist.
+	 * 
+	 * @param string $file File path
+	 * @param string $contents The contents to be written
+	 * 
+	 * @return bool|int
+	 */
 	public static function prepend ($file, $contents)
 	{
 		$file_contents = static::read($file);
@@ -40,11 +87,26 @@ class File
 		return static::write($file, $contents . $file_contents);
 	}
 
+	/**
+	 * Gets the file extension.
+	 * 
+	 * @param string $file File path
+	 * 
+	 * @return string
+	 */
 	public static function extension ($file)
 	{
 		return pathinfo($file, PATHINFO_EXTENSION);
 	}
 
+	/**
+	 * Checks if the file has the given extension.
+	 * 
+	 * @param string $extension The extension the file will be checked for
+	 * @param string $file File path
+	 * 
+	 * @return bool
+	 */
 	public static function is ($extension, $file)
 	{
 		$return = false;
@@ -59,6 +121,13 @@ class File
 		return $return;
 	}
 
+	/**
+	 * Gets the size in bytes of a file.
+	 * 
+	 * @param string $file File path
+	 * 
+	 * @return bool|int
+	 */
 	public static function size ($file)
 	{
 		$return = false;
@@ -71,6 +140,13 @@ class File
 		return $return;
 	}
 
+	/**
+	 * Gets the modification time of a file.
+	 * 
+	 * @param string $file File path
+	 * 
+	 * @return bool|int
+	 */
 	public static function modified ($file)
 	{
 		$return = false;
@@ -83,6 +159,14 @@ class File
 		return $return;
 	}
 
+	/**
+	 * Moves a file to a different path.
+	 * 
+	 * @param string $file File path
+	 * @param string $target Destination path
+	 * 
+	 * @return bool
+	 */
 	public static function move ($file, $target)
 	{
 		$return = false;
@@ -95,6 +179,14 @@ class File
 		return $return;
 	}
 
+	/**
+	 * Copies a file to a different path.
+	 * 
+	 * @param string $file File path
+	 * @param string $target Destination path
+	 * 
+	 * @return bool
+	 */
 	public static function copy ($file, $target)
 	{
 		$return = false;
@@ -107,6 +199,13 @@ class File
 		return $return;
 	}
 
+	/**
+	 * Deletes a file from the file system.
+	 * 
+	 * @param string $file File path
+	 * 
+	 * @return bool
+	 */
 	public static function delete ($file)
 	{
 		$return = false;
@@ -120,6 +219,15 @@ class File
 		return $return;
 	}
 
+	/**
+	 * Uploads a file using the standart move_uploaded_file().
+	 * 
+	 * @param string $file File path
+	 * @param string $path Path to upload the file to
+	 * @param string $name Rename the file
+	 * 
+	 * @return bool|string
+	 */
 	public static function upload ($file, $path, $name = null)
 	{
 		$return = false;

@@ -38,10 +38,7 @@ else
 
 $error = new Error;
 
-if (config('db host') != '' and config('db user') != '')
-{
-	DB::connect(config('db host'), config('db user'), config('db password'), config('db name'));
-}
+DB::connect();
 
 Router::start();
 Response::output();
