@@ -27,6 +27,11 @@ class Psyc
 	protected static $filename;
 
 	/**
+	 * @var string Path of the compiled file
+	 */
+	protected static $compiled;
+
+	/**
 	 * @var string Path of the template file.
 	 */
 	protected static $file;
@@ -79,15 +84,18 @@ class Psyc
 			}
 		}
 
+		static::$compiled = 'stash/views/'.md5(static::$filename).'.php';
+
 		// Will only parse the template if it hasn't expired yet. Otherwise
 		// the existing, compiled file will be used.
 		if (static::expired())
 		{
+			static::expired();
 			static::parse();
 			static::save();
 		}
 
-		return static::$file;
+		return static::$compiled;
 	}
 
 	/**
@@ -133,7 +141,7 @@ class Psyc
 			return;
 		}
 
-		preg_match_all("|\{\s*partial\s+'(.+?)'\s*\}\n*(.+?)\n*\{\s*/partial\s*\}\n*|i", static::$contents, $matches);
+		preg_match_all("|\{\s*partial\s+'(.+?)'\s*\}\n*(.+?)\n*\{\s*/partial\s*\}\n*|is", static::$contents, $matches);
 
 		$find = $matches[0];
 		$partials = $matches[1];
@@ -282,18 +290,15 @@ class Psyc
 	protected static function expired ()
 	{
 		$return = false;
-		$original = static::$file;
-
-		static::$file = 'stash/views/'.md5(static::$filename).'.php';
 
 		// If the compiled template's modification time is lower then the original's, it
 		// means that it needs to be recompiled. In the elseif() part, the original's
 		// modification time is checked with the parent template (if it exists).
-		if (filemtime(static::$file) < filemtime($original))
+		if (filemtime(static::$compiled) < filemtime(static::$file))
 		{
 			$return = true;
 		}
-		elseif (isset(static::$parent) and filemtime(static::$file) < filemtime(static::$parent))
+		elseif (isset(static::$parent) and filemtime(static::$compiled) < filemtime(static::$parent))
 		{
 			$return = true;
 		}
@@ -308,7 +313,7 @@ class Psyc
 	 */
 	protected static function save ()
 	{
-		file_put_contents(static::$file, static::$contents);
+		file_put_contents(static::$compiled, static::$contents);
 	}
 	
 }

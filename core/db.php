@@ -1,17 +1,49 @@
 <?php
 namespace FW\Core;
+use \PDO;
 
+/**
+ * Database
+ * 
+ * A simple interface to PDO. Database driver and configuration are set in
+ * config/database.php as templates.
+ *
+ * @package FW\Core\DB
+ * @author Fadion Dashi
+ * @version 1.0
+ * @since 1.0
+ */
 class DB {
 
-	protected static $templates;
-	protected static $dbh;
-	protected static $results;
-	protected static $values;
 
+	/**
+	 * @var object PDO Object
+	 */
+	public static $pdo;
+
+	/**
+	 * @var array Template file cache
+	 */
+	protected static $templates;
+
+	/**
+	 * @var object PDO Statement Object
+	 */
+	protected static $results;
+
+	/**
+	 * Connects to the database via PDO using one of the defined templates.
+	 * 
+	 * @param string $template Configuration template
+	 * 
+	 * @return void
+	 */
 	public static function connect ($template = null)
 	{
 		static::read_templates();
 
+		// If a template is defined as parameter, check if it exists in the
+		// configuration cache. Otherwise get the first template.
 		if (!is_null($template) and isset(static::$templates[$template]))
 		{
 			$template = static::$templates[$template];
@@ -24,8 +56,8 @@ class DB {
 
 		try
 		{
-			static::$dbh = new \PDO($template['type'].':host='.$template['host'].';dbname='.$template['name'], $template['user'], $template['password']);
-			static::$dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);  
+			static::$pdo = new PDO($template['type'].':host='.$template['host'].';dbname='.$template['name'], $template['user'], $template['password']);
+			static::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);  
 		}
 		catch (\PDOException $e)
 		{
@@ -33,16 +65,32 @@ class DB {
 		}
 	}
 
+	/**
+	 * Makes the SQL query. Any parameter after the SQL code is treated
+	 * as a parameter to be bound.
+	 * 
+	 * It can be a single array: DB::query("UPDATE table SET a=?, b=?", array($a, $b));
+	 * or multi parameters: DB::query("UPDATE table SET a=?, b=?", $a, $b);
+	 * 
+	 * @param string $sql The raw SQL
+	 * 
+	 * @return int|object
+	 */
 	public static function query ($sql)
 	{
 		try
 		{
-			static::$results = static::$dbh->prepare($sql);
-			static::$results->setFetchMode(\PDO::FETCH_OBJ);
+			static::$results = static::$pdo->prepare($sql);
 
+			// Sets the return as object.
+			static::$results->setFetchMode(PDO::FETCH_OBJ);
+
+			// Received the dynamic args and unsets the first (SQL query)
 			$args = func_get_args();
 			unset($args[0]);
 
+			// If it's a single array, run it with execute().
+			// Otherwise bind every parameter.
 			if (is_array($args[1]) and count($args[1]))
 			{
 				static::$results->execute($args[1]);
@@ -51,15 +99,22 @@ class DB {
 			{
 				foreach ($args as $key => $val)
 				{
-					static::$results->bindParam($key, $val);
+					static::$results->bindValue($key, $val);
 				}
 
 				static::$results->execute();
 			}
 
-			static::$values = static::$results->fetchAll();
-
-			return static::$values;
+			// SELECT queries return a fetched object.
+			// UPDATE or INSERT return the affected rows.
+			if (stripos($sql, 'select') === 0)
+			{
+				return static::$results->fetchAll();
+			}
+			elseif (stripos($sql, 'insert') === 0 or stripos($sql, 'update') === 0)
+			{
+				return static::$results->rowCount();
+			}
 		}
 		catch (\PDOException $e)
 		{
@@ -67,6 +122,11 @@ class DB {
 		}
 	}
 
+	/**
+	 * Reads the templates configuration file.
+	 * 
+	 * @return void
+	 */
 	protected static function read_templates ()
 	{
 		if (isset(static::$templates))
