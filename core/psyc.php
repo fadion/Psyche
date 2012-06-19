@@ -55,7 +55,7 @@ class Psyc
 	 * @var array List of available parses. Each one will call a class method.
 	 */
 	protected static $parsers = array(
-		'use', 'partials', 'comments', 'core', 'echo', 'if', 'foreach', 'for', 'while', 'includes', 'others', 'generics'
+		'use', 'partials', 'includes', 'comments', 'core', 'echo', 'if', 'foreach', 'for', 'while', 'others', 'generics'
 	);
 
 	/**
@@ -90,6 +90,7 @@ class Psyc
 		// the existing, compiled file will be used.
 		if (static::expired())
 		{
+
 			static::expired();
 			static::parse();
 			static::save();
@@ -235,14 +236,38 @@ class Psyc
 	}
 
 	/**
-	 * Parses includes with the {include 'file'} syntax. As included files will always be views,
-	 * the path is automatically fixed to point the right directory.
+	 * Parses includes with the {include 'file'} syntax. This doesn't get
+	 * compiled as a normal PHP include, as the included file's content
+	 * wouldn't be parsed. Instead, the file content is read and replaced
+	 * with the pseudo-function.
 	 * 
 	 * @return void
 	 */
 	protected static function parse_includes ()
 	{
-		static::$contents = preg_replace("|\{\s*include\s+'(.+?)'\s*\}|i", "<?php include('".config('views path')."$1'); ?>", static::$contents);
+		if (preg_match_all("|\{\s*include\s+'(.+?)'\s*\}|i", static::$contents, $matches))
+		{
+			$find = $matches[0];
+			$includes = $matches[1];
+
+			$i = 0;
+			foreach ($includes as $include)
+			{
+				if (pathinfo($include, PATHINFO_EXTENSION) == '')
+				{
+					$include .= '.psy';
+				}
+
+				$file = config('views path').$include;
+
+				if (file_exists($file))
+				{
+					static::$contents = str_replace($find[$i], file_get_contents($file), static::$contents);
+				}
+				$i++;
+			}
+
+		}
 	}
 
 	/**

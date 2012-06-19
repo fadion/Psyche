@@ -9,7 +9,6 @@ require_once 'core/autoload.php';
 use FW\Core\Autoload;
 Autoload::start();
 
-use FW\Core\Localizer;
 use FW\Core\DB;
 use FW\Core\Config;
 use FW\Core\Router;
@@ -18,7 +17,7 @@ use FW\Core\Error;
 
 function __ ()
 {
-	return Localizer::get(func_get_args());
+	return call_user_func_array('FW\Core\Localizer::get', func_get_args());
 }
 
 function config ($key)

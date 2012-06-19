@@ -1,41 +1,72 @@
 <?php
 namespace FW\Core;
 
+/**
+ * Localizer
+ * 
+ * A very practical approach to localizing, using a similiar technique
+ * as gettext(), but with a few extras. It supports rollback, variables
+ * and single/plural calculation.
+ *
+ * @package FW\Core\Localizer
+ * @author Fadion Dashi, Andri Xhitoni
+ * @version 1.0
+ * @since 1.0
+ */
 class Localizer
 {
 
-	private static $path;
-	private static $cache;
-	private static $rollback_cache;
+	/**
+	 * @var string Base path of locales
+	 */
+	protected static $path;
 
+	/**
+	 * @var array Language keys
+	 */
+	protected static $cache;
+
+	/**
+	 * @var array Rollback keys
+	 */
+	protected static $rollback_cache;
+
+	/**
+	 * Runs the Localizer. Arguments can be as much as needed, where
+	 * the first is always the language string and the rest are variables.
+	 * If no language file is found, the string will be returned as is.
+	 * 
+	 * @return string
+	 */
 	public static function get ()
 	{
 		static::$path = config('locale path');
 
 		$params = func_get_args();
-		$params = $params[0];
 		
+		// The first function parameter is always the language string.
 		$text = $params[0];
 		$vars = array();
 
-		$lang = config('base locale');
-		$rollback = config('rollback locale');
+		static::read_language_file();
 
-		static::read_language_file($lang);
-
+		// If the key doesn't exists in the current language, the rollback
+		// is checked.
 		if (count(static::$cache) and array_key_exists($text, static::$cache))
 		{
 			$text = static::$cache[$text];
 		}
 		else
 		{
-			static::read_rollback_file($rollback);
+			static::read_rollback_file();
 			if (count(static::$rollback_cache) and array_key_exists($text, static::$rollback_cache))
 			{
 				$text = static::$rollback_cache[$text];
 			}
 		}
 		
+		// Variable parameters can either be passed as a single array or
+		// as function parameters.
 		if (isset($params[1]))
 		{
 			if (is_array($params[1]))
@@ -57,19 +88,32 @@ class Localizer
 		return $text;
 	}
 
-	private static function read_language_file ($lang)
+	/**
+	 * Reads the default language file.
+	 * 
+	 * @return void
+	 */
+	protected static function read_language_file ()
 	{
-		$path = static::$path . $lang . '.php';
+		$path = static::$path . config('base locale') . '.php';
 
+		// Language will be read only if the keys aren't set yet.
+		// This offers some basic optimization so files are read
+		// only once a session.
 		if (file_exists($path) and !count(static::$cache))
 		{
 			static::$cache = include($path);
 		}
 	}
 
-	private static function read_rollback_file ($lang)
+	/**
+	 * Reads the rollback language file.
+	 * 
+	 * @return void
+	 */
+	protected static function read_rollback_file ()
 	{
-		$path = static::$path . $lang . '.php';
+		$path = static::$path . config('rollback locale') . '.php';
 
 		if (file_exists($path) and !count(static::$rollback_cache))
 		{
@@ -77,7 +121,17 @@ class Localizer
 		}
 	}
 
-	private static function parse_variables ($text, $vars)
+	/**
+	 * Replaces variable values with their occurrences in the string.
+	 * :1 will be replaced with the variable value in the first position
+	 * after the language string. :2 with the second and so on.
+	 * 
+	 * @param string $text The language string
+	 * @param array $vars Variables passed
+	 * 
+	 * @return string
+	 */
+	protected static function parse_variables ($text, $vars)
 	{
 		preg_match_all('|:\d|', $text, $matches);
 		$matches = $matches[0];
@@ -94,7 +148,18 @@ class Localizer
 		return $text;
 	}
 
-	private static function parse_case ($text, $vars)
+	/**
+	 * Parses cases based on variable values. Cases are written as:
+	 * {1:singular|plural}. An integer variable with a value of 1 will
+	 * always trigger the singular case; a value different than 1 will
+	 * trigger the plural case.
+	 * 
+	 * @param string $text The language string
+	 * @param array $vars Variable passed
+	 * 
+	 * @return string
+	 */
+	protected static function parse_case ($text, $vars)
 	{
 		preg_match_all('|(\{(.+?)\})|', $text, $matches);
 		$matches = $matches[count($matches) - 1];

@@ -27,9 +27,14 @@ class DB {
 	protected static $templates;
 
 	/**
-	 * @var object PDO Statement Object
+	 * @var object PDO statement object
 	 */
 	protected static $results;
+
+	/**
+	 * @var object PDO fetched results
+	 */
+	protected static $fetch;
 
 	/**
 	 * Connects to the database via PDO using one of the defined templates.
@@ -93,7 +98,7 @@ class DB {
 			// Otherwise bind every parameter.
 			if (is_array($args[1]) and count($args[1]))
 			{
-				static::$results->execute($args[1]);
+				static::$fetch = static::$results->execute($args[1]);
 			}
 			else
 			{
@@ -102,23 +107,46 @@ class DB {
 					static::$results->bindValue($key, $val);
 				}
 
-				static::$results->execute();
+				static::$fetch = static::$results->execute();
 			}
 
 			// SELECT queries return a fetched object.
 			// UPDATE or INSERT return the affected rows.
 			if (stripos($sql, 'select') === 0)
 			{
-				return static::$results->fetchAll();
+				return static::$fetch = static::$results->fetchAll();
 			}
 			elseif (stripos($sql, 'insert') === 0 or stripos($sql, 'update') === 0)
 			{
 				return static::$results->rowCount();
 			}
+			else
+			{
+				return static::$fetch;
+			}
 		}
 		catch (\PDOException $e)
 		{
 			trigger_error('Database: '.$e->getMessage(), FATAL);
+		}
+	}
+
+	/**
+	 * Counts number of rows. For select queries and MySQL, PDO doesn't
+	 * return selected rows via rowCount(), so a count() on the object is used.
+	 * For insert and update, rowCount() is accurate.
+	 * 
+	 * @return int
+	 */
+	public static function count ()
+	{
+		if (is_object(static::$fetch))
+		{
+			return count(static::$fetch);
+		}
+		else
+		{
+			return static::$results->rowCount();
 		}
 	}
 
