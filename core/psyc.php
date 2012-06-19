@@ -1,6 +1,5 @@
 <?php
 namespace FW\Core;
-use FW\Core\Response;
 
 /**
  * Psyc Template Engine
@@ -22,7 +21,7 @@ class Psyc
 {
 
 	/**
-	 * @var string Filename of the template file without the path or extension.
+	 * @var string Filename of the template file without the path or extension
 	 */
 	protected static $filename;
 
@@ -32,30 +31,30 @@ class Psyc
 	protected static $compiled;
 
 	/**
-	 * @var string Path of the template file.
+	 * @var string Path of the template file
 	 */
 	protected static $file;
 
 	/**
-	 * @var string Contents of the template file.
+	 * @var string Contents of the template file
 	 */
 	protected static $contents;
 
 	/**
-	 * @var string Path of the parent if inheritance is detected.
+	 * @var string Path of the parent if inheritance is detected
 	 */
 	protected static $parent;
 
 	/**
-	 * @var string Name of the parent without the path or extension.
+	 * @var string Name of the parent without the path or extension
 	 */
 	protected static $use;
 
 	/**
-	 * @var array List of available parses. Each one will call a class method.
+	 * @var array List of available parses. Each one will call a class method
 	 */
 	protected static $parsers = array(
-		'use', 'partials', 'includes', 'comments', 'core', 'echo', 'if', 'foreach', 'for', 'while', 'others', 'generics'
+		'comments', 'use', 'partials', 'reserves', 'includes', 'core', 'echo', 'if', 'foreach', 'for', 'while', 'others', 'generics'
 	);
 
 	/**
@@ -88,13 +87,11 @@ class Psyc
 
 		// Will only parse the template if it hasn't expired yet. Otherwise
 		// the existing, compiled file will be used.
-		if (static::expired())
-		{
-
-			static::expired();
+		//if (static::expired())
+		//{
 			static::parse();
 			static::save();
-		}
+		//}
 
 		return static::$compiled;
 	}
@@ -157,13 +154,24 @@ class Psyc
 				// the partial content will be insterted into the parent.
 				if (preg_match("|\{\s*reserve\s+'".$partial."'\s*\}|i", static::$contents, $matches))
 				{
-					static::$contents = preg_replace("|\{\s*reserve\s+'".$partial."'\s*\}|", $inner[$i], static::$contents);
+					static::$contents = preg_replace("|\{\s*reserve\s+'".$partial."'\s*\}(\n*(.+?)\n*\{/reserve\})?|is", $inner[$i], static::$contents);
 					static::$contents = str_replace($find[$i], '', static::$contents);
 				}
 
 				$i++;
 			}
 		}
+	}
+
+	/**
+	 * Parses block reserves with the {reserve 'name'}default value{/reserve} syntax.
+	 * Those will be compiled only if no partial used them.
+	 * 
+	 * @return void
+	 */
+	protected static function parse_reserves ()
+	{
+		static::$contents = preg_replace("|\{\s*reserve\s+'(.+?)'\s*\}\n*(.+?)\n*\{/reserve\}|is", '$2', static::$contents);
 	}
 
 	/**

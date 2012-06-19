@@ -6,14 +6,6 @@ class Image
 
 	private $image;
 
-	const AUTO = 'auto';
-	const WIDTH = 'width';
-	const HEIGHT = 'height';
-	const TOP_RIGHT = 'top right';
-	const BOTTOM_RIGHT = 'bottom right';
-	const BOTTOM_LEFT = 'bottom left';
-	const CENTER =  'center';
-
 	public function __construct ($image)
 	{
 		$image_r = $this->create($image);
@@ -38,7 +30,7 @@ class Image
 		return new static($image);
 	}
 
-	public function resize ($width, $height = null, $ratio = self::AUTO)
+	public function resize ($width, $height = null, $ratio = 'auto')
 	{
 		list($o_width, $o_height) = $this->dimensions($this->image);
 
@@ -52,19 +44,19 @@ class Image
 			$w_aspect = $width / $o_width;
 			$h_aspect = $height / $o_height;
 
-			if ($ratio == self::AUTO)
+			if ($ratio == 'auto')
 			{
 				$aspect = min($w_aspect, $h_aspect);
 
 				$new_width = round($o_width * $aspect);
 				$new_height = round($o_height * $aspect);
 			}
-			elseif ($ratio == self::WIDTH)
+			elseif ($ratio == 'width')
 			{
 				$new_width = $width;
 				$new_height = round($o_height * $w_aspect);
 			}
-			elseif ($ratio == self::HEIGHT)
+			elseif ($ratio == 'height')
 			{
 				$new_width = round($o_width * $h_aspect);
 				$new_height = $height;
@@ -148,19 +140,23 @@ class Image
 		{
 			switch ($position)
 			{
-				case self::TOP_RIGHT:
+				case 'top right':
+				case 'tr':
 					$x = $o_width - $w_width;
 					$y = 0;
 					break;
-				case self::BOTTOM_LEFT:
+				case 'bottom left':
+				case 'bl':
 					$x = 0;
 					$y = $o_height - $w_height;
 					break;
-				case self::BOTTOM_RIGHT:
+				case 'bottom right':
+				case 'br':
 					$x = $o_width - $w_width;
 					$y = $o_height - $w_height;
 					break;
-				case self::CENTER:
+				case 'center':
+				case 'c':
 					$x = ($o_width / 2) - ($w_width / 2);
 					$y = ($o_height / 2) - ($w_height / 2);
 					break;

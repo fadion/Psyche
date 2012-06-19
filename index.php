@@ -1,19 +1,9 @@
 <?php
 session_start();
 
-define('FATAL', E_USER_ERROR);
-define('ERROR', E_USER_WARNING);
-define('WARNING', E_USER_NOTICE);
-
 require_once 'core/autoload.php';
-use FW\Core\Autoload;
-Autoload::start();
 
-use FW\Core\DB;
-use FW\Core\Config;
-use FW\Core\Router;
-use FW\Core\Response;
-use FW\Core\Error;
+FW\Core\Autoload::start();
 
 function __ ()
 {
@@ -22,7 +12,7 @@ function __ ()
 
 function config ($key)
 {
-	return Config::get($key);
+	return FW\Core\Config::get($key);
 }
 
 if (config('debug') == 1)
@@ -35,10 +25,10 @@ else
 	ini_set('display_errors', 0);
 }
 
-$error = new Error;
+$error = new FW\Core\Error;
 
-DB::connect();
+FW\Core\DB::connect();
 
-Router::start();
-Response::output();
+FW\Core\Router::start();
+FW\Core\Response::output();
 ?>

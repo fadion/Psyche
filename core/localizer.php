@@ -10,7 +10,7 @@ namespace FW\Core;
  *
  * @package FW\Core\Localizer
  * @author Fadion Dashi, Andri Xhitoni
- * @version 1.0
+ * @version 1.1
  * @since 1.0
  */
 class Localizer
@@ -32,6 +32,11 @@ class Localizer
 	protected static $rollback_cache;
 
 	/**
+	 * @var string Language that's being used
+	 */
+	protected static $language = null;
+
+	/**
 	 * Runs the Localizer. Arguments can be as much as needed, where
 	 * the first is always the language string and the rest are variables.
 	 * If no language file is found, the string will be returned as is.
@@ -40,7 +45,7 @@ class Localizer
 	 */
 	public static function get ()
 	{
-		static::$path = config('locale path');
+		static::set_defaults();
 
 		$params = func_get_args();
 		
@@ -89,15 +94,52 @@ class Localizer
 	}
 
 	/**
+	 * Sets and gets the language that is being used.
+	 * 
+	 * @param string $language Language name
+	 * 
+	 * @return string|void
+	 */
+	public static function language ($language = null)
+	{
+		static::set_defaults();
+
+		if ($language == null)
+		{
+			return static::$language;
+		}
+		else
+		{
+			static::$language = $language;
+		}
+	}
+
+	/**
+	 * Sets the base locale path and default language.
+	 * 
+	 * @return void
+	 */
+	protected static function set_defaults ()
+	{
+		static::$path = config('locale path');
+
+		if (static::$language == null)
+		{
+			static::$language = config('base locale');
+		}
+	}
+
+	/**
 	 * Reads the default language file.
 	 * 
 	 * @return void
 	 */
 	protected static function read_language_file ()
 	{
-		$path = static::$path . config('base locale') . '.php';
 
-		// Language will be read only if the keys aren't set yet.
+		$path = static::$path . static::$language . '.php';
+
+		// Locale file will be read, only if the keys aren't set yet.
 		// This offers some basic optimization so files are read
 		// only once a session.
 		if (file_exists($path) and !count(static::$cache))
@@ -107,7 +149,7 @@ class Localizer
 	}
 
 	/**
-	 * Reads the rollback language file.
+	 * Reads the rollback locale file.
 	 * 
 	 * @return void
 	 */
