@@ -40,6 +40,8 @@ class Router
 	 */
 	protected static $routes;
 
+	protected static $errors = array();
+
 	/**
 	 * Starts the router functionality.
 	 * 
@@ -172,7 +174,7 @@ class Router
 					// There may be as many arguments as needed and they aren't obligatory
 					// to be reflected in the URL parameters. On the contrary, URL parameters
 					// shouldn't be more than the number of arguments.
-					if (count($method_parameters) >= count($params))
+					if (count($method_parameters) >= count($params) or $method == 'route')
 					{
 						$show_error = false;
 
@@ -302,14 +304,32 @@ class Router
 	}
 
 	/**
-	 * @TODO: Test! It most probably needs some refactoring
+	 * Checks manual routes with the current URL and executes a closure
+	 * if it's successful.
+	 * 
+	 * @param string $route Route to be checked
+	 * @param closure $function Closure to be executed
+	 * @param array $request_type The http request type/types
+	 * 
+	 * @return void
 	 */
 	protected static function manual_route ($route, $function, $request_type = array('GET', 'POST', 'PUT'))
 	{
-		if (empty($route)) return false;
+		// An empty route triggers an error
+		if (empty($route))
+		{
+			static::$errors[] = 1;
+			return false;
+		}
 
-		if (!in_array($_SERVER['REQUEST_METHOD'], $request_type)) return false;
+		// An invalid http request triggers an error
+		if (!in_array($_SERVER['REQUEST_METHOD'], $request_type))
+		{
+			static::$errors[] = 1;
+			return false;
+		}
 		
+		// Explode route into pieces
 		$routes = explode('/', trim($route, ' /'));
 		$routes = static::analyze_manual_route($routes);
 		
@@ -318,16 +338,24 @@ class Router
 		$params = array();
 		$i = 0;
 
+		// Number of routes should be the same as the current url pieces.
 		if (count($routes) == count($pieces))
 		{
 			foreach ($routes as $route)
 			{
-				if ($route == $pieces[$i] or (static::parse_params($route, $pieces[$i]) and !is_null($pieces[$i])))
+				// For the manual route to be successful, every piece should
+				// be the same as the url piece in the same position, or have
+				// a wildcard whose value corresponds with the data type (-any,
+				// -num, -int). If a single manual piece doesn't fulfill the
+				// requirements, the route is discarded.
+				if ($route == $pieces[$i])
 				{
-					if (static::parse_params($route, $pieces[$i]))
-					{
-						$params[] = $pieces[$i];
-					}
+					$make_reroute = true;
+				}
+				elseif (static::parse_params($route, $pieces[$i]) and !is_null($pieces[$i]))
+				{
+					// $param holds any url parameter that corresponds to a wildcard.
+					$params[] = $pieces[$i];
 					$make_reroute = true;
 				}
 				else
@@ -342,12 +370,39 @@ class Router
 
 		if ($make_reroute)
 		{
+			static::$errors[] = 0;
 			call_user_func_array($function, $params);
+		}
+		else
+		{
+			static::$errors[] = 1;
 		}
 	}
 
 	/**
-	 * @TODO: Test! It most probably needs some refactoring
+	 * Triggers a 404 error if all the manual routes in a controller are
+	 * treated as invalid. Should be called after all manual routes are
+	 * created.
+	 * 
+	 * @return void
+	 */
+	public static function errors ()
+	{
+		if (!count(static::$errors) or !in_array('0', static::$errors))
+		{
+			Response::error(404);
+		}
+	}
+
+	/**
+	 * Checks the manual route for a -self or -this wildcard and
+	 * replaces them with the current controller. It works even for
+	 * controllers nested in sub-folders, as it checks each piece
+	 * if it's a directory.
+	 * 
+	 * @param array $routes The manual route pieces
+	 * 
+	 * @return array
 	 */
 	protected static function analyze_manual_route ($routes)
 	{
@@ -357,6 +412,7 @@ class Router
 			$to_add = array();
 			$real_pieces = array();
 
+			// Each found directory is added in a separate array.
 			foreach ($pieces as $piece)
 			{
 				if (is_dir(static::$path . $piece))
@@ -369,6 +425,9 @@ class Router
 				}
 			}
 
+			// The controller is the first piece of the url pieces
+			// with the directories removed. Finally it's merged with
+			// the directories.
 			$routes[0] = $real_pieces[0];
 			$routes = array_merge($to_add, $routes);
 		}
@@ -376,6 +435,14 @@ class Router
 		return $routes;
 	}
 
+	/**
+	 * Parses wildcards and checks if the value is of the correct data type.
+	 * 
+	 * @param string $param The route piece
+	 * @param string $value The url value corresponding to the route piece
+	 * 
+	 * @return bool
+	 */
 	protected static function parse_params ($param, $value)
 	{
 		if ($param == '-any')
@@ -401,7 +468,9 @@ class Router
 	}
 	
 	/**
-	 * @TODO: Test! It most probably needs some refactoring
+	 * Checks the config file for any reroutes.
+	 * 
+	 * @return bool
 	 */
 	protected static function check_reroutes ()
 	{
@@ -424,13 +493,19 @@ class Router
 	}
 	
 	/**
-	 * @TODO: Test! It most probably needs some refactoring
+	 * Checks any reroute from the config if it matches the current url.
+	 * The idea is pretty much similiar to the manual routes, but with a
+	 * few changes.
+	 * 
+	 * @return bool|array
 	 */
 	protected static function make_reroute ()
 	{
 		$routes = static::$routes;
 		$real_route = null;
-		
+
+		// Each reroute is checked individually. $key is the route
+		// to be checked and $val is the reroute.
 		foreach ($routes as $key=>$val)
 		{
 			$reroute = $val;
@@ -439,27 +514,34 @@ class Router
 			
 			$i = 0;
 			$make_reroute = false;
-			foreach ($route as $val)
+
+			if (count($pieces) == count($route))
 			{
-				if (isset($pieces[$i]) and ($val == $pieces[$i] or (static::parse_params($val, $pieces[$i]) and $pieces[$i] != null)))
+				foreach ($route as $val)
 				{
-					$make_reroute = true;
-					$real_route = $reroute;
-					unset($pieces[$i]);
+					// Pieces should be equal to url parameters or have the appropriate
+					// value for wildcards. If a single route doesn't fulfill the conditions,
+					// the reroute is discarded completely.
+					if (isset($pieces[$i]) and ($val == $pieces[$i] or (static::parse_params($val, $pieces[$i]) and $pieces[$i] != null)))
+					{
+						$make_reroute = true;
+						$real_route = $reroute;
+					}
+					else
+					{
+						$make_reroute = false;
+						$real_route = null;
+						break;
+					}
+					
+					$i++;
 				}
-				else
-				{
-					$make_reroute = false;
-					$real_route = null;
-					break;
-				}
-				
-				$i++;
 			}
 
+			// For a successfull reroute, the route pieces are returned
 			if ($make_reroute)
 			{
-				return array_merge(explode('/', $real_route), $pieces);
+				return explode('/', $real_route);
 			}
 		}
 		

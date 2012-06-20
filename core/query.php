@@ -1,6 +1,7 @@
 <?php
 namespace FW\Core;
 
+// WIP
 class Query {
 
 	protected $results;
