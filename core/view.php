@@ -96,8 +96,7 @@ class View
 	}
 
 	/**
-	 * Factory static method. It allows for an easier initiation of the
-	 * View class.
+	 * Factory static method.
 	 * 
 	 * @param string $file Template filename
 	 * @param array $vars Template variables to assign

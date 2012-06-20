@@ -2,23 +2,59 @@
 namespace FW\Core;
 use FW\Core\DB;
 
+/**
+ * Form Validator
+ * 
+ * A simple and intuitive, rules-based form validation.
+ *
+ * @package FW\Core\Psyc
+ * @author Fadion Dashi
+ * @version 1.0.3
+ * @since 1.0
+ */
 class Validator
 {
 
-	private static $extra = '';
-	private static $errors = array();
-	private static $input;
-	private static $labels;
+	/**
+	 * @var string Extra rules parameters
+	 */
+	private $extra = '';
 
-	public static function run ($inputs, $rules)
+	/**
+	 * @var array List of all errors
+	 */
+	private $errors = array();
+
+	/**
+	 * @var string Active input that's being validated
+	 */
+	private $input;
+
+	/**
+	 * @var array Form elements labels
+	 */
+	private $labels;
+
+	/**
+	 * Constructor. Starts the validation.
+	 * 
+	 * @param array $inputs List of inputs to be validated
+	 * @param array $rules List of rules for each input
+	 * 
+	 * @return object 
+	 */
+	public function __construct ($inputs, $rules)
 	{
-		$rules = static::parse_labels($rules);
-		$return = true;
+		$rules = $this->parse_labels($rules);
 
 		foreach ($rules as $input => $rule)
 		{
 			$sub = null;
 
+			// A dot in the input means it's calling a sub-element
+			// of an array. Mostly for $_FILES that return a multi-dimensional
+			// array and each item can be accessed as: input.name, input.size,
+			// input.tmp_name, etc.
 			if ((bool) strpos($input, '.') === true)
 			{
 				list($input, $sub) = explode('.', $input);
@@ -35,56 +71,135 @@ class Validator
 				$input_name = $input;
 			}
 
+			// If the input has a name such as "name[]", it means it's a group
+			// of elements with the same name and is treated as an array. Each
+			// value is validated seperately.
 			if (is_array($real_value))
 			{
 				foreach ($real_value as $rv) {
-					static::$input = $input_name;
-					static::validate($rv, $rule);
+					$this->input = $input_name;
+					$this->validate($rv, $rule);
 				}
 			}
-			elseif (isset($real_value))
+			else
 			{
-				static::$input = $input_name;
-				static::validate($real_value, $rule);
+				$this->input = $input_name;
+				$this->validate($real_value, $rule);
 			}
 		}
 
-		if (count(static::$errors))
-		{
-			$return = false;
-		}
-
-		return $return;
+		return $this;
 	}
 
-	private static function validate ($value, $rule)
+	/**
+	 * Factory static method.
+	 * 
+	 * @param array $inputs List of inputs to be validated
+	 * @param array $rules List of rules for each input
+	 * 
+	 * @return object 
+	 */
+	public static function run ($inputs, $rules)
+	{
+		return new static($inputs, $rules);
+	}
+
+	/**
+	 * Checks if validation passed.
+	 * 
+	 * @return bool
+	 */
+	public function passed ()
+	{
+		if (count($this->errors))
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks if validation failed.
+	 * 
+	 * @return bool
+	 */
+	public function failed ()
+	{
+		if (count($this->errors))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns the list of errors.
+	 * 
+	 * @param string $input Input name to be returned specifically
+	 * 
+	 * @return string|array
+	 */
+	public function errors ($input = null)
+	{
+		if (is_null($input))
+		{
+			return $this->errors;
+		}
+		else
+		{
+			if (isset($this->errors[ucwords($input)]))
+			{
+				return ucwords($input) . ' ' . $this->errors[ucwords($input)];
+			}
+		}
+	}
+
+	/**
+	 * Runs the appropriate validation rule.
+	 * 
+	 * @param string $value Value of the input
+	 * @param string $rule The rule for the input to be checked
+	 * 
+	 * @return void
+	 */
+	protected function validate ($value, $rule)
 	{
 		if ($rule != '' and !is_null($rule))
 		{
-			$rules = static::parse_rule($rule);
+			$rules = $this->parse_rule($rule);
 
+			// Iterates through all the rules of a single input.
 			foreach ($rules as $rule)
 			{
+				// A colon in the rule means it's a rule with values (extras).
+				// That value is passed to the $extra property.
+				// Ex: length:10
 				if ((bool) strpos($rule, ':') === true)
 				{
-					static::$extra = substr($rule, strpos($rule, ':') + 1);
+					$this->$extra = substr($rule, strpos($rule, ':') + 1);
 					$rule = substr($rule, 0, strpos($rule, ':'));
 				}
 
 				$method = 'validate_' . $rule;
 
+				// If the rule has no "required" and it's empty, there's no
+				// need to validated it.
 				if (!in_array('required', $rules) and $value == '')
 				{
 					$return = false;
 				}
 				else
 				{
-					if (method_exists('\FW\Core\Validator', $method))
+					// Call the validation method if it exists.
+					if (method_exists($this, $method))
 					{
-						$return = static::$method($value);
+						$return = $this->$method($value);
 					}
 				}
 
+				// If a rule fails, the whole validation for an input fails.
 				if ($return === false)
 				{
 					break;
@@ -93,19 +208,29 @@ class Validator
 		}
 	}
 
-	private static function parse_labels ($rules)
+	/**
+	 * Reads input labels and renames the input. The same label will be
+	 * used for error messages.
+	 * Ex: name, Full Name => '...'
+	 * 
+	 * @param array $rules List of rules
+	 * 
+	 * @return array
+	 */
+	protected function parse_labels ($rules)
 	{
 		foreach ($rules as $name => $value)
 		{
 			unset($rules[$name]);
 
+			// If it contains a label, the rule's name is modified.
 			if ((bool) strpos($name, ','))
 			{
 				list($new_name, $label) = explode(',', $name);
 				
 				$rules[trim($new_name, ' []')] = $value;
 				
-				static::$labels[trim($new_name, ' []')] = trim($label);
+				$this->labels[trim($new_name, ' []')] = trim($label);
 			}
 			else
 			{
@@ -116,7 +241,16 @@ class Validator
 		return $rules;
 	}
 
-	private static function parse_rule ($rule)
+	/**
+	 * Parses an input's rule and returns multiple rules separated
+	 * with a comma.
+	 * Ex: required, email
+	 * 
+	 * @param string $rule A single input rule
+	 * 
+	 * @return array
+	 */
+	protected function parse_rule ($rule)
 	{
 		$rule = explode(',', $rule);
 		$rule = array_map("trim", $rule);
@@ -124,79 +258,103 @@ class Validator
 		return $rule;
 	}
 
-	public static function errors ($input = null)
+	/**
+	 * Adds an error.
+	 * 
+	 * @param string $message Error message
+	 * 
+	 * @return void
+	 */
+	protected function add_error ($message)
 	{
-		if (is_null($input))
+		$input = $this->input;
+
+		// If a label exists for the active rule, it's set
+		// in the message.
+		if (isset($this->labels[$input]))
 		{
-			return static::$errors;
+			$input = $this->labels[$input];
 		}
-		else
-		{
-			if (isset(static::$errors[ucwords($input)]))
-			{
-				return ucwords($input) . ' ' . static::$errors[ucwords($input)];
-			}
-		}
+
+		$this->errors[ucwords($input)] = $message;
 	}
 
-	private static function add_error ($message)
-	{
-		$input = static::$input;
-
-		if (isset(static::$labels[$input]))
-		{
-			$input = static::$labels[$input];
-		}
-
-		static::$errors[ucwords($input)] = $message;
-	}
-
-	private static function validate_required ($value)
+	/**
+	 * Validates a "required" rule.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_required ($value)
 	{
 		$value = trim($value);
 
-		if ($value == '' or is_null($value))
+		if ($value == '' or is_null($value) or $value === false)
 		{
-			static::add_error(__('is required'));
+			$this->add_error(__('is required'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_email ($value)
+	/**
+	 * Validates an "email" rule.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_email ($value)
 	{
 		if (!filter_var($value, FILTER_VALIDATE_EMAIL))
 		{
-			static::add_error(__('should be a valid email address'));
+			$this->add_error(__('should be a valid email address'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_length ($value)
+	/**
+	 * Validates a "length" rule. The value's length should be exactly the same.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_length ($value)
 	{
-		$length = static::$extra;
+		$length = $this->extra;
 
 		if (strlen($value) != $length)
 		{
-			static::add_error(__('should be exactly :1 character{1:|s}', $length));
+			$this->add_error(__('should be exactly :1 character{1:|s}', $length));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_min ($value)
+	/**
+	 * Validates a "min" rule. If values is a number, it should be bigger than
+	 * specified. If it's a string, it's length should be higher.
+	 * 
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_min ($value)
 	{
-		$min = static::$extra;
+		$min = $this->extra;
 
 		if (is_numeric($value))
 		{
-			if (!is_numeric($value) or $value < $min)
+			if ($value < $min)
 			{
-				static::add_error(__('should be higher than :1', $min));
+				$this->add_error(__('should be higher than :1', $min));
 				return false;
 			}
 		}
@@ -204,7 +362,7 @@ class Validator
 		{
 			if (strlen($value) < $min)
 			{
-				static::add_error(__('should be longer than :1 character{1:|s}', $min));
+				$this->add_error(__('should be longer than :1 character{1:|s}', $min));
 				return false;
 			}
 		}
@@ -212,251 +370,422 @@ class Validator
 		return true;
 	}
 
-	private static function validate_max ($value)
+	/**
+	 * Validates a "max" rule. If value is a number, it should be smaller than
+	 * specified. If it's a string, it's length should smaller.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_max ($value)
 	{
-		$max = static::$extra;
+		$max = $this->extra;
 
 		if (is_numeric($max))
 		{
 			if (!is_numeric($value) or $value > $max)
 			{
-				static::add_error(__('should be smaller than :1', $max));
+				$this->add_error(__('should be smaller than :1', $max));
 				return false;
 			}
 		}
 		elseif (strlen($value) > $max)
 		{
-			static::add_error(__('should be shorter than :1 character{1:|s}', $max));
+			$this->add_error(__('should be shorter than :1 character{1:|s}', $max));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_between ($value)
+	/**
+	 * Validates a "between" rule. Value's length should be between the specified range.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_between ($value)
 	{
-		$between = static::$extra;
+		$between = $this->extra;
 		list($min, $max) = explode(';', $between);
 
 		if (strlen($value) < $min or strlen($value) > $max)
 		{
-			static::add_error(__('should be between :1 and :2 characters', $min, $max));
+			$this->add_error(__('should be between :1 and :2 characters', $min, $max));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_alpha ($value)
+	/**
+	 * Validates an "alpha" rule. Value should have only alphabetic characters.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_alpha ($value)
 	{
 		if (!preg_match('|^([a-z])+$|i', $value)) {
-			static::add_error(__('should contain only letters'));
+			$this->add_error(__('should contain only letters'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_alphanumeric ($value)
+	/**
+	 * Validates an "alphanumeric" rule. Value should have only alphanumeric characters.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_alphanumeric ($value)
 	{
 		if (!preg_match('|^([a-z0-9])+$|i', $value))
 		{
-			static::add_error(__('should contain only letters and numbers'));
+			$this->add_error(__('should contain only letters and numbers'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_alpha_dash ($value)
+	/**
+	 * Validates an "alpha_dash" rule. Value should have only alphanumeric
+	 * and dash characters.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_alpha_dash ($value)
 	{
 		if (!preg_match('|^([a-z0-9_-])+$|i', $value))
 		{
-			static::add_error(__('should contain only letters, numbers, underscores and hyphens'));
+			$this->add_error(__('should contain only letters, numbers, underscores and hyphens'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_url ($value)
+	/**
+	 * Validates a "url" rule.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_url ($value)
 	{
 		if (!filter_var($value, FILTER_VALIDATE_URL))
 		{
-			static::add_error(__('should be a valid web address'));
+			$this->add_error(__('should be a valid web address'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_numeric ($value)
+	/**
+	 * Validates a "numeric" rule.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_numeric ($value)
 	{
 		if (!is_numeric($value))
 		{
-			static::add_error(__('should be numeric'));
+			$this->add_error(__('should be numeric'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_integer ($value)
+	/**
+	 * Validates an "integer" rule.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_integer ($value)
 	{
 		if (!filter_var($value, FILTER_VALIDATE_INT))
 		{
-			static::add_error(__('should be integer'));
+			$this->add_error(__('should be integer'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_same ($value)
+	/**
+	 * Validates a "same" rule. Value should be exactly as the
+	 * confirmation field.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_same ($value)
 	{
-		$field = static::$extra;
+		$field = $this->extra;
 
 		if (!isset($_POST[$field]) and $value != $_POST[$field])
 		{
-			static::add_error(__('should match the confirmation field'));
+			$this->add_error(__('should match the confirmation field'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_different ($value)
+	/**
+	 * Validates a "different" rule. Value should be different than
+	 * specified field.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_different ($value)
 	{
-		$field = static::$extra;
+		$field = $this->extra;
 
 		if (!isset($_POST[$field]) and $value == $_POST[$field])
 		{
-			static::add_error(__('should not match the confirmation field'));
+			$this->add_error(__('should not match the confirmation field'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_in ($value)
+	/**
+	 * Validates an "in" rule. Value should be as one of the list.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_in ($value)
 	{
-		$values = explode(';', static::$extra);
+		$values = explode(';', $this->extra);
+		var_dump($values);
 
 		if (!in_array($value, $values))
 		{
-			static::add_error(__('should be a correct value'));
+			$this->add_error(__('should be a correct value'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_out ($value)
+	/**
+	 * Validates an "out" rule. Value shouldn't be as one of the list.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_out ($value)
 	{
-		$values = explode(';', static::$extra);
+		$values = explode(';', $this->extra);
 
 		if (in_array($value, $values))
 		{
-			static::add_error(__('should be a correct value'));
+			$this->add_error(__('should be a correct value'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_match ($value)
+	/**
+	 * Validates a "match" rule. Value should match a regular expression.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_match ($value)
 	{
-		$match = static::$extra;
+		$match = $this->extra;
 
 		if (!preg_match($match, $value))
 		{
-			static::add_error(__('should be a correct value'));
+			$this->add_error(__('should be a correct value'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_unique ($value)
+	/**
+	 * Validates a "unique" rule. Value should be unique in the database.
+	 * An optional second parameter can be passed as an ID that should
+	 * not be checked for uniqueness.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_unique ($value)
 	{
-		$table = static::$extra;
+		$table = $this->extra;
 		list($table, $field) = explode('.', $table);
 		$except = '';
 
 		if ((bool) strpos($field, ';') === true)
 		{
 			list($field, $except) = explode(';', $field);
-			$except = 'AND ' . str_replace('=', "!='", DB::clean($except)) . "'";
+			$except = 'AND ' . str_replace('=', "!='", $except) . "'";
 		}
 
-		$value = DB::clean($value);
-		$results = DB::query("SELECT $field FROM $table WHERE $field='$value' $except");
+		$results = DB::query("SELECT $field FROM $table WHERE $field=? $except", $value);
 
-		if ($results->num_rows())
+		if (count($results))
 		{
-			static::add_error(__('should be unique'));
+			$this->add_error(__('should be unique'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_exists ($value)
+	/**
+	 * Validates an "exists" rule. Value should exists in the database.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_exists ($value)
 	{
-		$table = static::$extra;
+		$table = $this->extra;
 		list($table, $field) = explode('.', $table);
 
-		$value = DB::clean($value);
-		$results = DB::query("SELECT $field FROM $table WHERE $field='$value'");
+		$results = DB::query("SELECT $field FROM $table WHERE $field=?", $value);
 
-		if (!$results->num_rows())
+		if (!count($results))
 		{
-			static::add_error(__('should be a correct value'));
+			$this->add_error(__('should be a correct value'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_before ($value)
+	/**
+	 * Validates a "before" rule. Value should be a date before
+	 * the specified one.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_before ($value)
 	{
-		$before = static::$extra;
+		$before = $this->extra;
 
 		if (strtotime($value) > strtotime($before))
 		{
-			static::add_error(__('should be a lower date'));
+			$this->add_error(__('should be a lower date'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_after ($value)
+	/**
+	 * Validates an "after" rule. Value should be a date after
+	 * the specified one.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_after ($value)
 	{
-		$before = static::$extra;
+		$before = $this->extra;
 
 		if (strtotime($value) < strtotime($before))
 		{
-			static::add_error(__('should be a higher date'));
+			$this->add_error(__('should be a higher date'));
 			return false;
 		}
 
 		return true;
 	}
 
-	private static function validate_type ($value)
+	/**
+	 * Validates a "type" rule. Value should have an extension from the list.
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_type ($value)
 	{
-		$types = static::$extra;
+		$types = $this->extra;
 		$types = explode(';', $types);
 		$ext = pathinfo($value, PATHINFO_EXTENSION);
 
 		if (!in_array($ext, $types))
 		{
-			static::add_error(__('should be on of the following format{2:|s}: :1', implode(', ', $types), count($types)));
+			$this->add_error(__('should be on of the following format{2:|s}: :1', implode(', ', $types), count($types)));
 			return false;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Validates a "password" rule. Value should contain the appropriate
+	 * characters for the strength (easy|normal|strong).
+	 * 
+	 * @param string $value The input's value
+	 * 
+	 * @return bool
+	 */
+	protected function validate_password ($value)
+	{
+		$strength = $this->extra;
+
+		if ($strength == 'easy')
+		{
+			if (strlen($value) < 5)
+			{
+				$this->add_error(__('should be at least 5 characters'));
+				return false;
+			}
+		}
+		elseif ($strength == 'normal')
+		{
+			if (strlen($value) < 5 or !preg_match('|([A-Z])+([0-9])+|', $value))
+			{
+				$this->add_error(__('should be at least 5 characters, contain an upper case letter and a number'));
+				return false;
+			}
+		}
+		elseif ($strength == 'strong')
+		{
+			if (strlen($value) < 5 or !preg_match('|([A-Z])+([0-9])+|', $value) or !preg_match('|.[!,@,#,$,%,^,&,*,?,_,~,-,£,(,)]+|', $value))
+			{
+				$this->add_error(__('should be at least 5 characters, contain an upper case letter, a number and a symbol'));
+				return false;
+			}
+		}
 	}
 
 }

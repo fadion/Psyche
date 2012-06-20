@@ -87,11 +87,11 @@ class Psyc
 
 		// Will only parse the template if it hasn't expired yet. Otherwise
 		// the existing, compiled file will be used.
-		//if (static::expired())
-		//{
+		if (static::expired())
+		{
 			static::parse();
 			static::save();
-		//}
+		}
 
 		return static::$compiled;
 	}
