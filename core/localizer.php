@@ -5,7 +5,7 @@ namespace FW\Core;
  * Localizer
  * 
  * A very practical approach to localizing, using a similiar technique
- * as gettext(), but with a few extras. It supports rollback, variables
+ * as gettext(). It supports rollback, variables
  * and single/plural calculation.
  *
  * @package FW\Core\Localizer

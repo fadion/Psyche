@@ -4,9 +4,7 @@ namespace FW\Core;
 /**
  * Class Autoloader
  * 
- * Attempts to load namespaced classes. It is psr-0 compliant, meaning
- * that the class namespace and underscore in it's name are translated
- * to folders.
+ * A psr-0 compliant autoloader that attempts to load namespaced classes.
  *
  * @package FW\Core\Autoload
  * @author Fadion Dashi
@@ -43,7 +41,7 @@ class Autoload
 	 * 
 	 * @return void
 	 */
-	private function load ($class)
+	protected function load ($class)
 	{
 		$path = $this->clean($class);
 
@@ -72,7 +70,7 @@ class Autoload
 	 * 
 	 * @return string
 	 */
-	private function clean ($class) {
+	protected function clean ($class) {
 		$class = strtolower(trim($class, '\\'));
 		$class_name = substr($class, strrpos($class, '\\') + 1);
 

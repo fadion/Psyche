@@ -9,7 +9,7 @@ use FW\Core\DB;
  *
  * @package FW\Core\Psyc
  * @author Fadion Dashi
- * @version 1.0.3
+ * @version 1.0.2
  * @since 1.0
  */
 class Validator

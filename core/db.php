@@ -48,7 +48,7 @@ class DB {
 		static::read_templates();
 
 		// If a template is defined as parameter, check if it exists in the
-		// configuration cache. Otherwise get the first template.
+		// configuration cache. Otherwise gets the first template.
 		if (!is_null($template) and isset(static::$templates[$template]))
 		{
 			$template = static::$templates[$template];
@@ -148,6 +148,19 @@ class DB {
 		{
 			return static::$results->rowCount();
 		}
+	}
+
+	/**
+	 * Quotes (if necessary) and escapes strings for safe using in a
+	 * database. Binding is better alternative in raw queries, but this
+	 * method is used extensively in the Query Builder.
+	 * 
+	 * @param string $string String to be quoted
+	 * @return string
+	 */
+	public static function quote ($string)
+	{
+		return static::$pdo->quote($string);
 	}
 
 	/**

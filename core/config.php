@@ -17,7 +17,7 @@ class Config
 	/**
 	 * @var array Stores config options
 	 */
-	private static $keys;
+	protected static $keys;
 
 	/**
 	 * Returns a config option.
@@ -42,7 +42,7 @@ class Config
 	 * 
 	 * @return void
 	 */
-	private static function open_file ()
+	protected static function open_file ()
 	{
 		// Keys are cached. If they are already set, no need to
 		// open the file again.
@@ -68,7 +68,7 @@ class Config
 	 * 
 	 * @return void
 	 */
-	private static function auto_path () {
+	protected static function auto_path () {
 		if (isset(static::$keys['path']) and static::$keys['path'] == 'auto')
 		{
 			static::$keys['path'] = 'http://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['SCRIPT_NAME']) . '/';

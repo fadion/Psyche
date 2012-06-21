@@ -1,14 +1,35 @@
 <?php
 namespace FW\Core;
 
+/**
+ * Image manipulation helper
+ * 
+ * Offers some very easy to use methods and flexible chaining
+ * for the most common image manipulation requirements.
+ *
+ * @package FW\Core\Form
+ * @author Fadion Dashi
+ * @version 1.0
+ * @since 1.0
+ */
 class Image
 {
 
-	private $image;
+	/**
+	 * @var resource Image resource handler
+	 */
+	protected $image;
 
-	public function __construct ($image)
+	/**
+	 * Constructor. Sets the image handler.
+	 * 
+	 * @param string $file Path to the image file
+	 * 
+	 * @return void
+	 */
+	public function __construct ($file)
 	{
-		$image_r = $this->create($image);
+		$image_r = $this->create($file);
 
 		if ($image_r)
 		{
@@ -16,29 +37,56 @@ class Image
 		}
 		else
 		{
-			trigger_error('Not a valid image type', ERROR);
+			trigger_error('Not a valid image', ERROR);
 		}
 	}
 
+	/**
+	 * Destructor. Detroys the image handler.
+	 * 
+	 * @return void
+	 */
 	public function __descruct ()
 	{
 		imagedestroy($this->image);
 	}
 
-	public static function open ($image)
+	/**
+	 * Factory static method.
+	 * 
+	 * @param string $file Path to the image file
+	 * 
+	 * @return object
+	 */
+	public static function open ($file)
 	{
-		return new static($image);
+		return new static($file);
 	}
 
+	/**
+	 * Resizes the image by maintaining aspect ratio. If only the
+	 * width is specified, it will be resized in % insted of px.
+	 * 
+	 * @param string $width
+	 * @param string $height
+	 * @param string $ratio Can be: 'auto', 'width' or 'height'
+	 * 
+	 * @return object
+	 */
 	public function resize ($width, $height = null, $ratio = 'auto')
 	{
 		list($o_width, $o_height) = $this->dimensions($this->image);
 
+		// If the height isn't set, dimensions will be resized
+		// by percentage. Ex: a 20 value will resize the image
+		// 20% of it's original dimensions.
 		if ($height == null)
 		{
 			$new_width = round($o_width * ($width / 100));
 			$new_height = round($o_height * ($width / 100));
 		}
+		// Otherwise, calculate dimensions based on the original
+		// ones and the defined aspect ratio type.
 		else
 		{
 			$w_aspect = $width / $o_width;
@@ -68,6 +116,7 @@ class Image
 			}
 		}
 
+		// Creates the new image resource by beeing aware of transparency
 		$resize = imagecreatetruecolor($new_width, $new_height);
 		$transparent = imagecolorallocatealpha($resize, 0, 0, 0, 127);
 		imagefill($resize, 0, 0, $transparent);
@@ -80,6 +129,16 @@ class Image
 		return $this;
 	}
 
+	/**
+	 * Crops the image.
+	 * 
+	 * @param string $width
+	 * @param string $height
+	 * @param int $x X-coordinate of the crop
+	 * @param int $y Y-coordinate of the crop
+	 * 
+	 * @return object
+	 */
 	public function crop ($width, $height, $x = 0, $y = 0)
 	{
 		list($o_width, $o_height) = $this->dimensions($this->image);
@@ -88,7 +147,7 @@ class Image
 		$transparent = imagecolorallocatealpha($crop, 0, 0, 0, 127);
 
 		imagefill($crop, 0, 0, $transparent);
-		imagecopy($crop, $this->image, 0, 0, $x, $y, $o_width, $o_height);
+		imagecopyresampled($crop, $this->image, 0, 0, $x, $y, $o_width, $o_height);
 		imagedestroy($this->image);
 		imagecolortransparent($crop, $transparent);
 
@@ -97,6 +156,13 @@ class Image
 		return $this;
 	}
 
+	/**
+	 * Rotates the image clock-wise.
+	 * 
+	 * @param float $angle Angle of rotation
+	 * 
+	 * @return object
+	 */
 	public function rotate ($angle)
 	{
 		list($o_width, $o_height) = $this->dimensions($this->image);
@@ -108,6 +174,15 @@ class Image
 		return $this;
 	}
 
+	/**
+	 * Places a watermak on top of the source image.
+	 * 
+	 * @param string $file Path to the watermark image file
+	 * @param string|array $position Position of the watermak
+	 * @param int $opacity Transparency of the watermak
+	 * 
+	 * @return object
+	 */
 	public function watermark ($file, $position = null, $opacity = 100)
 	{
 		if (!file_exists($file))
@@ -126,12 +201,16 @@ class Image
 			$opacity = 100;
 		}
 
+		// Calculate alpha based on opacity. The alpha parameter in
+		// Imagecolloralocatealpha() takes values from 0 - 127.
 		$alpha = min(round(abs(($opacity * 127 / 100) - 127)), 127);
 		$transparent = imagecolorallocatealpha($watermark, 0, 0, 0, $alpha);
 
 		imagelayereffect($watermark, IMG_EFFECT_OVERLAY);
 		imagefilledrectangle($watermark, 0, 0, $w_width, $w_height, $transparent);	
 
+		// If position is set manually, take the $x and $y coordinates directly.
+		// Otherwise, calculate them based on the string parameter.
 		if (is_array($position) and count($position) == 2)
 		{
 			list($x, $y) = $position;
@@ -173,26 +252,40 @@ class Image
 		return $this;
 	}
 
-	private function dimensions ($image)
+	/**
+	 * Gets the width and height of an image.
+	 * 
+	 * @param resource $image
+	 * 
+	 * @return array
+	 */
+	protected function dimensions ($image)
 	{
 		return array(imagesx($image), imagesy($image));
 	}
 
-	private function create ($image)
+	/**
+	 * Creates an image resource handler based on the image type.
+	 * 
+	 * @param string $file Path to the image file
+	 * 
+	 * @return resource
+	 */
+	protected function create ($file)
 	{
-		$extension = pathinfo($image, PATHINFO_EXTENSION);
+		$info = getimagesize($file);
+		$mime = $info['mime'];
 
-		switch($extension)
+		switch($mime)
 		{
-			case 'jpg':
-			case 'jpeg':
-				$img = @imagecreatefromjpeg($image);
+			case 'image/jpeg':
+				$img = @imagecreatefromjpeg($file);
 				break;
-			case 'gif':
-				$img = @imagecreatefromgif($image);
+			case 'image/gif':
+				$img = @imagecreatefromgif($file);
 				break;
-			case 'png':
-				$img = @imagecreatefrompng($image);
+			case 'image/png':
+				$img = @imagecreatefrompng($file);
 				break;
 			default:
 				$img = false;
@@ -202,6 +295,14 @@ class Image
 		return $img;
 	}
 
+	/**
+	 * Saves an image in the filesystem.
+	 * 
+	 * @param string $file Path to the image file
+	 * @param int $quality Quality the JPEG image will be saved
+	 * 
+	 * @return void
+	 */
 	public function save ($file, $quality = 80)
 	{
 		$dir = pathinfo($file, PATHINFO_DIRNAME);
@@ -231,8 +332,6 @@ class Image
 				trigger_error('Could not save file', ERROR);
 				return false;
 		}
-
-		return $this;
 	}
 
 }
