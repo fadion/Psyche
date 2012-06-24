@@ -18,11 +18,14 @@ class Form
 	/**
 	 * Opens the form.
 	 * 
+	 * @param string $request_type
+	 * @param string $action
+	 * 
 	 * @return string
 	 */
-	public static function open ($request_type = 'post')
+	public static function open ($request_type = 'post', $action = '')
 	{
-		return '<form method="'.$request_type.'" enctype="multipart/form-data">';
+		return '<form method="'.$request_type.'" enctype="multipart/form-data" action="'.$action.'">';
 	}
 
 	/**

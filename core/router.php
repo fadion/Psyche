@@ -156,6 +156,14 @@ class Router
 					// Method is removed from the params.
 					unset($params[1]);
 				}
+				elseif (isset($pieces[0]) and $r_class->hasMethod('action_'.$pieces[0]))
+				{
+					$method = 'action_'.$pieces[0];
+
+					unset($params[0]);
+				}
+
+				//echo $method;
 
 				// We know that the class exists and it may have a method. What's of
 				// interest now are the method arguments, as those will be compared

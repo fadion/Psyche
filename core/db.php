@@ -153,7 +153,7 @@ class DB {
 	/**
 	 * Quotes (if necessary) and escapes strings for safe using in a
 	 * database. Binding is better alternative in raw queries, but this
-	 * method is used extensively in the Query Builder.
+	 * method is used extensively in the Query Builder class.
 	 * 
 	 * @param string $string String to be quoted
 	 * @return string
@@ -161,6 +161,16 @@ class DB {
 	public static function quote ($string)
 	{
 		return static::$pdo->quote($string);
+	}
+
+	/**
+	 * Returns the ID of the last inserted row.
+	 * 
+	 * @return int
+	 */
+	public static function last_insert ()
+	{
+		return static::$pdo->lastInsertId();
 	}
 
 	/**

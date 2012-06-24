@@ -3,11 +3,16 @@ namespace FW\Core;
 use FW\Core\DB;
 
 // WIP
-class Query {
+class Query
+{
 
 	protected $results;
 	protected $query = array(
+		'insert' 		=> '',
+		'update'		=> '',
+		'delete'		=> '',
 		'select'	  	=> '',
+		'distinct'		=> '',
 		'from'		  	=> '',
 		'join'		  	=> array(),
 		'left_join'	  	=> array(),
@@ -16,7 +21,6 @@ class Query {
 		'on'			=> array(),
 		'using'			=> array(),
 		'where'		 	=> '',
-		'like'		  	=> '',
 		'group'			=> '',
 		'order'		  	=> '',
 		'limit'		  	=> ''
@@ -29,16 +33,44 @@ class Query {
 			case 'select':
 				return $this->make_select($fields);
 				break;
+			case 'insert':
+				return $this->make_insert($fields, $parameters);
+				break;
+			case 'update':
+				return $this->make_update($fields, $parameters);
+				break;
+			case 'delete':
+				return $this->make_delete($fields);
+				break;
 		}
 	}
 
+	// done
 	public static function select ($fields = '*')
 	{
 		return new static($fields, 'select');
 	}
 
 	// done
-	public function make_select ($fields)
+	public static function insert ($table, $fields)
+	{
+		return new static($fields, 'insert', $table);
+	}
+
+	// done
+	public static function update ($table, $fields)
+	{
+		return new static($fields, 'update', $table);
+	}
+
+	// done
+	public static function delete ($fields)
+	{
+		return new static($fields, 'delete');
+	}
+
+	// done
+	protected function make_select ($fields)
 	{
 		if (!is_array($fields))
 		{
@@ -58,10 +90,12 @@ class Query {
 			
 			if (strpos($field, '(') !== false)
 			{
-				$function = substr($field, 0, strpos($field, '(') + 1);
-				$field = substr($field, strpos($field, '(') + 1);
+				$function = substr($field, 0, strrpos($field, '(') + 1);
+				$function_end = str_repeat(')', substr_count($function, '('));
+				$function = $function.'###'.$function_end;
+
+				$field = substr($field, strrpos($field, '(') + 1, strpos($field, ')'));
 				$field = str_replace(')', '', $field);
-				$function_end = ')';
 			}
 
 			list($field, $as) = $this->fix_as($field);
@@ -71,18 +105,104 @@ class Query {
 				$field = $this->tick($field);
 			}
 
-			$select_pieces[] = $function.$table.$field.$function_end.$as;
+			if ($function != '')
+			{
+				$field = str_replace('###', $table.$field, $function);
+			}
+			else
+			{
+				$field = $table.$field;
+			}
+
+			$select_pieces[] = $field.$as;
 		}
 
 		$select = implode(', ', $select_pieces);
 		
 		$this->query['select'] = $select;
+	}
+
+	// done
+	protected function make_insert ($fields, $parameters)
+	{
+		$values = array_values($fields);
+		$fields = array_keys($fields);
+		$table = $this->tick($parameters);
+
+		$values = array_map(array($this, "quote"), $values);
+		$fields = array_map(array($this, "tick"), $fields);
+
+		$fields = '('.implode(', ', $fields).')';
+		$values = 'VALUES ('.implode(', ', $values).')';
+
+		$this->query['insert'] = 'INSERT INTO '.$table.' '.$fields.' '.$values;
+	}
+
+	// done
+	protected function make_update ($fields, $parameters)
+	{
+		$table = $this->tick($parameters);
+		$update = array();
+
+		foreach ($fields as $field => $value)
+		{
+			$update[] = $this->tick($field).'='.$this->quote($value);
+		}
+
+		$this->query['update'] = 'UPDATE '.$table.' SET '.implode(', ', $update);
+	}
+
+	//done
+	protected function make_delete ($fields)
+	{
+		$this->query['delete'] = 'DELETE FROM '.$this->tick($fields);
+	}
+
+	public function count ($field = '*')
+	{
+		return $this->make_aggregate($field, 'count');
+	}
+
+	public function sum ($field)
+	{
+		return $this->make_aggregate($field, 'sum');
+	}
+
+	public function avg ($field)
+	{
+		return $this->make_aggregate($field, 'avg');
+	}
+
+	public function max ($field)
+	{
+		return $this->make_aggregate($field, 'max');
+	}
+
+	public function min ($field)
+	{
+		return $this->make_aggregate($field, 'min');
+	}
+
+	protected function make_aggregate ($field, $type)
+	{
+		list($field, $table) = $this->fix_dot($field);
+		list($field, $as) = $this->fix_as($field);
+
+		if ($field != '*')
+		{
+			$field = $this->tick($field);
+		}
+
+		$this->query['select'] .= ', '.strtoupper($type).'('.$table.$field.')'.$as;
 
 		return $this;
 	}
 	
 	// done
-	public function from ($table) {
+	public function from ($table)
+	{
+		$tables = $table;
+
 		if (!is_array($table))
 		{
 			$tables = explode(',', $table);
@@ -104,101 +224,231 @@ class Query {
 		return $this;
 	}
 	
-	public function where ($where) {
-		$wheres = explode(' ', $where);
-		$where_final = '';
-
-		foreach ($wheres as $where)
+	public function where ($where)
+	{
+		if (stripos($where, ' is not null') !== false or stripos($where, ' is null') !== false or
+			stripos($where, ' is not') !== false or stripos($where, ' is') !== false)
 		{
-			$where = trim($where);
-			$table = '';
-			$bool = array('or', 'OR', 'and', 'AND');
+			$field = substr($where, 0, strpos($where, ' '));
+			$check = substr($where, strpos($where, ' '));
 
-			if (!in_array($where, $bool))
+			list($field, $table) = $this->fix_dot($field);
+
+			$where = $table.$this->tick($field).strtoupper($check);
+		}
+		elseif (stripos($where, ' not like ') !== false or stripos($where, ' like ') !== false)
+		{
+			$field = substr($where, 0, strpos($where, ' '));
+			$like = substr($where, strpos($where, ' '));
+			$like = substr($like, 0, strrpos($like, ' '));
+			$value = substr($where, strrpos($where, ' ') + 1);
+
+			list($field, $table) = $this->fix_dot($field);
+
+			$where = $table.$this->tick($field).' '.strtoupper($like).' '.$this->quote(trim($value, '\'" '));
+		}
+		elseif (stripos($where, ' not in(') !== false or stripos($where, ' not in (') !== false or
+				stripos($where, ' in (') !== false or stripos($where, ' in(') !== false)
+		{
+			$field = substr($where, 0, strpos($where, ' '));
+			$in = substr($where, strpos($where, ' '));
+			$values = trim(substr($in, strpos($in, '(') + 1, strrpos($in, ')')), ')');
+			$in = strtoupper(str_replace($values, '###', $in));
+
+			$values = explode(',', $values);
+
+			foreach ($values as &$val)
 			{
-				if (strpos($where, '>='))
-				{
-					$operand = '>=';
-				}
-				elseif (strpos($where, '<='))
-				{
-					$operand = '<=';
-				}
-				elseif (strpos($where, '='))
-				{
-					$operand = '=';
-				}
-				elseif (strpos($where, '>'))
-				{
-					$operand = '>';
-				}
-				elseif (strpos($where, '<'))
-				{
-					$operand = '<';
-				}
-
-				list($where, $value) = explode($operand, $where);
-
-				if (strpos($where, '.'))
-				{
-					list($table, $where) = explode('.', $where);
-				}
-
-				if ($table !== '')
-				{
-					$table = $this->tick($table).'.';
-				}
-
-				if ($value != '?')
-				{
-					$value = $this->quote($value);
-				}
-
-				$where = $table.$this->tick($where).$operand.$value;
-
-				if (strpos($where, '('))
-				{
-					$where = '('.str_replace('(', '', $where);
-				}
-
-				if (strpos($where, ')'))
-				{
-					$where = str_replace(')', '', $where).')';
-				}
-			}
-			else
-			{
-				$where = " $where ";
+				$val = trim($val, '\'" ');
+				$val = $this->quote($val);
 			}
 
-			$where_final .= $where;
+			$values = implode(', ', $values);
+
+			list($field, $table) = $this->fix_dot($field);
+
+			$in = str_replace('###', $values, $in);
+
+			$where = $table.$this->tick($field).' '.$in;
+		}
+		elseif (stripos($where, 'between') !== false)
+		{
+			$field = substr($where, 0, strpos($where, ' '));
+			$values = substr($where, stripos($where, 'between') + strlen('between') + 1);
+			list($first, $operand, $second) = explode(' ', $values);
+
+			list($field, $table) = $this->fix_dot($field);
+
+			$where = $table.$this->tick($field).' BETWEEN '.$this->quote(trim($first, '\'" ')).' '.strtoupper($operand).' '.$this->quote(trim($second, '\'" '));
+		}
+		else
+		{
+			list($field, $operand, $value) = explode(' ', $where);
+			list($field, $table) = $this->fix_dot($field);
+
+			$where = $table.$this->tick($field).$operand.$this->quote(trim($value, '\'" '));
 		}
 
-		$this->query['where'] = $where_final;
+		$this->query['where'][] = $where;
+
+		return $this;
+	}
+
+	public function __call ($method, $arguments)
+	{
+		if (strpos($method, 'where_') !== false)
+		{
+			$fields = str_replace('where_', '', $method);
+			$fields = explode('_', $fields);
+
+			$i = 0;
+			foreach ($fields as $field)
+			{
+				if ($field != 'or' and $field != 'and')
+				{
+					$value = $arguments[$i];
+					$this->where("$field = $value");
+
+					$i++;
+				}
+				else
+				{
+					if ($field == 'or')
+					{
+						$this->_or();
+					}
+				}
+			}
+		}
+
+		return $this;
+	}
+
+	public function where_group ($function)
+	{
+		$this->query['where'][] = '(';
+		call_user_func($function, $this);
+		$this->query['where'][] = ')';
+
+		return $this;
+	}
+
+	public function _or ()
+	{
+		$this->query['where'][] = 'OR';
 
 		return $this;
 	}
 	
-	public function like ($field, $like) {
-		if (!empty($field) and !empty($like)) {
-			$this->query['like'] = "$field LIKE '$like'";
-		}
+	public function like ($field, $like)
+	{
+		$this->where("$field LIKE '$like'");
 
 		return $this;
+	}
+
+	public function not_like ($field, $like)
+	{
+		return $this->where("$field NOT LIKE '$like'");
+	}
+
+	//done
+	public function starts ($field, $value)
+	{
+		return $this->where("$field LIKE $value%");
+	}
+
+	//done
+	public function ends ($field, $value)
+	{
+		return $this->where("$field LIKE %$value");
+	}
+
+	//done
+	public function has ($field, $value)
+	{
+		return $this->where("$field LIKE %$value%");
 	}
 
 	// done
 	public function id ($id)
 	{
-		list($id, $table) = $this->fix_dot($id);
+		return $this->where("id = $id");
+	}
 
-		$this->query['where'] = $this->tick('id').'='.$this->quote($id);
+	// done
+	public function is_empty ($field)
+	{
+		return $this->where("$field = ''");
+	}
+
+	// done
+	public function not_empty ($field)
+	{
+		return $this->where("$field != ''");
+	}
+
+	// done
+	public function is_null ($field)
+	{
+		return $this->where("$field IS NULL");
+	}
+
+	// done
+	public function not_null ($field)
+	{
+		return $this->where("$field IS NOT NULL");
+	}
+
+	// done
+	public function in ($field, $in)
+	{
+		return $this->where("$field IN (".implode(', ', $in).")");
+	}
+
+	// done
+	public function not_in ($field, $in)
+	{
+		return $this->where("$field NOT IN (".implode(', ', $in).")");
+	}
+
+	public function between ($field, $from, $to)
+	{
+		return $this->where("$field BETWEEN $from AND $to");
+	}
+
+	// done
+	public function distinct ()
+	{
+		$this->query['distinct'] = 'distinct';
+
+		return $this;
+	}
+
+	public function match ($match, $against)
+	{
+		$match = explode(',', $match);
+
+		foreach ($match as &$m)
+		{
+			list($m, $table) = $this->fix_dot($m);
+			$m = $table.$this->tick(trim($m));
+		}
+
+		$match = 'MATCH ('.implode(', ', $match).')';
+		$against = 'AGAINST ('.$this->quote('*'.$against.'*').' IN BOOLEAN MODE)';
+
+		$this->query['select'] .= ', '.$match.' '.$against.' AS '.$this->tick('score');
+		$this->query['where'][] = $match.' '.$against;
 
 		return $this;
 	}
 	
 	// done
-	public function group ($group) {
+	public function group ($group)
+	{
+		$groups = $group;
+
 		if (!is_array($group))
 		{
 			$groups = explode(',', $group);
@@ -208,10 +458,9 @@ class Query {
 		foreach ($groups as $group)
 		{
 			$group = trim($group);
-			list($group, $as) = $this->fix_as($group);
 			list($group, $table) = $this->fix_dot($group);
 
-			$group_pieces[] = $table.$this->tick($group).$as;
+			$group_pieces[] = $table.$this->tick($group);
 		}
 
 		$group = implode(', ', $group_pieces);
@@ -222,27 +471,39 @@ class Query {
 	}
 	
 	// done
-	public function asc ($field) {
+	public function asc ($field)
+	{
 		return $this->order($field, 'asc');
 	}
 	
 	// done
-	public function desc ($field) {
+	public function desc ($field)
+	{
 		return $this->order($field, 'desc');
 	}
 
 	// done
-	protected function order ($field, $type)
+	public function order ($field, $type)
 	{
+		$fields = $field;
+
 		if (!is_array($field))
 		{
 			$fields = explode(',', $field);
+		}
+
+		$type = strtolower($type);
+
+		if ($type != 'asc' and $type != 'desc')
+		{
+			$type = 'asc';
 		}
 
 		$field_pieces = array();
 		foreach ($fields as $field)
 		{
 			$field = trim($field);
+
 			list($field, $table) = $this->fix_dot($field);
 
 			$field_pieces[] = $table.$this->tick($field).$as;
@@ -256,11 +517,14 @@ class Query {
 	}
 	
 	// done
-	public function limit ($start, $limit = '') {
-		if (!empty($start) and is_int($start)) {
+	public function limit ($start, $limit = '')
+	{
+		if (!empty($start) and is_int($start))
+		{
 			$this->query['limit'] = $start;
 			
-			if ($limit !== '' and is_int($limit)) {
+			if ($limit !== '' and is_int($limit))
+			{
 				$this->query['limit'] .= ", $limit";
 			}
 		}
@@ -269,22 +533,26 @@ class Query {
 	}
 	
 	// done
-	public function join ($table) {
+	public function join ($table)
+	{
 		return $this->make_join($table, 'join');
 	}
 	
 	// done
-	public function left_join ($table) {
+	public function left_join ($table)
+	{
 		return $this->make_join($table, 'left_join');
 	}
 	
 	// done
-	public function right_join ($table) {
+	public function right_join ($table)
+	{
 		return $this->make_join($table, 'right_join');
 	}
 	
 	// done
-	public function outer_join ($table) {
+	public function outer_join ($table)
+	{
 		return $this->make_join($table, 'outer_join');
 	}
 
@@ -299,7 +567,8 @@ class Query {
 	}
 	
 	// done
-	public function on ($clause) {
+	public function on ($clause)
+	{
 		list($first, $second) = explode('=', $clause);
 
 		list($first, $table1) = $this->fix_dot($first);
@@ -311,7 +580,8 @@ class Query {
 	}
 
 	// done
-	public function using ($clause) {
+	public function using ($clause)
+	{
 		list($clause, $table) = $this->fix_dot($clause);
 		
 		$this->query['using'][] = $table.$this->tick($clause);
@@ -319,35 +589,52 @@ class Query {
 		return $this;
 	}
 	
-	public function __toString () {
+	public function __toString ()
+	{
 		$query = $this->query;
 		$sql = '';
 		
-		if ($query['select'] == '') {
-			trigger_error("SELECT clause shouldn't be empty.", FATAL);
-		}
-		
-		if ($query['from'] == '') {
-			trigger_error("FROM clause shouldn't be empty.", FATAL);
-		}
-		
-		foreach ($query as $key=>$val) {
-			switch ($key) {
+		foreach ($query as $key=>$val)
+		{
+			switch ($key)
+			{
+				case 'insert':
+				case 'update':
+				case 'delete':
+					if ($val != '')
+					{
+						$sql = $val;
+						break;
+					}
 				case 'select':
-					$sql .= "SELECT $val";
-					break;
+					if ($val != '')
+					{
+						$sql = 'SELECT ';
+						if ($query['distinct'] != '')
+						{
+							$sql .= 'DISTINCT ';
+						}
+						$sql .= $val;
+						break;
+					}
 				case 'from':
-					$sql .= " FROM $val";
-					break;
+					if ($val != '')
+					{
+						$sql .= " FROM $val";
+						break;
+					}
 				case 'join':
 				case 'left_join':
 				case 'right_join':
-					if (count($val)) {
+					if (count($val))
+					{
 						$type = strtoupper(str_replace('_', ' ', $key));
 						
 						$i = 0;
-						foreach ($val as $join) {
-							if (count($query['on'])) {
+						foreach ($val as $join)
+						{
+							if (count($query['on']))
+							{
 								$sql .= " $type $join ON {$query['on'][$i]}";
 							}
 							elseif (count($query['using']))
@@ -362,7 +649,8 @@ class Query {
 					}
 					break;
 				case 'outer_join':
-					if ($val != '' and count($query['on'])) {
+					if ($val != '' and count($query['on']))
+					{
 						$sql .= " LEFT JOIN $val ON {$query['on'][0]}";
 						$sql .= " UNION";
 						$sql .= " SELECT {$query['select']}";
@@ -371,23 +659,51 @@ class Query {
 					}
 					break;
 				case 'where':
-				case 'like':
-					if ($val != '') {
-						$sql .= " WHERE $val";
+					if (is_array($val))
+					{
+						$i = 0;
+						foreach ($val as $where)
+						{
+							$operand = '';
+
+							if ($where != 'OR')
+							{
+								if (isset($val[$i-1]))
+								{
+									if ($val[$i-1] != '(' and $where != ')')
+									{
+										$operand = ' AND ';
+										if ($val[$i-1] == 'OR')
+										{
+											$operand = ' OR ';
+										}
+									}
+								}
+
+								$the_where .= $operand.$where;
+							}
+
+							$i++;
+						}
+
+						$sql .= " WHERE $the_where";
 					}
 					break;
 				case 'group':
-					if ($val != '') {
+					if ($val != '')
+					{
 						$sql .= " GROUP BY $val";
 					}
 					break;
 				case 'order':
-					if ($val != '') {
+					if ($val != '')
+					{
 						$sql .= " ORDER BY $val";
 					}
 					break;
 				case 'limit':
-					if ($val != '') {
+					if ($val != '')
+					{
 						$sql .= " LIMIT $val";
 					}
 					break;
@@ -416,11 +732,11 @@ class Query {
 	{
 		$as = '';
 
-		if (strpos($field, 'AS'))
+		if (strpos($field, 'AS') !== false)
 		{
 			list($field, $as) = explode(' AS ', $field);
 		}
-		elseif (strpos($field, 'as'))
+		elseif (strpos($field, 'as') !== false)
 		{
 			list($field, $as) = explode(' as ', $field);
 		}

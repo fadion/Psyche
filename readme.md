@@ -1,6 +1,6 @@
-## PHP Framework
+## Psyche
 
-A PHP MVC Framework that works
+A simple, elegant and intuitive PHP framework
 
 ### PHP Framework Installation
 
@@ -8,20 +8,19 @@ A PHP MVC Framework that works
 2. Edit /app/config/config.php
 3. Go!
 
-### PHP Framework Contribution
+### Contribution
 
 Contributions are encouraged and welcome. All commits must be signed off using the "-s" switch.
 
 	git commit -s -m "this commit will be signed off automatically!"
 
-### PHP License
+### License
 
-PHP Framework is FLOSS software licensed under the GPL License.
+Psyche is FLOSS software licensed under the GPL License.
 
-### PHP Framework Credits
+### Credits
 
-PHP Framework is developed by:
+Psyche is developed by:
 	Fadion Dashi at [Laboratori.al](http://laboratori.al/ "Web Developer and Designer from Tirana, Albania")
+
 	Baki Goxhaj at [WPlancer.Com](http://wplancer.com/ "WordPress Freelancer").
-
-
