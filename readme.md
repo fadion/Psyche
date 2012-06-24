@@ -21,5 +21,5 @@ Psyche is FLOSS software licensed under the GPL License.
 ### Credits
 
 Psyche is developed by:
-*Fadion Dashi at [Laboratori.al](http://laboratori.al/ "Web Developer and Designer from Tirana, Albania")
-*Baki Goxhaj at [WPlancer.Com](http://wplancer.com/ "WordPress Freelancer").
+* Fadion Dashi at [Laboratori.al](http://laboratori.al/ "Web Developer and Designer from Tirana, Albania")
+* Baki Goxhaj at [WPlancer.Com](http://wplancer.com/ "WordPress Freelancer").
