@@ -8,7 +8,11 @@ class Index
 
 	public function action_index ()
 	{
-		echo 'Framework Started';
+		echo Core\Test::run();
+		
+		echo '<br><br>';
+
+		echo \Some\Lib\TestLib::run();
 	}
 
 }
