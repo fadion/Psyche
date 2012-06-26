@@ -1,0 +1,251 @@
+<?php
+namespace Psyche\Core;
+
+/**
+ * Handles HTTP Requests
+ * 
+ * Some easy to use methods to access HTTP Requests.
+ *
+ * @package Psyche\Core\Request
+ * @author Fadion Dashi
+ * @version 1.0
+ * @since 1.0
+ */
+class Request {
+
+	/**
+	 * Returns a single or an array with all the
+	 * GET parameters.
+	 * 
+	 * @param string $name GET key
+	 * 
+	 * @return string|array|bool
+	 */
+	public static function get ($name = null)
+	{
+		$return = false;
+
+		if (is_null($name))
+		{
+			if (count($_GET))
+			{
+				$return = $_GET;
+			}
+		}
+		else
+		{
+			if (array_key_exists($name, $_GET))
+			{
+				$return = $_GET[$name];
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Returns a single or an array with all the
+	 * POST parameters.
+	 * 
+	 * @param string $name POST key
+	 * 
+	 * @return string|array|bool
+	 */
+	public static function post ($name = null)
+	{
+		$return = false;
+
+		if (is_null($name))
+		{
+			if (count($_POST))
+			{
+				$return = $_POST;
+			}
+		}
+		else
+		{
+			if (array_key_exists($name, $_POST))
+			{
+				$return = $_POST[$name];
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Returns a single or an array with all the
+	 * FILES parameters. It supports sub array keys
+	 * with the "name.key" format.
+	 * 
+	 * @param string $name FILES key
+	 * 
+	 * @return string|array|bool
+	 */
+	public static function files ($name = null)
+	{
+		$return = false;
+
+		if (is_null($name))
+		{
+			if (count($_FILES))
+			{
+				$return = $_FILES;
+			}
+		}
+		else
+		{
+			$key = null;
+
+			if ((bool) strpos($name, '.') == true)
+			{
+				list($name, $key) = explode('.', $name);
+			}
+
+			if (array_key_exists($name, $_FILES))
+			{
+				if (is_null($key))
+				{
+					$return = $_FILES[$name];
+				}
+				else
+				{
+					$return = $_FILES[$name][$key];
+				}
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Returns any set HTTP request with the option
+	 * to exclude certain requests.
+	 * 
+	 * @return array
+	 */
+	public static function all ()
+	{
+		$get = array();
+		$post = array();
+		$files = array();
+
+		// Excludes can be set as single arguments.
+		$excludes = func_get_args();
+
+		if (!in_array('get', $excludes) and static::get())
+		{
+			$get = static::get();
+		}
+
+		if (!in_array('post', $excludes) and static::post())
+		{
+			$post = static::post();
+		}
+
+		if (!in_array('files', $excludes) and static::files())
+		{
+			$files = static::files();
+		}
+
+		return array_merge($get, $post, $files);
+	}
+
+	/**
+	 * Returns a single or an array with all the
+	 * SERVER parameters.
+	 * 
+	 * @param string $name SERVER key
+	 * 
+	 * @return string|array|bool
+	 */
+	public static function server ($name = null)
+	{
+		$return = false;
+
+		if (is_null($name))
+		{
+			$return = $_SERVER;
+		}
+		else
+		{
+			$name = strtoupper($name);
+
+			if (array_key_exists($name, $_SERVER))
+			{
+				$return = $_SERVER[$name];
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Attemps to get the visitor's IP.
+	 * 
+	 * @return string
+	 */
+	public static function ip ()
+	{
+		if (!empty($_SERVER['HTTP_CLIENT_IP']))
+		{
+			$ip = $_SERVER['HTTP_CLIENT_IP'];
+		} elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
+		{
+			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		}
+		else
+		{
+			$ip = $_SERVER['REMOTE_ADDR'];
+		}
+
+		return $ip;
+	}
+
+	/**
+	 * Returns the referer.
+	 * 
+	 * @return string
+	 */
+	public static function referer ()
+	{
+		return static::server('HTTP_REFERER');
+	}
+
+	/**
+	 * Determines if the request is from a XMLHTTPREQUEST object.
+	 * Most Javascript libraries create a correct response, but
+	 * it's not something to be relied for sensitive data.
+	 * 
+	 * @return bool
+	 */
+	public static function ajax ()
+	{
+		$return = false;
+
+		if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) and strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
+		{
+			$return = true;
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Determines if the request is secure.
+	 * 
+	 * @return bool
+	 */
+	public static function secure ()
+	{
+		$return = false;
+
+		if (!empty($_SERVER['HTTPS']) and ($_SERVER['HTTPS'] !== 'off' or $_SERVER['SERVER_PORT'] == 443))
+		{
+			$return = true;
+		}
+
+		return $return;
+	}
+
+}

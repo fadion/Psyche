@@ -1,0 +1,16 @@
+<?php
+require_once 'core/probe.php';
+use Psyche\Core\Probe;
+
+$vars = $argv;
+unset($vars[0]);
+
+Probe::create();
+
+if (count($vars))
+{
+	if ($vars[1] == 'create')
+	{
+		Probe::create();
+	}
+}
