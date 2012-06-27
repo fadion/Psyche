@@ -41,15 +41,27 @@ class Cookie
 	 * Return the value of a cookie.
 	 * 
 	 * @param string $name
+	 * @param string $default
 	 * 
 	 * @return void|mixed
 	 */
-	public static function val ($name)
+	public static function val ($name, $default = null)
 	{
+		$return = false;
+
 		if (isset($_COOKIE[$name]))
 		{
-			return $_COOKIE[$name];
+			$return = $_COOKIE[$name];
 		}
+		else
+		{
+			if (!is_null($default))
+			{
+				$return = $default;
+			}
+		}
+
+		return $return;
 	}
 
 	/**

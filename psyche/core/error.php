@@ -44,18 +44,29 @@ class Error
 		$trace = $exception->getTrace();
 
 		echo '<b>Uncaught exception</b> in ['.$trace[0]['file'].'] at line ['.$trace[0]['line'].']';
-		if (isset($trace[1]))
-			{
-				$back = 'Started in ['.$trace[1]['file'].'] at line ['.$trace[1]['line'].']';
-				if (isset($trace[1]['function']) and isset($trace[1]['class']))
-				{
-					$back .= "<br>Called as ".$trace[1]['class'].'::'.$trace[1]['function'];
-					$back .= '('.implode(', ', $trace[2]['args']).')';
-				}
-
-				echo '<div style="background:#f0dddd; border:1px solid #cf9898; color:#c58080; padding:15px; margin-bottom: 5px;">'.$back.'</div>';
-			}
 		echo '<div style="background:#e6edf3; border:1px solid #a2bcd2; color:#7691a9; padding:15px; margin-bottom: 20px;">'.$exception->getMessage().'</div>';
+		
+		$i = 1;
+		$msg = '';
+		foreach ($trace as $t)
+		{
+			if ($i > 5) break;
+
+			$msg = 'Trace '.$i;
+
+			if ((isset($t['file']) and $t['file'] != '') and (isset($t['line']) and $t['line'] != ''))
+			{
+				$msg .= ' in ['.$t['file'].'] at line ['.$t['line'].']';
+			}
+
+			if ((isset($t['class']) and $t['class'] != '') and (isset($t['function']) and $t['function'] != ''))
+			{
+				$msg .= '<br>Started by: '.$t['class'].'::'.$t['function'].'()';
+			}
+
+			$i++;
+			echo '<div style="background:#f0dddd; border:1px solid #cf9898; color:#c58080; padding:15px; margin-bottom: 5px;">'.$msg.'</div>';
+		}
 	}
 	
 	/**
@@ -93,19 +104,30 @@ class Error
 			$trace = debug_backtrace();
 
 			echo "<b>".$type."</b> in [$file] at line $line";
-			if (isset($trace[2]))
-			{
-				$back = 'Started in ['.$trace[2]['file'].'] at line ['.$trace[2]['line'].']';
-				if (isset($trace[2]['function']) and isset($trace[2]['class']))
-				{
-					$back .= "<br>Called as ".$trace[2]['class'].'::'.$trace[2]['function'];
-					$back .= '('.implode(', ', $trace[2]['args']).')';
-				}
-
-				echo '<div style="background:#f0dddd; border:1px solid #cf9898; color:#c58080; padding:15px; margin-bottom: 5px;">'.$back.'</div>';
-			}
 			echo '<div style="background:#e6edf3; border:1px solid #a2bcd2; color:#7691a9; padding:15px; margin-bottom: 20px;">'.$message.'</div>';
 
+			$i = 1;
+			$msg = '';
+			foreach ($trace as $t)
+			{
+				if ($i > 5) break;
+
+				$msg = 'Trace '.$i;
+
+				if ((isset($t['file']) and $t['file'] != '') and (isset($t['line']) and $t['line'] != ''))
+				{
+					$msg .= ' in ['.$t['file'].'] at line ['.$t['line'].']';
+				}
+
+				if ((isset($t['class']) and $t['class'] != '') and (isset($t['function']) and $t['function'] != ''))
+				{
+					$msg .= '<br>Started by: '.$t['class'].'::'.$t['function'].'()';
+				}
+
+				$i++;
+				echo '<div style="background:#f0dddd; border:1px solid #cf9898; color:#c58080; padding:15px; margin-bottom: 5px;">'.$msg.'</div>';
+			}
+			
 			if ($exit) exit;
 		}
 	

@@ -161,6 +161,12 @@ class Query
 			list($field, $as) = $this->fix_as($field);
 			list($field, $table) = $this->fix_dot($field);
 
+			// An empty field is replaced with '*'.
+			if ($field == '')
+			{
+				$field = '*';
+			}
+
 			// A star (*) doesn't need to be ticked.
 			if ($field !== '*')
 			{
@@ -378,9 +384,18 @@ class Query
 	 */
 	public function where ($where)
 	{
-		// Parses IS, IS NOT, IS NULL and IS NOT NULL.
-		if (stripos($where, ' is not null') !== false or stripos($where, ' is null') !== false or
-			stripos($where, ' is not') !== false or stripos($where, ' is') !== false)
+		// Check if it's a simple comparison (a = 10, a > 10, etc).
+		if(strpos($where, '=') !== false or strpos($where, '>') !== false or strpos($where, '<') !== false)
+		{
+			list($field, $operand) = explode(' ', $where);
+			list($field, $table) = $this->fix_dot($field);
+
+			$value = substr($where, strpos($where, $operand) + strlen($operand));
+
+			$where = $table.$this->tick($field).$operand.$this->quote(trim($value, '\'" '));
+		}
+		// Parses IS NULL and IS NOT NULL.
+		elseif (stripos($where, ' is not null') !== false or stripos($where, ' is null') !== false)
 		{
 			$field = substr($where, 0, strpos($where, ' '));
 			$check = substr($where, strpos($where, ' '));
@@ -393,9 +408,8 @@ class Query
 		elseif (stripos($where, ' not like ') !== false or stripos($where, ' like ') !== false)
 		{
 			$field = substr($where, 0, strpos($where, ' '));
-			$like = substr($where, strpos($where, ' '));
-			$like = substr($like, 0, strrpos($like, ' '));
-			$value = substr($where, strrpos($where, ' ') + 1);
+			$value = substr($where, strpos($where, " '"));
+			$like = trim(str_replace(array($field, $value), '', $where));
 
 			list($field, $table) = $this->fix_dot($field);
 
@@ -436,14 +450,6 @@ class Query
 			list($field, $table) = $this->fix_dot($field);
 
 			$where = $table.$this->tick($field).' BETWEEN '.$this->quote(trim($first, '\'" ')).' '.strtoupper($operand).' '.$this->quote(trim($second, '\'" '));
-		}
-		// Otherwise, treat it as a simple comparison (a = 10, a > 10, etc).
-		else
-		{
-			list($field, $operand, $value) = explode(' ', $where);
-			list($field, $table) = $this->fix_dot($field);
-
-			$where = $table.$this->tick($field).$operand.$this->quote(trim($value, '\'" '));
 		}
 
 		$this->query['where'][] = $where;
@@ -616,6 +622,26 @@ class Query
 	public function id ($id)
 	{
 		return $this->where("id = $id");
+	}
+
+	/**
+	 * Depending on the data type provided, it will
+	 * make an ID or a normal where query.
+	 * 
+	 * @param int|string $what
+	 * 
+	 * @return object
+	 */
+	public function find ($what)
+	{
+		if (is_numeric($what))
+		{
+			return $this->id($id);
+		}
+		else
+		{
+			return $this->where($what);
+		}
 	}
 
 	/**

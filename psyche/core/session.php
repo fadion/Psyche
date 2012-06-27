@@ -31,15 +31,27 @@ class Session
 	 * Gets the value of a session variable.
 	 * 
 	 * @param string $name
+	 * @param string $default
 	 * 
 	 * @return void|string
 	 */
-	public static function val ($name)
+	public static function val ($name, $default = null)
 	{
+		$return = false;
+
 		if (isset($_SESSION[$name]))
 		{
-			return $_SESSION[$name];
+			$return = $_SESSION[$name];
 		}
+		else
+		{
+			if (!is_null($default))
+			{
+				$return = $default;
+			}
+		}
+
+		return $return;
 	}
 
 	/**

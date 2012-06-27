@@ -74,6 +74,80 @@ class Request {
 	}
 
 	/**
+	 * Returns a single value or an array with all the
+	 * PUT parameters.
+	 * 
+	 * @param string $name POST key
+	 * 
+	 * @return string|array|bool
+	 */
+	public static function put ($name = null)
+	{
+		$return = false;
+
+		if (static::is('put'))
+		{
+			// Gets PUT data from the stream and parses it
+			// into an array.
+			parse_str(file_get_contents("php://input"), $put);
+
+			if (is_null($name))
+			{
+				if (count($put))
+				{
+					$return = $put;
+				}
+			}
+			else
+			{
+				if (array_key_exists($name, $put))
+				{
+					$return = $put[$name];
+				}
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Returns a single value or an array with all the
+	 * DELETE parameters.
+	 * 
+	 * @param string $name DELETE key
+	 * 
+	 * @return string|array|bool
+	 */
+	public static function delete ($name = null)
+	{
+		$return = false;
+
+		if (static::is('delete'))
+		{
+			// Gets PUT data from the stream and parses it
+			// into an array.
+			parse_str(file_get_contents("php://input"), $delete);
+
+			if (is_null($name))
+			{
+				if (count($delete))
+				{
+					$return = $delete;
+				}
+			}
+			else
+			{
+				if (array_key_exists($name, $delete))
+				{
+					$return = $delete[$name];
+				}
+			}
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Returns a single or an array with all the
 	 * FILES parameters. It supports sub array keys
 	 * with the "name.key" format.
@@ -97,6 +171,7 @@ class Request {
 		{
 			$key = null;
 
+			// Fixes the "name.key" format for sub array access.
 			if ((bool) strpos($name, '.') == true)
 			{
 				list($name, $key) = explode('.', $name);
@@ -133,6 +208,8 @@ class Request {
 		// Excludes can be set as single arguments.
 		$excludes = func_get_args();
 
+		// Request values will only be returned if they arent'
+		// in the exclude list and are set.
 		if (!in_array('get', $excludes) and static::get())
 		{
 			$get = static::get();
@@ -149,6 +226,34 @@ class Request {
 		}
 
 		return array_merge($get, $post, $files);
+	}
+
+	/**
+	 * Determines if the http request is the same as the one
+	 * provided.
+	 * 
+	 * @param string $name The request to be checked
+	 * 
+	 * @return bool
+	 */
+	public static function is ($name)
+	{
+		if ($_SERVER['REQUEST_METHOD'] == strtoupper($name))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Returns the http request method.
+	 * 
+	 * @return bool
+	 */
+	public static function method ($name)
+	{
+		return $_SERVER['REQUEST_METHOD'];
 	}
 
 	/**

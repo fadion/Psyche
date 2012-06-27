@@ -24,17 +24,40 @@ class Config
 	 * 
 	 * @param string $key The key of the config option
 	 * 
-	 * @return string|void
+	 * @return string|bool
 	 */
-	public static function get ($key = null)
+	public static function get ($key)
 	{
 		static::open_file();
 		static::auto_path();
 
+		$return = false;
+
 		if (isset(static::$keys[$key]))
 		{
-			return static::$keys[$key];
+			$return = static::$keys[$key];
 		}
+
+		return $return;
+	}
+
+	/**
+	 * Sets a config option.
+	 * 
+	 * @param string $key The key to be created
+	 * @param string $value Value of the key
+	 * 
+	 * @return bool
+	 */
+	public static function set ($key, $value)
+	{
+		if (isset(static::$keys[$key]))
+		{
+			static::$keys[$key] = $value;
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

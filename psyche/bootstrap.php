@@ -27,9 +27,16 @@ function __ ()
  * 
  * @return string
  */
-function config ($key)
+function config ($key, $value = null)
 {
-	return Psyche\Core\Config::get($key);
+	if (is_null($value))
+	{
+		return Psyche\Core\Config::get($key);
+	}
+	else
+	{
+		return Psyche\Core\Config::set($key, $value);
+	}
 }
 
 // Set error levels depending on the DEBUG option.

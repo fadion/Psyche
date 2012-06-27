@@ -6,8 +6,7 @@ namespace Psyche\Core;
  * 
  * Provide some nice functions for file handling, information and upload.
  *
- * @package Psyche\Core\Psyc
- * @see Psyche\Core\View
+ * @package Psyche\Core\File
  * @author Fadion Dashi
  * @version 1.0
  * @since 1.0
@@ -160,6 +159,32 @@ class File
 	}
 
 	/**
+	 * Gets or sets the file permissions as an octal value.
+	 * 
+	 * @param string $file File path
+	 * 
+	 * @return bool|int
+	 */
+	public static function permissions ($file, $permission = null)
+	{
+		$return = false;
+
+		if (file_exists($file))
+		{	
+			if (is_null($permission))
+			{
+				$return = substr(sprintf('%o', fileperms('/etc/passwd')), -4);
+			}
+			else
+			{
+				$return = chmod($file, $permission);
+			}
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Moves a file to a different path.
 	 * 
 	 * @param string $file File path
@@ -212,7 +237,7 @@ class File
 
 		if (file_exists($file))
 		{
-			@unlink($file);
+			unlink($file);
 			$return = true;
 		}
 

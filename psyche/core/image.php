@@ -21,6 +21,11 @@ class Image
 	protected $image;
 
 	/**
+	 * @var string The opened image filename
+	 */
+	protected $original;
+
+	/**
 	 * Constructor. Sets the image handler.
 	 * 
 	 * @param string $file Path to the image file
@@ -29,6 +34,7 @@ class Image
 	 */
 	public function __construct ($file)
 	{
+		$this->original = $file;
 		$image_r = $this->create($file);
 
 		if ($image_r)
@@ -305,6 +311,22 @@ class Image
 	 */
 	public function save ($file, $quality = 80)
 	{
+		$original = $this->original;
+
+		// Checks for an overwrite '-self.ext' wildcard.
+		if ($file == '-self.ext')
+		{
+			$file = $original;
+		}
+		// Checks for a partial wildcard (ex: thumb_-self.ext).
+		elseif (strpos($file, '-self.ext'))
+		{
+			$original_base = pathinfo($original, PATHINFO_BASENAME);
+			$original_dir = pathinfo($original, PATHINFO_DIRNAME);
+
+			$file = $original_dir.'/'.str_replace('-self.ext', $original_base, $file);
+		}
+
 		$dir = pathinfo($file, PATHINFO_DIRNAME);
 		$extension = pathinfo($file, PATHINFO_EXTENSION);
 

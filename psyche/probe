@@ -1,16 +1,31 @@
+#!/usr/bin/php
 <?php
 require_once 'core/probe.php';
+require_once 'core/probe/cli.php';
+require_once 'core/probe/command/help.php';
+require_once 'core/probe/command/create.php';
+
 use Psyche\Core\Probe;
+use Psyche\Core\Probe\Command;
 
 $vars = $argv;
 unset($vars[0]);
 
-Probe::create();
+$command = $vars[1];
+unset($vars[1]);
 
-if (count($vars))
+$vars = array_values($vars);
+
+switch ($command)
 {
-	if ($vars[1] == 'create')
-	{
-		Probe::create();
-	}
+	case 'help':
+		Command\Help::exec();
+		break;
+	case 'create':
+		Command\Create::exec($vars);
+		break;
+
 }
+
+echo PHP_EOL;
+exit(0);
