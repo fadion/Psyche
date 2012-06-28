@@ -145,27 +145,30 @@ class Query
 			$function_end = '';
 
 			$field = trim($field);
+
+			// An empty field is replaced with '*'. This is
+			// for the cases when the field is passed from an
+			// empty variable.
+			if ($field == '')
+			{
+				$field = '*';
+			}
 			
 			// Check for SQL functions and parse them so the individual
 			// field can be ticked. It works even for nested functions.
-			if (strpos($field, '(') !== false)
+			if (preg_match('/([a-zA-z^\(]+)\((.+)\)/i', $field))
 			{
 				$function = substr($field, 0, strrpos($field, '(') + 1);
 				$function_end = str_repeat(')', substr_count($function, '('));
 				$function = $function.'###'.$function_end;
 
-				$field = substr($field, strrpos($field, '(') + 1, strpos($field, ')'));
+				$field = substr($field, strrpos($field, '(') + 1);
 				$field = str_replace(')', '', $field);
 			}
 
+
 			list($field, $as) = $this->fix_as($field);
 			list($field, $table) = $this->fix_dot($field);
-
-			// An empty field is replaced with '*'.
-			if ($field == '')
-			{
-				$field = '*';
-			}
 
 			// A star (*) doesn't need to be ticked.
 			if ($field !== '*')
@@ -384,6 +387,14 @@ class Query
 	 */
 	public function where ($where)
 	{
+		// Closures can be passed as a single parameter
+		// for boolean groups. This comes as an alternative
+		// to calling where_group().
+		if (is_callable($where))
+		{
+			return $this->where_group($where);
+		}
+
 		// Check if it's a simple comparison (a = 10, a > 10, etc).
 		if(strpos($where, '=') !== false or strpos($where, '>') !== false or strpos($where, '<') !== false)
 		{
@@ -395,29 +406,27 @@ class Query
 			$where = $table.$this->tick($field).$operand.$this->quote(trim($value, '\'" '));
 		}
 		// Parses IS NULL and IS NOT NULL.
-		elseif (stripos($where, ' is not null') !== false or stripos($where, ' is null') !== false)
+		elseif (preg_match('/(\sis null|\sis not null)/i', $where, $matches))
 		{
+			$null = strtoupper($matches[1]);
 			$field = substr($where, 0, strpos($where, ' '));
-			$check = substr($where, strpos($where, ' '));
 
 			list($field, $table) = $this->fix_dot($field);
 
-			$where = $table.$this->tick($field).strtoupper($check);
+			$where = $table.$this->tick($field).$null;
 		}
 		// Parses LIKE $val and NOT LIKE $val.
-		elseif (stripos($where, ' not like ') !== false or stripos($where, ' like ') !== false)
+		elseif (preg_match('/(\snot like\s|\slike\s)/i', $where, $matches))
 		{
-			$field = substr($where, 0, strpos($where, ' '));
-			$value = substr($where, strpos($where, " '"));
-			$like = trim(str_replace(array($field, $value), '', $where));
-
+			list($field, $like, $value) = preg_split('/(\snot like\s|\slike\s)/i', $where, 2, PREG_SPLIT_DELIM_CAPTURE);
 			list($field, $table) = $this->fix_dot($field);
 
 			$where = $table.$this->tick($field).' '.strtoupper($like).' '.$this->quote(trim($value, '\'" '));
 		}
 		// Parses IN (val1, val2, ...) and NOT IN (val1, val2, ...).
-		elseif (stripos($where, ' not in(') !== false or stripos($where, ' not in (') !== false or
-				stripos($where, ' in (') !== false or stripos($where, ' in(') !== false)
+		//elseif (stripos($where, ' not in(') !== false or stripos($where, ' not in (') !== false or
+		//		stripos($where, ' in (') !== false or stripos($where, ' in(') !== false)
+		elseif (preg_match('/(\snot in\s*\(|\sin\s*\()/i', $where, $matches))
 		{
 			$field = substr($where, 0, strpos($where, ' '));
 			$in = substr($where, strpos($where, ' '));
@@ -441,7 +450,7 @@ class Query
 			$where = $table.$this->tick($field).' '.$in;
 		}
 		// Parses BETWEEN val1 AND val2
-		elseif (stripos($where, 'between') !== false)
+		elseif (stripos($where, ' between ') !== false)
 		{
 			$field = substr($where, 0, strpos($where, ' '));
 			$values = substr($where, stripos($where, 'between') + strlen('between') + 1);
@@ -465,24 +474,26 @@ class Query
 	 */
 	public function __call ($method, $arguments)
 	{
-		// Fixes the arguments when they're passed as array
-		if (is_array($arguments[0]))
-		{
-			$arguments = $arguments[0];
-		}
-
 		// Only method calls that start with a "where_"
 		// are considered.
 		if (strpos($method, 'where_') !== false)
 		{
+			// Fixes the arguments when they're passed as array
+			if (is_array($arguments[0]))
+			{
+				$arguments = $arguments[0];
+			}
+
 			// The "where_" part is removed and fields are
-			// retrieved by exploding the string by "_".
+			// retrieved by splitting the string by probable operands.
 			$fields = str_replace('where_', '', $method);
-			$fields = explode('_', $fields);
+			$fields = preg_split('/(_and_|_or_)|/', $fields, -1, PREG_SPLIT_DELIM_CAPTURE);
 
 			$i = 0;
 			foreach ($fields as $field)
 			{
+				$field = str_ireplace(array('_and_', '_or_'), array('and', 'or'), $field);
+
 				// Adds a where clause if the field isn't an OR or AND.
 				if ($field != 'or' and $field != 'and')
 				{
@@ -509,19 +520,81 @@ class Query
 	 * Makes boolean where groups using closures. Basically,
 	 * it allows unlimited nesting of where clauses.
 	 * 
-	 * @param closure $function
+	 * @param closure $callback
 	 * 
 	 * @return object
 	 */
-	public function where_group ($function)
+	public function where_group ($callback)
 	{
 		$this->query['where'][] = '(';
 
 		// $this is passed as an argument so the closure can
 		// access the Query object.
-		call_user_func($function, $this);
+		call_user_func($callback, $this);
 
 		$this->query['where'][] = ')';
+
+		return $this;
+	}
+
+	/**
+	 * Constructs subqueries that can be used in SELECT,
+	 * FROM or WHERE clauses.
+	 * 
+	 * @param string $field
+	 * @param string $subquery
+	 * 
+	 * @return object
+	 */
+	public function subquery ($field, $subquery = null)
+	{
+		// The second parameter is reserved for usage in
+		// WHERE clauses. In this case, it will evaluate
+		// for usage in the SELECT or FROM clause. 
+		if (!isset($subquery))
+		{
+			$subquery = $this->fix_subquery($field);
+
+			// If the FROM clause is empty, it means that
+			// it is being called directly after the SELECT.
+			if ($this->query['from'] == '')
+			{
+				// There's no point in having a SELECT clause
+				// as: SELECT *, ([subquery]), so if there's
+				// a single '*', it is discarded. Otherwise,
+				// it's added normally.
+				if ($this->query['select'] != '*')
+				{
+					$this->query['select'] .= ', '.$subquery;
+				}
+				else
+				{
+					$this->query['select'] = $subquery;	
+				}
+			}
+			else
+			{
+				$this->query['from'] .= ', '.$subquery;
+			}
+		}
+		// Will be evaluated for WHERE clauses.
+		else
+		{
+			$subquery = $this->fix_subquery($subquery);
+
+			// EXISTS or NOT EXISTS keywords are left untouched.
+			// A normal comparison with a subquery, ex: field = ([subquery]),
+			// is parsed so the field is ticked.
+			if (strtolower($field) != 'exists' and strtolower($field) != 'not exists')
+			{
+				list($field, $operand) = explode(' ', $field);
+				list($field, $table) = $this->fix_dot($field);
+
+				$field = $table.$this->tick($field).' '.$operand;
+			}
+
+			$this->query['where'][] = $field.' '.$subquery;
+		}
 
 		return $this;
 	}
@@ -642,7 +715,7 @@ class Query
 	{
 		if (is_numeric($what))
 		{
-			return $this->id($id);
+			return $this->id($what);
 		}
 		else
 		{
@@ -1188,9 +1261,9 @@ class Query
 	 * Parses the "AS" keyword in queries. It supports
 	 * "field f" and "field AS f". 
 	 * 
-	 * @param $params Bound parameters
+	 * @param $field
 	 * 
-	 * @return int|array
+	 * @return array
 	 */
 	protected function fix_as ($field)
 	{
@@ -1220,9 +1293,9 @@ class Query
 	/**
 	 * Parses dots, the table selector in queries.
 	 * 
-	 * @param $params Bound parameters
+	 * @param $field
 	 * 
-	 * @return int|array
+	 * @return array
 	 */
 	protected function fix_dot ($field)
 	{
@@ -1239,6 +1312,27 @@ class Query
 		}
 
 		return array($field, $table);
+	}
+
+	/**
+	 * Parses the "AS" keyword in subqueries.
+	 * 
+	 * @param $field
+	 * 
+	 * @return string
+	 */
+	protected function fix_subquery ($field)
+	{
+		list($subquery, $as) = preg_split('/ as /i', $field);
+		$subquery = trim($subquery, '() ');
+
+		$subquery = '('.$subquery.')';
+		if (isset($as))
+		{
+			$subquery .= ' AS '.$this->tick(trim($as));
+		}
+
+		return $subquery;
 	}
 
 }

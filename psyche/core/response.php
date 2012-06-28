@@ -10,9 +10,9 @@ class Response
 	{
 		ob_start();
 
-		if (is_object($output) and !is_null($method))
+		if (is_object($output) and isset($method))
 		{
-			if (is_null($parameters))
+			if (!isset($parameters))
 			{
 				$output->$method();
 			}
@@ -36,7 +36,7 @@ class Response
 			$url = config('path') . $url . '/';
 		}
 
-		if (!is_null($delay))
+		if (isset($delay))
 		{
 			echo '<meta http-equiv="refresh" content="'.$delay.'; url='.$url.'">';
 		}

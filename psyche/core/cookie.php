@@ -55,7 +55,7 @@ class Cookie
 		}
 		else
 		{
-			if (!is_null($default))
+			if (isset($default))
 			{
 				$return = $default;
 			}

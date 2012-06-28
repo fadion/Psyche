@@ -171,7 +171,7 @@ class File
 
 		if (file_exists($file))
 		{	
-			if (is_null($permission))
+			if (!isset($permission))
 			{
 				$return = substr(sprintf('%o', fileperms('/etc/passwd')), -4);
 			}
@@ -261,7 +261,7 @@ class File
 		{
 			$path = trim($path, '/');
 
-			if (!is_null($name))
+			if (isset($name))
 			{
 				$path = "$path/$name";
 			}

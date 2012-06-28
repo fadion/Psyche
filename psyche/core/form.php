@@ -98,7 +98,7 @@ class Form
 	{
 		$parameters = static::fix_params($parameters);
 
-		if (!is_null($for))
+		if (isset($for))
 		{
 			$for = 'for="control_'.htmlspecialchars($for).'"';
 		}
@@ -143,7 +143,7 @@ class Form
 
 		$output = '<input type="checkbox" name="'.htmlspecialchars($name).'" id="control_'.htmlspecialchars($name).'" '.$checked.' '.$parameters.'>';
 
-		if (!is_null($label))
+		if (isset($label))
 		{
 			$output .= '<label for="control_'.htmlspecialchars($name).'">'.htmlspecialchars($label).'</label>';
 		}
@@ -233,7 +233,7 @@ class Form
 
 		$output = '<input type="radio" name="'.htmlspecialchars($name).'" id="control_'.htmlspecialchars($name).'" '.$checked.' '.$parameters.'>';
 
-		if (!is_null($label))
+		if (isset($label))
 		{
 			$output .= $output .= '<label for="control_'.htmlspecialchars($name).'">'.htmlspecialchars($label).'</label>';
 		}
@@ -373,7 +373,7 @@ class Form
 	 */
 	protected static function fix_params ($parameters)
 	{
-		if (!is_null($parameters))
+		if (isset($parameters))
 		{
 			foreach ($parameters as &$param)
 			{

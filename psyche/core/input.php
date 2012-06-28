@@ -15,9 +15,9 @@ class Input
 		}
 		else
 		{
-			if (is_null($id))
+			if (!isset($id))
 			{
-				if (!is_null($default))
+				if (isset($default))
 				{
 					$return = $default;
 				}
@@ -43,7 +43,7 @@ class Input
 	{
 		if ($val)
 		{
-			if (is_null($id))
+			if (!isset($id))
 			{
 				if ($val == $default)
 				{
@@ -59,7 +59,7 @@ class Input
 			}
 		} else
 		{
-			if (!is_null($id))
+			if (isset($id))
 			{
 				if (is_numeric($id) and $id > 0)
 				{
