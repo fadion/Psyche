@@ -56,6 +56,8 @@ class Response
 	public static function error ($error = '404')
 	{
 		echo 'Error ' . $error;
+		echo '<pre>'; print_r( $_SERVER ); echo '</pre>';
+		
 	}
 
 }

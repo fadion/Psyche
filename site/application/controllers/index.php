@@ -6,7 +6,7 @@ use Psyche\Models;
 class Index
 {
 
-	public function action_index ()
+	public function action_drill ()
 	{
 		/* ----------------------------- */
 		/* Start a Page model with id=10 */
