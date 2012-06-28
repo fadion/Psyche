@@ -6,7 +6,7 @@ use Psyche\Models;
 class Index
 {
 
-	public function action_drill ()
+	public function action_index ()
 	{
 		
 	}
