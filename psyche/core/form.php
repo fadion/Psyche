@@ -23,9 +23,11 @@ class Form
 	 * 
 	 * @return string
 	 */
-	public static function open ($request_type = 'post', $action = '')
+	public static function open ($request_type = 'post', $action = '', $parameters = null)
 	{
-		return '<form method="'.$request_type.'" enctype="multipart/form-data" action="'.$action.'">';
+		$parameters = static::fix_params($parameters);
+		
+		return '<form method="'.$request_type.'" enctype="multipart/form-data" action="'.$action.'" '.$parameters.'>';
 	}
 
 	/**
