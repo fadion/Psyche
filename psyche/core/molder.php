@@ -83,7 +83,7 @@ class Molder
 			}
 		}
 
-		static::$compiled = 'stash/views/'.md5(static::$filename).'.php';
+		static::$compiled = 'application/stash/views/'.md5(static::$filename).'.php';
 
 		// Will only parse the template if it hasn't expired yet. Otherwise
 		// the existing, compiled file will be used.
@@ -346,12 +346,12 @@ class Molder
 	 */
 	protected static function save ()
 	{
-		if (is_writable('stash/views'))
+		if (is_writeable('application/stash/views'))
 		{
 			file_put_contents(static::$compiled, static::$contents);
 		}
 		else
-		{
+		{	
 			throw new \Exception("Stash/Views is not writable");
 		}
 	}
