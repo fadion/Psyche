@@ -10,19 +10,27 @@ class Drill
 
 	protected $vars = array();
 	protected $operation = 'insert';
-	protected $id;
+	protected $condition;
 
-	public function __construct ($id = null)
+	public function __construct ($where = null)
 	{
 		if (!isset(static::$table))
 		{
 			static::$table = strtolower(substr(get_called_class(), strrpos(get_called_class(), '\\') + 1));
 		}
 
-		if (!is_null($id))
+		if (!is_null($where))
 		{
 			$this->operation = 'update';
-			$this->id = $id;
+
+			if (is_numeric($where))
+			{
+				$this->condition = "id = $where";
+			}
+			else
+			{
+				$this->condition = $where;
+			}
 		}
 	}
 
@@ -33,9 +41,17 @@ class Drill
 
 	public function __get ($name)
 	{
-		$results = Query::select($name)->from(static::$table)->id($this->id)->first();
+		$results = Query::select($name)->from(static::$table)->where($this->condition)->first();
 
 		return $results->$name;
+	}
+
+	public function __callStatic ($method, $arguments)
+	{
+		$table = static::table();
+		$method = 'where_'.substr($method, strpos($method, '_') + 1);
+
+		return Query::select()->from($table)->$method($arguments);
 	}
 
 	public function save ()
@@ -44,12 +60,12 @@ class Drill
 		{
 			Query::insert(static::$table, $this->vars)->query();
 			$this->vars = array();
-			$this->id = DB::last_insert();
+			$this->condition = 'id = '.DB::last_insert();
 			$this->operation = 'update';
 		}
 		else
 		{
-			Query::update(static::$table, $this->vars)->id($this->id)->query();
+			Query::update(static::$table, $this->vars)->where($this->condition)->query();
 		}
 	}
 

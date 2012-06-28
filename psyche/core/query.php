@@ -465,6 +465,12 @@ class Query
 	 */
 	public function __call ($method, $arguments)
 	{
+		// Fixes the arguments when they're passed as array
+		if (is_array($arguments[0]))
+		{
+			$arguments = $arguments[0];
+		}
+
 		// Only method calls that start with a "where_"
 		// are considered.
 		if (strpos($method, 'where_') !== false)
