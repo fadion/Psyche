@@ -1,12 +1,14 @@
 <?php
+namespace Psyche\Core;
+
 /**
  * Authentication Class
  * 
  * Secure login/logout functionality 
  *
- * @package    PHP Framework - We Neeed a Name
- * @subpackage Auth
+ * @package    Psyche\Core\Cookie
  * @author     Baki Goxhaj 
+ * @since		1.0
  * @since		1.0
  */
 
@@ -19,11 +21,13 @@ class Auth {
 	
 	public function __construct() 
 	{
-		static::$_key = Cfg::KEY;	
+		static::$_key = config('salt');	
 	}
 
 	private function random_string( $length = 50 )
 	{
+		return Core\String::random('mix', 40);
+		/*
 		$chars = '0123456789abcdefghijklmnopqrstuvwxyz';
 		$str = '';
 		
@@ -32,6 +36,7 @@ class Auth {
 		}
 		
 		return $str;
+		*/
 	}
 	
 	private function generate_hash( $data ) 
@@ -174,5 +179,12 @@ class Auth {
 		session_unset();
 		header('Location: ' . APP_URL );
 	} 
+	
+	public static function test() 
+	{
+		echo 'Works' . "\n\n";
+		echo 'Key: ' . static::$_key;
+
+	}
 
 }
