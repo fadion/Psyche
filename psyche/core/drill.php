@@ -2,22 +2,23 @@
 namespace Psyche\Core;
 use Psyche\Core\Query;
 use Psyche\Core\DB;
+use Psyche\Core\Drill\Cache;
 
 /**
  * Drill ORM
  * 
- * A very simple, but rather powerful ORM implemenation.
+ * A rather simple, but powerful ORM implemenation.
  * It treats Model classes as database tables, providing
  * an intuitive approach to CRUD operations. In addition,
- * it handles query caching, relations and interfaces with
- * most of the funcionality of the Query Builder.
+ * it handles query caching, relations and offers the same
+ * expressive power of the Query Builder.
  *
  * @package Psyche\Core\Drill
  * @author Fadion Dashi
  * @version 1.0
  * @since 1.0
  */
-class Drill
+class Drill extends \Psyche\Core\Drill\Query
 {
 
 	/**
@@ -65,7 +66,20 @@ class Drill
 			$this->id = $id;
 			$this->is_new = false;
 
-			$results = Query::select()->from(static::table())->where(static::$p_key.' = '.$this->id)->first();
+			$query = Query::select()->from(static::table())->where(static::$p_key.' = '.$this->id);
+
+			// Check first for a cached result with the built
+			// query. If yes, get it from cache. Otherwise, run it.
+			if (Cache::exists($query))
+			{
+				$results = Cache::get($query);
+			}
+			else
+			{
+				$results = $query->first();
+				Cache::add($query, $results);
+			}
+
 			$this->hydrate($results);
 		}
 		else
@@ -233,6 +247,20 @@ class Drill
 	{
 		Query::delete(static::table())->where(static::$p_key.' = '.$this->id)->query();
 		$this->clean();
+	}
+
+	/**
+	 * Creates an instance of the Drill class.
+	 * It's intended to be used as a simple way
+	 * of generating database objects, but it
+	 * doesn't offer any of the flexibilites of using
+	 * Model classes.
+	 */
+	public static function create ($table, $id = null)
+	{
+		static::$table = $table;
+
+		return new static($id);
 	}
 
 	/**
