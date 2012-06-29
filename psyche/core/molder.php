@@ -14,7 +14,7 @@ namespace Psyche\Core;
  *
  * @package Psyche\Core\Molder
  * @author Fadion Dashi
- * @version 1.0.3
+ * @version 1.0
  * @since 1.0
  */
 class Molder

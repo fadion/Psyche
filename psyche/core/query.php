@@ -13,7 +13,7 @@ use Psyche\Core\DB;
  *
  * @package Psyche\Core\Query
  * @author Fadion Dashi
- * @version 1.5
+ * @version 1.0
  * @since 1.0
  */
 class Query

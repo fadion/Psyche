@@ -10,7 +10,7 @@ use \PDO;
  *
  * @package Psyche\Core\Db
  * @author Fadion Dashi
- * @version 1.0.2
+ * @version 1.0
  * @since 1.0
  */
 class Db {

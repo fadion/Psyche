@@ -43,8 +43,6 @@ class View
 	 * 
 	 * @param string $file Template filename
 	 * @param array $vars Template variables to assign
-	 * 
-	 * @return void
 	 */
 	public function __construct ($file, $vars)
 	{

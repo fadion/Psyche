@@ -21,8 +21,6 @@ class Autoload
 
 	/**
 	 * Constructor. Registers the autoload method.
-	 * 
-	 * @return void
 	 */
 	public function __construct ()
 	{
