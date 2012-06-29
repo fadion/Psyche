@@ -60,7 +60,7 @@ class Validator
 				list($input, $sub) = explode('.', $input);
 			}
 
-			if (!is_null($sub))
+			if (isset($sub))
 			{
 				$real_value = $inputs[$input][$sub];
 				$input_name = $input . '.' . $sub;
@@ -143,7 +143,7 @@ class Validator
 	 */
 	public function errors ($input = null)
 	{
-		if (is_null($input))
+		if (!isset($input))
 		{
 			return $this->errors;
 		}
@@ -166,7 +166,7 @@ class Validator
 	 */
 	protected function validate ($value, $rule)
 	{
-		if ($rule != '' and !is_null($rule))
+		if ($rule != '' and isset($rule))
 		{
 			$rules = $this->parse_rule($rule);
 
@@ -290,7 +290,7 @@ class Validator
 	{
 		$value = trim($value);
 
-		if ($value == '' or is_null($value) or $value === false)
+		if ($value == '' or !isset($value) or $value === false)
 		{
 			$this->add_error(__('is required'));
 			return false;

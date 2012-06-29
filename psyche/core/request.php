@@ -25,7 +25,7 @@ class Request {
 	{
 		$return = false;
 
-		if (is_null($name))
+		if (!isset($name))
 		{
 			if (count($_GET))
 			{
@@ -55,7 +55,7 @@ class Request {
 	{
 		$return = false;
 
-		if (is_null($name))
+		if (!isset($name))
 		{
 			if (count($_POST))
 			{
@@ -91,7 +91,7 @@ class Request {
 			// into an array.
 			parse_str(file_get_contents("php://input"), $put);
 
-			if (is_null($name))
+			if (!isset($name))
 			{
 				if (count($put))
 				{
@@ -128,7 +128,7 @@ class Request {
 			// into an array.
 			parse_str(file_get_contents("php://input"), $delete);
 
-			if (is_null($name))
+			if (!isset($name))
 			{
 				if (count($delete))
 				{
@@ -160,7 +160,7 @@ class Request {
 	{
 		$return = false;
 
-		if (is_null($name))
+		if (!isset($name))
 		{
 			if (count($_FILES))
 			{
@@ -179,7 +179,7 @@ class Request {
 
 			if (array_key_exists($name, $_FILES))
 			{
-				if (is_null($key))
+				if (!isset($key))
 				{
 					$return = $_FILES[$name];
 				}
@@ -268,7 +268,7 @@ class Request {
 	{
 		$return = false;
 
-		if (is_null($name))
+		if (!isset($name))
 		{
 			$return = $_SERVER;
 		}

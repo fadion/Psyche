@@ -97,7 +97,7 @@ class Asset
 	 */
 	protected static function fix_params ($parameters)
 	{
-		if (!is_null($parameters))
+		if (isset($parameters))
 		{
 			foreach ($parameters as &$param)
 			{

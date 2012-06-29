@@ -54,7 +54,7 @@ class Db {
 
 		// If a template is defined as parameter, check if it exists in the
 		// configuration cache. Otherwise gets the first template.
-		if (!is_null($template) and isset(static::$templates[$template]))
+		if (isset($template) and isset(static::$templates[$template]))
 		{
 			$template = static::$templates[$template];
 		}
@@ -103,7 +103,7 @@ class Db {
 			// Otherwise bind every parameter.
 			if (is_array($args[1]) and count($args[1]))
 			{
-				static::$fetch = static::$results->execute($args[1]);
+				static::$results->execute($args[1]);
 			}
 			else
 			{
@@ -112,7 +112,7 @@ class Db {
 					static::$results->bindValue($key, $val);
 				}
 
-				static::$fetch = static::$results->execute();
+				static::$results->execute();
 			}
 
 			// SELECT queries return a fetched object.
@@ -196,6 +196,29 @@ class Db {
 	public static function last_insert ()
 	{
 		return static::$pdo->lastInsertId();
+	}
+
+	/**
+	 * Returns all the table columns with the
+	 * associated information.
+	 * 
+	 * @param strint $table
+	 * 
+	 * @return array
+	 */
+	public static function columns ($table)
+	{
+		try
+		{
+			static::$results = static::$pdo->prepare("SHOW COLUMNS FROM $table");
+			static::$results->execute();
+
+			return static::$results->fetchAll();
+		}
+		catch (\PDOException $e)
+		{
+			throw new \Exception('Database: '.$e->getMessage());
+		}        
 	}
 
 	/**

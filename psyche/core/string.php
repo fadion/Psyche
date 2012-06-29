@@ -84,7 +84,7 @@ class String
 		$open = '<b>';
 		$close = '</b>';
 
-		if (!is_null($delimiters) and is_array($delimiters) and count($delimiters) == 2)
+		if (isset($delimiters) and is_array($delimiters) and count($delimiters) == 2)
 		{
 			$open = $delimiters[0];
 			$close = $delimiters[1];

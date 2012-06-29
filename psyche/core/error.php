@@ -5,7 +5,7 @@ namespace Psyche\Core;
  * Error Handler
  * 
  * Catches User Errors and Uncaught Exceptions. When in DEBUG mode,
- * messages will be shown fully together with a single backtrace.
+ * messages will be shown fully, together with a backtrace.
  *
  * @package Psyche\Core\Error
  * @author Fadion Dashi
@@ -46,6 +46,8 @@ class Error
 		echo '<b>Uncaught exception</b> in ['.$trace[0]['file'].'] at line ['.$trace[0]['line'].']';
 		echo '<div style="background:#e6edf3; border:1px solid #a2bcd2; color:#7691a9; padding:15px; margin-bottom: 20px;">'.$exception->getMessage().'</div>';
 		
+		unset($trace[0]);
+
 		$i = 1;
 		$msg = '';
 		foreach ($trace as $t)
@@ -61,7 +63,7 @@ class Error
 
 			if ((isset($t['class']) and $t['class'] != '') and (isset($t['function']) and $t['function'] != ''))
 			{
-				$msg .= '<br>Started by: '.$t['class'].'::'.$t['function'].'()';
+				$msg .= '<br>Triggered by: '.$t['class'].'::'.$t['function'].'()';
 			}
 
 			$i++;
@@ -121,7 +123,7 @@ class Error
 
 				if ((isset($t['class']) and $t['class'] != '') and (isset($t['function']) and $t['function'] != ''))
 				{
-					$msg .= '<br>Started by: '.$t['class'].'::'.$t['function'].'()';
+					$msg .= '<br>Triggered by: '.$t['class'].'::'.$t['function'].'()';
 				}
 
 				$i++;

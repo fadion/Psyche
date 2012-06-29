@@ -262,52 +262,52 @@ class Router
 	 * Manual route for a GET http request.
 	 * 
 	 * @param string $route Route to be checked
-	 * @param closure $function Closure to be executed
+	 * @param closure $callback Closure to be executed
 	 * 
 	 * @return void
 	 */
-	public static function get ($route, $function)
+	public static function get ($route, $callback)
 	{
-		static::manual_route($route, $function, array('GET'));
+		static::manual_route($route, $callback, array('GET'));
 	}
 
 	/**
 	 * Manual route for a POST http request.
 	 * 
 	 * @param string $route Route to be checked
-	 * @param closure $function Closure to be executed
+	 * @param closure $callback Closure to be executed
 	 * 
 	 * @return void
 	 */
-	public static function post ($route, $function)
+	public static function post ($route, $callback)
 	{
-		static::manual_route($route, $function, array('POST'));
+		static::manual_route($route, $callback, array('POST'));
 	}
 
 	/**
 	 * Manual route for a PUT http request.
 	 * 
 	 * @param string $route Route to be checked
-	 * @param closure $function Closure to be executed
+	 * @param closure $callback Closure to be executed
 	 * 
 	 * @return void
 	 */
-	public static function put ($route, $function)
+	public static function put ($route, $callback)
 	{
-		static::manual_route($route, $function, array('PUT'));
+		static::manual_route($route, $callback, array('PUT'));
 	}
 
 	/**
 	 * Manual route for any type of http request.
 	 * 
 	 * @param string $route Route to be checked
-	 * @param closure $function Closure to be executed
+	 * @param closure $callback Closure to be executed
 	 * 
 	 * @return void
 	 */
-	public static function any ($route, $function)
+	public static function any ($route, $callback)
 	{
-		static::manual_route($route, $function);
+		static::manual_route($route, $callback);
 	}
 
 	/**
@@ -315,12 +315,12 @@ class Router
 	 * if it's successful.
 	 * 
 	 * @param string $route Route to be checked
-	 * @param closure $function Closure to be executed
+	 * @param closure $callback Closure to be executed
 	 * @param array $request_type The http request type/types
 	 * 
 	 * @return void
 	 */
-	protected static function manual_route ($route, $function, $request_type = array('GET', 'POST', 'PUT'))
+	protected static function manual_route ($route, $callback, $request_type = array('GET', 'POST', 'PUT'))
 	{
 		// An empty route triggers an error
 		if (empty($route))
@@ -359,7 +359,7 @@ class Router
 				{
 					$make_reroute = true;
 				}
-				elseif (static::parse_params($route, $pieces[$i]) and !is_null($pieces[$i]))
+				elseif (static::parse_params($route, $pieces[$i]) and isset($pieces[$i]))
 				{
 					// $param holds any url parameter that corresponds to a wildcard.
 					$params[] = $pieces[$i];
@@ -378,7 +378,7 @@ class Router
 		if ($make_reroute)
 		{
 			static::$errors[] = 0;
-			call_user_func_array($function, $params);
+			call_user_func_array($callback, $params);
 		}
 		else
 		{

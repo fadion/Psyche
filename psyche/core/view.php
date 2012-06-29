@@ -84,7 +84,7 @@ class View
 			throw new \Exception(sprintf("View %s doesn't exist", $file));
 		}
 
-		if (!is_null($vars))
+		if (isset($vars))
 		{
 			$this->vars = $vars;
 		}
