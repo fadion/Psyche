@@ -8,6 +8,7 @@ return array (
 	'Session' => 'Psyche\Core\Session',
 	'String'  => 'Psyche\Core\String',
 	'Number'  => 'Psyche\Core\Number',
-	'Uri'     => 'Psyche\Core\Uri'
+	'Uri'     => 'Psyche\Core\Uri',
+	'Partial' => 'Psyche\Core\View\Partial'
 
 );

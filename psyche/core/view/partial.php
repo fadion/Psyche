@@ -1,83 +1,98 @@
 <?php
 namespace Psyche\Core\View;
 
-// WIP
+/**
+ * Partial Views
+ * 
+ * Makes template inheritance possible with a very simple
+ * technique. It gets the contents of a partial block via
+ * output buffering and returns it to a reserve declaration.
+ * There is practically on overhead, as it works with native
+ * PHP includes.
+ *
+ * @package Psyche\Core\View\Partial
+ * @author Fadion Dashi
+ * @version 1.0
+ * @since 1.0
+ */
 class Partial
 {
 
-	protected static $master;
-	protected static $reserves = array();
+	/**
+	 * @var array Holds the contents of each partial.
+	 */
+	protected static $partials = array();
+
+	/**
+	 * @var string The currently active partial.
+	 */
 	protected static $active;
 
-	public static function _use ($file)
+	/**
+	 * Replaces a reserve declaration with the appropriate
+	 * partial. When no partial block (or inline) exists,
+	 * the default value is returned.
+	 * 
+	 * @param string $name
+	 * @param string $default
+	 * 
+	 * @return string
+	 */
+	public static function reserve ($name, $default = null)
 	{
-		$file = static::path($file);
-
-		ob_start();
-		include($file);
-		static::$master = ob_get_clean();
+		if (isset(static::$partials[$name]))
+		{
+			return static::$partials[$name];
+		}
+		else
+		{
+			if (isset($default))
+			{
+				return $default;
+			}
+		}
 	}
 
-	public static function reserve ($name)
-	{
-		static::$reserves[$name] = true;
-		echo '#####@'.$name.'@#####';
-	}
-
+	/**
+	 * The start of a partial block. Adds a key to the
+	 * partial (so the class knowns it exists), makes itself
+	 * the active one and starts output buffering.
+	 * 
+	 * @param string $name
+	 * 
+	 * return void
+	 */
 	public static function begin ($name)
 	{
-		if (isset(static::$reserves[$name]))
-		{
-			static::$active = $name;
-			ob_start();
-		}
+		static::$partials[$name] = true;
+		static::$active = $name;
+		ob_start();
 	}
 
+	/**
+	 * Returns the contents of the buffer and adds it to
+	 * the active partial key.
+	 * 
+	 * @return void
+	 */
 	public static function end ()
 	{
-		if (isset(static::$active))
-		{
-			$partial = ob_get_clean();
-			echo str_replace('#####@'.static::$active.'@#####', $partial, static::$master);
-		}
+		static::$partials[static::$active] = ob_get_clean();
 	}
 
-	protected static function path ($file)
+	/**
+	 * Adds an inline partial. These are simple, one line
+	 * contents and are here mostly as a shorthand to
+	 * declaring a partial block.
+	 * 
+	 * @param $name
+	 * @param $content
+	 * 
+	 * return void
+	 */
+	public static function inline ($name, $content)
 	{
-		$file = config('views path').$file;
-		$exists = true;
-
-		if (stripos($file, config('mold extension')) === false and stripos($file, '.php') === false)
-		{
-			if (file_exists($file.'.php'))
-			{
-				$file .= '.php';
-			}
-			elseif (file_exists($file.config('mold extension')))
-			{
-				$file .= config('mold extension');
-			}
-			else
-			{
-				$exists = false;
-			}
-		}
-		else
-		{
-			if (!file_exists($file))
-			{
-				$exists = false;
-			}
-		}
-
-		if ($exists)
-		{
-			return $file;
-		}
-		else
-		{
-			throw new \Exception(sprintf("View %s doesn't exist", $file));
-		}
+		static::$partials[$name] = $content;
 	}
 
 }
