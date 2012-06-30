@@ -1,5 +1,5 @@
 <?php
-namespace Psyche\Core;
+namespace Psyche\Core\View;
 
 /**
  * Molder Template Engine
@@ -12,7 +12,7 @@ namespace Psyche\Core;
  * Mold syntax. It isn't supposed to be called directly, but will be run by Psyche\Core\View
  * when mold template files (defaults to .mold.php) are found.
  *
- * @package Psyche\Core\Molder
+ * @package Psyche\Core\View\Molder
  * @author Fadion Dashi
  * @version 1.0
  * @since 1.0
@@ -54,7 +54,7 @@ class Molder
 	 * @var array List of available parses. Each one will call a class method
 	 */
 	protected static $parsers = array(
-		'comments', 'use', 'partials', 'reserves', 'includes', 'core', 'echo', 'if', 'foreach', 'for', 'while', 'others', 'generics'
+		'comments', 'use', 'partials', 'reserves', 'includes', 'echo', 'if', 'foreach', 'for', 'while', 'others', 'generics'
 	);
 
 	/**
@@ -228,19 +228,6 @@ class Molder
 	{
 		static::$contents = preg_replace('|\{\s*while\s+(.+?)\s*\}|i', "<?php while ($1): ?>", static::$contents);
 		static::$contents = preg_replace("|\{\s*/while\s*\}|i", "<?php endfor; ?>", static::$contents);
-	}
-
-	/**
-	 * Parses core classes calls with a special syntax: {% Class::method() %}. The main purpose
-	 * is to provide a simple access to namespaced classes, removing the need to write
-	 * \Psyche\Core\Class::method().
-	 * 
-	 * @return void
-	 */
-	protected static function parse_core ()
-	{
-		static::$contents = preg_replace('|\{\{%\s+(.+?)::(.+?)\s+%\}\}|', '<?= Psyche\Core\\\$1::$2; ?>', static::$contents);
-		static::$contents = preg_replace('|\{%\s+(.+?)::(.+?)\s+%\}|', 'Psyche\Core\\\$1::$2', static::$contents);
 	}
 
 	/**
