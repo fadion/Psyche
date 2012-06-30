@@ -60,9 +60,9 @@ class View
 			{
 				$file .= '.php';
 			}
-			elseif (file_exists($file.'.mold'))
+			elseif (file_exists($file.'.mold.php'))
 			{
-				$file .= '.mold';
+				$file .= '.mold.php';
 			}
 			else
 			{
@@ -89,8 +89,8 @@ class View
 
 		$this->file = $file;
 
-		// .mold files are passed to Molder for compilation.
-		if (pathinfo($file, PATHINFO_EXTENSION) == 'mold')
+		// Mold files are passed to Molder for compilation.
+		if (strpos($file, config('mold extension')) !== false)
 		{
 			$this->file = Molder::run($file);
 		}

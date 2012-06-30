@@ -34,6 +34,9 @@ return array (
 	'default controller' => 'index',
 	'default method' => 'index',
 
+	// Default Mold Template Engine file extensions
+	'mold extension' => '.mold.php',
+
 	// Randomly generated SALT (for passwords) and TOKEN (for anything else)
 	'salt' => '$0R[Q4Cf6w$b?Ote+~RWu(u*n[gT#',
 	'token' => 'v8_]bQ4DT(<G3%Y+nFAT}1Y{#?Z!3'
