@@ -9,7 +9,7 @@ use Psyche\Core\DB;
  *
  * @package Psyche\Core\Psyc
  * @author Fadion Dashi
- * @version 1.0.2
+ * @version 1.0
  * @since 1.0
  */
 class Validator
@@ -40,8 +40,6 @@ class Validator
 	 * 
 	 * @param array $inputs List of inputs to be validated
 	 * @param array $rules List of rules for each input
-	 * 
-	 * @return object 
 	 */
 	public function __construct ($inputs, $rules)
 	{
@@ -87,8 +85,6 @@ class Validator
 				$this->validate($real_value, $rule);
 			}
 		}
-
-		return $this;
 	}
 
 	/**

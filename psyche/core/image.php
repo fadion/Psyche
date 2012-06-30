@@ -29,8 +29,6 @@ class Image
 	 * Constructor. Sets the image handler.
 	 * 
 	 * @param string $file Path to the image file
-	 * 
-	 * @return void
 	 */
 	public function __construct ($file)
 	{

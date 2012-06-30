@@ -1,7 +1,7 @@
 <?php
 namespace Psyche\Core;
 use Psyche\Core\Response;
-use Psyche\Core\Molder;
+use Psyche\Core\View\Molder;
 
 /**
  * View Engine
@@ -43,28 +43,24 @@ class View
 	 * 
 	 * @param string $file Template filename
 	 * @param array $vars Template variables to assign
-	 * 
-	 * @return void
 	 */
 	public function __construct ($file, $vars)
 	{
 		$this->filename = $file;
-
 		$file = config('views path').$file;
-		$ext = pathinfo($file, PATHINFO_EXTENSION);
 		$exists = true;
 
 		// When no extension is set, it tries to find it
 		// automatically. php files take precedence over mold.
-		if ($ext == '')
+		if (stripos($file, config('mold extension')) === false and stripos($file, '.php') === false)
 		{
 			if (file_exists($file.'.php'))
 			{
 				$file .= '.php';
 			}
-			elseif (file_exists($file.'.mold'))
+			elseif (file_exists($file.config('mold extension')))
 			{
-				$file .= '.mold';
+				$file .= config('mold extension');
 			}
 			else
 			{
@@ -91,8 +87,8 @@ class View
 
 		$this->file = $file;
 
-		// .mold files are passed to Molder for compilation.
-		if (pathinfo($file, PATHINFO_EXTENSION) == 'mold')
+		// Mold files are passed to Molder for compilation.
+		if (stripos($file, config('mold extension')) !== false)
 		{
 			$this->file = Molder::run($file);
 		}
@@ -185,24 +181,6 @@ class View
 		$output = ob_get_clean();
 		
 		Response::write($output);
-	}
-
-	/**
-	 * Checks if a template file exists.
-	 * 
-	 * @param string $file Template file
-	 * 
-	 * @return bool
-	 */
-	public function exists ($file)
-	{
-		$file = config('views path') . "$file.php";
-		if (file_exists($file))
-		{
-			return true;
-		}
-
-		return false;
 	}
 
 	/**

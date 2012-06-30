@@ -4,7 +4,7 @@ namespace Psyche\Core;
 /**
  * Helper for working with files
  * 
- * Provide some nice functions for file handling, information and upload.
+ * Provides some nice functions for file handling, information and upload.
  *
  * @package Psyche\Core\File
  * @author Fadion Dashi

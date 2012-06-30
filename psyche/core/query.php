@@ -13,7 +13,7 @@ use Psyche\Core\DB;
  *
  * @package Psyche\Core\Query
  * @author Fadion Dashi
- * @version 1.5
+ * @version 1.0
  * @since 1.0
  */
 class Query
@@ -424,14 +424,12 @@ class Query
 			$where = $table.$this->tick($field).' '.strtoupper($like).' '.$this->quote(trim($value, '\'" '));
 		}
 		// Parses IN (val1, val2, ...) and NOT IN (val1, val2, ...).
-		//elseif (stripos($where, ' not in(') !== false or stripos($where, ' not in (') !== false or
-		//		stripos($where, ' in (') !== false or stripos($where, ' in(') !== false)
-		elseif (preg_match('/(\snot in\s*\(|\sin\s*\()/i', $where, $matches))
+		elseif (preg_match('/(\snot in\s*\((.+)\)|\sin\s*\((.+)\))/i', $where, $matches))
 		{
 			$field = substr($where, 0, strpos($where, ' '));
-			$in = substr($where, strpos($where, ' '));
-			$values = trim(substr($in, strpos($in, '(') + 1, strrpos($in, ')')), ')');
-			$in = strtoupper(str_replace($values, '###', $in));
+			$values = ($matches[2] == '') ? $matches[3] : $matches[2];
+			$in = str_replace($values, '###', $matches[1]);
+			$in = strtoupper($in);
 
 			$values = explode(',', $values);
 

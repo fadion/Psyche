@@ -1,5 +1,5 @@
 <?php
-namespace Psyche\Core;
+namespace Psyche\Core\View;
 
 /**
  * Molder Template Engine
@@ -10,11 +10,11 @@ namespace Psyche\Core;
  * cache until the original template file is changed. Overhead is minimal, even when
  * compile happens, as there are only a few simple regular expressions that parse
  * Mold syntax. It isn't supposed to be called directly, but will be run by Psyche\Core\View
- * when '.mold' template files are found.
+ * when mold template files (defaults to .mold.php) are found.
  *
- * @package Psyche\Core\Molder
+ * @package Psyche\Core\View\Molder
  * @author Fadion Dashi
- * @version 1.0.3
+ * @version 1.0
  * @since 1.0
  */
 class Molder
@@ -54,7 +54,7 @@ class Molder
 	 * @var array List of available parses. Each one will call a class method
 	 */
 	protected static $parsers = array(
-		'comments', 'use', 'partials', 'reserves', 'includes', 'core', 'echo', 'if', 'foreach', 'for', 'while', 'others', 'generics'
+		'comments', 'use', 'partials', 'reserves', 'includes', 'echo', 'if', 'foreach', 'for', 'while', 'others', 'generics'
 	);
 
 	/**
@@ -79,7 +79,7 @@ class Molder
 			static::$parent = config('views path').$matches[1];
 			if (pathinfo(static::$parent, PATHINFO_EXTENSION) == '')
 			{
-				static::$parent .= '.mold';
+				static::$parent .= config('mold extension');
 			}
 		}
 
@@ -231,19 +231,6 @@ class Molder
 	}
 
 	/**
-	 * Parses core classes calls with a special syntax: {% Class::method() %}. The main purpose
-	 * is to provide a simple access to namespaced classes, removing the need to write
-	 * \Psyche\Core\Class::method().
-	 * 
-	 * @return void
-	 */
-	protected static function parse_core ()
-	{
-		static::$contents = preg_replace('|\{\{%\s+(.+?)::(.+?)\s+%\}\}|', '<?= Psyche\Core\\\$1::$2; ?>', static::$contents);
-		static::$contents = preg_replace('|\{%\s+(.+?)::(.+?)\s+%\}|', 'Psyche\Core\\\$1::$2', static::$contents);
-	}
-
-	/**
 	 * Parses includes with the {include 'file'} syntax. This doesn't get
 	 * compiled as a normal PHP include, as the included file's content
 	 * wouldn't be parsed. Instead, the file content is read and replaced
@@ -263,7 +250,7 @@ class Molder
 			{
 				if (pathinfo($include, PATHINFO_EXTENSION) == '')
 				{
-					$include .= '.mold';
+					$include .= config('mold extension');
 				}
 
 				$file = config('views path').$include;

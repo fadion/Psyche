@@ -20,9 +20,12 @@ class Autoload
 	protected $maps;
 
 	/**
+	 * @var array Class aliases cache.
+	 */
+	protected $aliases;
+
+	/**
 	 * Constructor. Registers the autoload method.
-	 * 
-	 * @return void
 	 */
 	public function __construct ()
 	{
@@ -49,6 +52,18 @@ class Autoload
 	protected function load ($class)
 	{
 		$this->maps();
+		$this->aliases();
+
+		// Checks for any defined aliases.
+		if (count($this->aliases))
+		{
+			// If a defined alias matches the called class,
+			// it will be aliased and the autoloader will run again.
+			if (isset($this->aliases[$class]))
+			{
+				return class_alias($this->aliases[$class], $class);
+			}
+		}
 		
 		$path = $this->clean($class);
 
@@ -72,7 +87,7 @@ class Autoload
 			{
 				if (strtolower(trim($ns, '\\')) == strtolower($class))
 				{
-					// If not extension is set, use '.php' as default.
+					// If no extension is set, use '.php' as default.
 					if (pathinfo($map_path, PATHINFO_EXTENSION) == '')
 					{
 						$map_path .= '.php';
@@ -112,6 +127,25 @@ class Autoload
 			if (file_exists($file))
 			{
 				$this->maps = include($file);
+			}
+		}
+	}
+
+	/**
+	 * Reads the aliases files and passes the returned array
+	 * to a variable, so it is cached and read only on the first run.
+	 * 
+	 * @return array
+	 */
+	protected function aliases ()
+	{
+		$file = 'config/aliases.php';
+
+		if (!isset($this->aliases))
+		{
+			if (file_exists($file))
+			{
+				$this->aliases = include($file);
 			}
 		}
 	}

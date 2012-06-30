@@ -14,7 +14,7 @@ use Psyche\Core\Response;
  *
  * @package Psyche\Core\Router
  * @author Fadion Dashi
- * @version 1.1
+ * @version 1.0
  * @since 1.0
  */
 class Router

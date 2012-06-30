@@ -11,7 +11,7 @@ namespace Psyche\Core;
  * @package Psyche\Core\Localizer
  * @author Fadion Dashi
  * @author Andri Xhitoni
- * @version 1.1
+ * @version 1.0
  * @since 1.0
  */
 class Localizer

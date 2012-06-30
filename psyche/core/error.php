@@ -17,8 +17,6 @@ class Error
 
 	/**
 	 * Constructor. Sets error handlers.
-	 * 
-	 * @return void
 	 */
 	public function __construct ()
 	{
