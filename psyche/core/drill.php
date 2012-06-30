@@ -70,7 +70,7 @@ class Drill extends \Psyche\Core\Drill\Query
 
 			// Check first for a cached result with the built
 			// query. If yes, get it from cache. Otherwise, run it.
-			if (Cache::exists($query))
+			if (Cache::has($query))
 			{
 				$results = Cache::get($query);
 			}
@@ -222,6 +222,19 @@ class Drill extends \Psyche\Core\Drill\Query
 		// Insert
 		if ($this->is_new)
 		{
+			// Checks if an insertion time field is specified.
+			if (isset(static::$insert_time))
+			{
+				$time_field = static::$insert_time;
+
+				// Checks if the insertion time field was overriden. It would mean
+				// that the user chose to set it manually.
+				if (!isset($this->dirty[$time_field]) or $this->dirty[$time_field] == '')
+				{
+					$this->dirty[$time_field] = date('Y-m-d H:i:s');
+				}
+			}
+
 			Query::insert(static::table(), $this->dirty)->query();
 
 			// Upon insertion, the insert ID is returned and the
@@ -231,6 +244,17 @@ class Drill extends \Psyche\Core\Drill\Query
 		// Update
 		else
 		{
+			// Checks if an update time field is specified.
+			if (isset(static::$update_time))
+			{
+				$time_field = static::$update_time;
+
+				if (!isset($this->dirty[$time_field]) or $this->dirty[$time_field] == '')
+				{
+					$this->dirty[$time_field] = date('Y-m-d H:i:s');
+				}
+			}
+
 			Query::update(static::table(), $this->dirty)->where(static::$p_key.' = '.$this->id)->query();
 		}
 
@@ -288,6 +312,16 @@ class Drill extends \Psyche\Core\Drill\Query
 	}
 
 	/**
+	 * Finds and returns all results from a table.
+	 * 
+	 * @return object
+	 */
+	public static function find_all ()
+	{
+		return static::find('', true, true);
+	}
+
+	/**
 	 * Finds results from the database based on the conditions.
 	 * It functions as a WHERE clause.
 	 * 
@@ -296,20 +330,49 @@ class Drill extends \Psyche\Core\Drill\Query
 	 * 
 	 * @return void
 	 */
-	public static function find ($what, $many = true)
+	public static function find ($what, $many = true, $all = false)
 	{
-		$results = static::select_from()->where($what);
+		$query = static::select_from();
+
+		// If the call wasn't from find_all(), add
+		// the where clause.
+		if (!$all)
+		{
+			$query = $query->where($what);
+		}
+
+		// If it is a closure, get the query from it's return value.
+		// static::select_from() is passed as an instance of the
+		// Query Builder with the select and from clause built.
+		if (is_callable($what))
+		{
+			$query = call_user_func($what, static::select_from());
+		}
+
+		// Query method and type of instance are built dynamically.
+		// Defaults are for a single result, triggered by find_one().
+		$method = 'first';
+		$instance = 'single_instance';
 
 		if ($many)
 		{
-			$results = $results->query();
-			return static::multi_instance($results);
+			$method = 'query';
+			$instance = 'multi_instance';
+		}
+
+		// First check if the query exists in the cache. Otherwise,
+		// run it.
+		if (Cache::has($query.$many))
+		{
+			$results = Cache::get($query.$many);
 		}
 		else
 		{
-			$results = $results->first();
-			return static::single_instance($results);
+			$results = $query->$method();
+			Cache::add($query.$many, $results);
 		}
+
+		return static::$instance($results);
 	}
 
 	/**

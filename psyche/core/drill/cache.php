@@ -25,13 +25,13 @@ class Cache
 	public static $cache = array();
 
 	/**
-	 * Checks if a query exists.
+	 * Checks if a key exists.
 	 * 
 	 * @param string $key
 	 * 
 	 * @return bool
 	 */
-	public static function exists ($key)
+	public static function has ($key)
 	{
 		return (isset(static::$cache[md5($key)])) ? true : false;
 	}
@@ -45,7 +45,7 @@ class Cache
 	 */
 	public static function get ($key)
 	{
-		if (static::exists(md5($key)))
+		if (static::has($key))
 		{
 			return static::$cache[md5($key)];
 		}
