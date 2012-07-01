@@ -184,6 +184,18 @@ class View
 	}
 
 	/**
+	 * Calls the render() method when the class is treated as string,
+	 * either via echo or string casting. Output will be passed to
+	 * the Response class, so echoing is safe.
+	 * 
+	 * @return void
+	 */
+	public function __toString ()
+	{
+		$this->render();
+	}
+
+	/**
 	 * Defines built-in template constants. These can be used directly,
 	 * without assigning.
 	 * 

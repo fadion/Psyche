@@ -20,14 +20,21 @@ class Form
 	 * 
 	 * @param string $request_type
 	 * @param string $action
+	 * @param array $parameters List of extra parameters
 	 * 
 	 * @return string
 	 */
 	public static function open ($request_type = 'post', $action = '', $parameters = null)
 	{
 		$parameters = static::fix_params($parameters);
-		
-		return '<form method="'.$request_type.'" enctype="multipart/form-data" action="'.$action.'" '.$parameters.'>';
+
+		$form  = '<form method="'.$request_type.'" enctype="multipart/form-data" action="'.$action.'" '.$parameters.'>';
+
+		/* Token should be automatically generated per user session */ 
+		$form .= '<input type="hidden" name="token" value="'.htmlspecialchars(config('token')).'">';
+
+		return $form;
+
 	}
 
 	/**
@@ -41,26 +48,66 @@ class Form
 	}
 
 	/**
-	 * Creates a submit button.
+	 * Opens a fieldset.
 	 * 
-	 * @param string $display Button label
-	 * @param srray $parameters List of extra parameters
+	 * @param array $parameters
 	 * 
 	 * @return string
 	 */
-	public static function button ($display = 'Submit', $parameters = null)
+	public static function fieldset ($parameters = null)
 	{
 		$parameters = static::fix_params($parameters);
 
-		return '<button type="submit" '.$parameters.'>'.$display.'</button>';
+		return '<fieldset '.$parameters.'>';
 	}
 
 	/**
-	 * Creates an type text input.
+	 * Closes a fieldset.
+	 * 
+	 * @return string
+	 */
+	public static function fieldset_close ()
+	{
+		return '</fieldset>';
+	}
+
+	/**
+	 * Creates a <legend>.
+	 * 
+	 * @param string $value Legend's label
+	 * @param array $parameters
+	 * 
+	 * @return string
+	 */
+	public static function legend ($value, $parameters = null)
+	{
+		$parameters = static::fix_params($parameters);
+
+		return '<legend '.$parameters.'>'.$value.'</legend>';
+	}
+
+	/**
+	 * Creates a type hidden input.
 	 * 
 	 * @param string $name Name of the input
 	 * @param string $value Value of the input
-	 * @param array $parameters List of extra parameters
+	 * @param array $parameters
+	 * 
+	 * @return string
+	 */
+	public static function hidden ($name, $value, $parameters = null)
+	{
+		$parameters = static::fix_params($parameters);
+
+		return '<input type="hidden" name="'.htmlspecialchars($name).'" id="control_'.htmlspecialchars($name).'" value="'.htmlspecialchars($value).'" '.$parameters.'>';
+	}
+
+	/**
+	 * Creates a type text input.
+	 * 
+	 * @param string $name
+	 * @param string $value
+	 * @param array $parameters
 	 * 
 	 * @return string
 	 */
@@ -362,6 +409,36 @@ class Form
 		$parameters = static::fix_params($parameters);
 
 		return '<input type="file" name="'.htmlspecialchars($name).'" id="control_'.htmlspecialchars($name).'" '.$parameters.'>';
+	}
+
+	/**
+	 * Creates a submit button.
+	 * 
+	 * @param string $display Button label
+	 * @param srray $parameters List of extra parameters
+	 * 
+	 * @return string
+	 */
+	public static function button ($display = 'Submit', $parameters = null)
+	{
+		$parameters = static::fix_params($parameters);
+
+		return '<button type="submit" '.$parameters.'>'.$display.'</button>';
+	}
+
+	/**
+	 * Creates a reset button.
+	 * 
+	 * @param string $display Button label
+	 * @param srray $parameters List of extra parameters
+	 * 
+	 * @return string
+	 */
+	public static function reset ($display = 'Reset', $parameters = null)
+	{
+		$parameters = static::fix_params($parameters);
+
+		return '<button type="reset" '.$parameters.'>'.$display.'</button>';
 	}
 
 	/**
