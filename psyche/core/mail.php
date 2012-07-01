@@ -40,29 +40,23 @@ class Mail {
 	{
 		if (is_null(static::$to)) 
 		{
-			throw new Exception("Must have at least one recipient.");
+			trigger_error('No recipient specified.', E_USER_WARNING);
 		}
 		
 		if (is_null(static::$from)) 
 		{
-			throw new Exception("Must have one, and only one sender set.");
+			trigger_error('No sender specified.', E_USER_WARNING);
 		}
-		
-		if (is_null(static::$subject)) 
-		{
-			throw new Exception("Subject is empty.");
-		}
-		
+			
 		if (is_null(static::$message)) 		
 		{
-			throw new Exception("Message is empty.");
+			trigger_error('Message is empty.', E_USER_WARNING);
 		}
 		
 		static::headers();
 		$sent = mail(static::$to, static::$subject, static::$message, static::$headers);
 		if(!$sent) {
-			$error = "Server couldn't send the email.";
-			throw new Exception($error);
+			trigger_error('Server cannot send the email.', E_USER_WARNING);
 		} else {
 			return true;
 		}
