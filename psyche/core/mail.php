@@ -258,21 +258,3 @@ class Mail {
 		}
 	}
 }
-			try {
-				// minimal requirements to be set
-			$email = Mail::from("My Website <eri.b.vl@gmail.com>")
-								->to("Baki banago@gmail.com, Joni jonidashi@gmail.com")
-								->subject("About stuff")
-								->message('Message')	
-								// options below are completely optional
-								->cc("Mr. Carlson manager@business.com")
-								->bcc("Mr. X mistery@mindmail.com")
-								->attachment('auth.php')
-								->send();
-			} catch( Exception $e ) {
-				echo $e->getMessage();
-				exit(0);
-			}
-
-echo 'Success.';	
-	
