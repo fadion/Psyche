@@ -19,7 +19,7 @@ class Db {
 	/**
 	 * @var object PDO Object
 	 */
-	public static $pdo;
+	protected static $pdo;
 
 	/**
 	 * @var array Template file cache
@@ -40,6 +40,16 @@ class Db {
 	 * @var string Return type: all|first
 	 */
 	protected static $type = 'all';
+
+	/**
+	 * Returns the database connection.
+	 * 
+	 * @return object
+	 */
+	public static function connection ()
+	{
+		return static::$pdo;
+	}
 
 	/**
 	 * Connects to the database via PDO using one of the defined templates.

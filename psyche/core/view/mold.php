@@ -2,7 +2,7 @@
 namespace Psyche\Core\View;
 
 /**
- * Molder Template Engine
+ * Mold Template Engine
  * 
  * A simple, efficient and easy to use pseudo-code parser that compiles templates
  * into native PHP code. In addition to variable echoing, conditionals and iterators,
@@ -12,12 +12,12 @@ namespace Psyche\Core\View;
  * Mold syntax. It isn't supposed to be called directly, but will be run by Psyche\Core\View
  * when mold template files (defaults to .mold.php) are found.
  *
- * @package Psyche\Core\View\Molder
+ * @package Psyche\Core\View\Mold
  * @author Fadion Dashi
  * @version 1.0
  * @since 1.0
  */
-class Molder
+class Mold
 {
 
 	/**
@@ -54,11 +54,11 @@ class Molder
 	 * @var array List of available parses. Each one will call a class method
 	 */
 	protected static $parsers = array(
-		'comments', 'use', 'partials', 'reserves', 'includes', 'echo', 'if', 'foreach', 'for', 'while', 'others', 'generics'
+		'comments', 'use', 'partials', 'reserves', 'includes', 'structures', 'echo', 'setters'
 	);
 
 	/**
-	 * Starts the Molder Engine.
+	 * Starts the Mold Engine.
 	 * 
 	 * @param string $file Template filename
 	 * 
@@ -73,7 +73,7 @@ class Molder
 
 		// Matches the {use 'file'} syntax to check for any defined inheritance.
 		// From the returned matches, the parent's name and path are set.
-		if (preg_match("|\{\s*use\s+'(.+?)'\s*\}|i", static::$contents, $matches))
+		if (preg_match("/\{\s*use\s+'(.+?)'\s*\}/i", static::$contents, $matches))
 		{
 			static::$use = $matches[1];
 			static::$parent = config('views path').$matches[1];
@@ -123,7 +123,7 @@ class Molder
 			return;
 		}
 
-		static::$contents = preg_replace("|\{\s*use\s+'".static::$use."'\s*\}\n*|i", file_get_contents(static::$parent), static::$contents);
+		static::$contents = preg_replace("/\{\s*use\s+'".static::$use."'\s*\}\n*/i", file_get_contents(static::$parent), static::$contents);
 	}
 
 	/**
@@ -139,7 +139,7 @@ class Molder
 			return;
 		}
 
-		preg_match_all("|\{\s*partial\s+'(.+?)'\s*\}\n*(.+?)\n*\{\s*/partial\s*\}\n*|is", static::$contents, $matches);
+		preg_match_all("/\{\s*partial\s+'(.+?)'\s*\}\n*(.+?)\n*\{\s*/partial\s*\}\n*/is", static::$contents, $matches);
 
 		$find = $matches[0];
 		$partials = $matches[1];
@@ -152,9 +152,9 @@ class Molder
 			{
 				// Each partial is confronted with a {reserve} of the same name. If it exists,
 				// the partial content will be insterted into the parent.
-				if (preg_match("|\{\s*reserve\s+'".$partial."'\s*\}|i", static::$contents, $matches))
+				if (preg_match("/\{\s*reserve\s+'".$partial."'\s*\}/i", static::$contents, $matches))
 				{
-					static::$contents = preg_replace("|\{\s*reserve\s+'".$partial."'\s*\}(\n*(.+?)\n*\{/reserve\})?|is", $inner[$i], static::$contents);
+					static::$contents = preg_replace("/\{\s*reserve\s+'".$partial."'\s*\}(\n*(.+?)\n*\{/reserve\})?/is", $inner[$i], static::$contents);
 					static::$contents = str_replace($find[$i], '', static::$contents);
 				}
 
@@ -171,7 +171,7 @@ class Molder
 	 */
 	protected static function parse_reserves ()
 	{
-		static::$contents = preg_replace("|\{\s*reserve\s+'(.+?)'\s*\}\n*(.+?)\n*\{/reserve\}|is", '$2', static::$contents);
+		static::$contents = preg_replace("/\{\s*reserve\s+'(.+?)'\s*\}\n*(.+?)\n*\{/reserve\}/is", '$2', static::$contents);
 	}
 
 	/**
@@ -181,53 +181,23 @@ class Molder
 	 */
 	protected static function parse_echo ()
 	{
-		static::$contents = preg_replace('|\{\{\s*(.+?)\s*\}\}|', "<?= $1; ?>", static::$contents);
+		static::$contents = preg_replace('/\{\{\s*(.+?)\s*\}\}/', "<?= $1; ?>", static::$contents);
 	}
 
 	/**
-	 * Parses {if}, {elseif}, {else} and {/if}.
+	 * Parses control structures: if, elseif, else, foreach, for and while.
+	 * Parses endings, break and continue too.
 	 * 
 	 * @return void
 	 */
-	protected static function parse_if ()
+	protected static function parse_structures ()
 	{
-		static::$contents = preg_replace('|\{\s*if\s+(.+?)\s*\}|i', "<?php if ($1): ?>", static::$contents);
-		static::$contents = preg_replace('|\{\s*elseif\s+(.+?)\s*\}|i', "<?php elseif ($1): ?>", static::$contents);
-		static::$contents = preg_replace('|\{\s*else\s*\}|i', "<?php else: ?>", static::$contents);
-		static::$contents = preg_replace("|\{\s*/if\s*\}|i", "<?php endif; ?>", static::$contents);
-	}
-
-	/**
-	 * Parses {foreach} and {/foreach}.
-	 * 
-	 * @return void
-	 */
-	protected static function parse_foreach ()
-	{
-		static::$contents = preg_replace('|\{\s*foreach\s+(.+?)\s*\}|i', "<?php foreach ($1): ?>", static::$contents);
-		static::$contents = preg_replace("|\{\s*/foreach\s*\}|i", "<?php endforeach; ?>", static::$contents);
-	}
-
-	/**
-	 * Parses {for} and {/for}.
-	 * 
-	 * @return void
-	 */
-	protected static function parse_for ()
-	{
-		static::$contents = preg_replace('|\{\s*for\s+(.+?)\s*\}|i', "<?php for ($1): ?>", static::$contents);
-		static::$contents = preg_replace("|\{\s*/for\s*\}|i", "<?php endfor; ?>", static::$contents);
-	}
-
-	/**
-	 * Parses {while} and {/while}.
-	 * 
-	 * @return void
-	 */
-	protected static function parse_while ()
-	{
-		static::$contents = preg_replace('|\{\s*while\s+(.+?)\s*\}|i', "<?php while ($1): ?>", static::$contents);
-		static::$contents = preg_replace("|\{\s*/while\s*\}|i", "<?php endfor; ?>", static::$contents);
+		static::$contents = preg_replace('/\{\s*((if|elseif|foreach|for|while)\s*(.+?))\s*\}/i', "<?php $2 ($3): ?>", static::$contents);
+		static::$contents = preg_replace('/\{\s*\/if\s*\}/i', "<?php endif; ?>", static::$contents);
+		static::$contents = preg_replace('/\{\s*\/foreach\s*\}/i', "<?php endforeach; ?>", static::$contents);
+		static::$contents = preg_replace('/\{\s*\/for\s*\}/i', "<?php endfor; ?>", static::$contents);
+		static::$contents = preg_replace('/\{\s*\/while\s*\}/i', "<?php endwhile; ?>", static::$contents);
+		static::$contents = preg_replace('/\{\s*(continue|break)\s*\}/i', "<?php $1; ?>", static::$contents);
 	}
 
 	/**
@@ -240,14 +210,17 @@ class Molder
 	 */
 	protected static function parse_includes ()
 	{
-		if (preg_match_all("|\{\s*include\s+'(.+?)'\s*\}|i", static::$contents, $matches))
+		if (preg_match_all("/\{\s*include\s+'(.+?)'\s*\}/i", static::$contents, $matches))
 		{
-			$find = $matches[0];
+			$finds = $matches[0];
 			$includes = $matches[1];
 
 			$i = 0;
+
+			// Every included file is read and put in it's position.
 			foreach ($includes as $include)
 			{
+				// Files without extension will have it added automatically.
 				if (pathinfo($include, PATHINFO_EXTENSION) == '')
 				{
 					$include .= config('mold extension');
@@ -257,7 +230,7 @@ class Molder
 
 				if (file_exists($file))
 				{
-					static::$contents = str_replace($find[$i], file_get_contents($file), static::$contents);
+					static::$contents = str_replace($finds[$i], file_get_contents($file), static::$contents);
 				}
 				$i++;
 			}
@@ -273,18 +246,7 @@ class Molder
 	 */
 	protected static function parse_comments ()
 	{
-		static::$contents = preg_replace('|\{\s*\*(.+?)\*\s*\}|', "<?php //$1; ?>", static::$contents);
-	}
-
-	/**
-	 * Parses some other, uncategorized control structures.
-	 * 
-	 * @return void
-	 */
-	protected static function parse_others ()
-	{
-		static::$contents = preg_replace('|\{\s*continue\s*\}|', "<?php continue; ?>", static::$contents);
-		static::$contents = preg_replace('|\{\s*beak\s*\}|', "<?php break; ?>", static::$contents);
+		static::$contents = preg_replace('/\{\s*\*(.+?)\*\s*\}/', "<?php //$1; ?>", static::$contents);
 	}
 
 	/**
@@ -295,9 +257,9 @@ class Molder
 	 * 
 	 * @return void
 	 */
-	protected static function parse_generics ()
+	protected static function parse_setters ()
 	{
-		static::$contents = preg_replace('|\{\s*\$(.+?)\s*\}|', "<?php $$1; ?>", static::$contents);
+		static::$contents = preg_replace('/\{\s*\$(.+?)\s*\}/', "<?php $$1; ?>", static::$contents);
 	}
 
 	/**

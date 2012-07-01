@@ -1,7 +1,7 @@
 <?php
 namespace Psyche\Core;
 use Psyche\Core\Response;
-use Psyche\Core\View\Molder;
+use Psyche\Core\View\Mold;
 
 /**
  * View Engine
@@ -21,7 +21,7 @@ class View
 	/**
 	 * @var array Keeps assigned template variables
 	 */
-	protected $vars;
+	public $vars;
 
 	/**
 	 * @var string Path of the opened template
@@ -87,10 +87,10 @@ class View
 
 		$this->file = $file;
 
-		// Mold files are passed to Molder for compilation.
+		// Mold files are passed to Mold Engine for compilation.
 		if (stripos($file, config('mold extension')) !== false)
 		{
-			$this->file = Molder::run($file);
+			$this->file = Mold::run($file);
 		}
 	}
 
@@ -192,6 +192,7 @@ class View
 	protected function tpl_constants ()
 	{
 		$this->tpl_constants['_path'] = config('path');
+		$this->tpl_constants['_view'] = config('views path');
 		$this->tpl_constants['_locale'] = config('base locale');
 	}
 

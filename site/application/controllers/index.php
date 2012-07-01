@@ -8,7 +8,9 @@ class Index
 
 	public function action_index ()
 	{
-		
+		$view = Core\View::open('content');
+		$view->title = 'Master Page';
+		$view->render();
 	}
 
 }

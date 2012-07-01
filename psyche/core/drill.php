@@ -433,7 +433,7 @@ class Drill extends \Psyche\Core\Drill\Query
 	 */
 	protected static function class_name ()
 	{
-		return '\Psyche\Models\\'.static::table();
+		return '\\Psyche\\Models\\'.static::table();
 	}
 
 	/**
