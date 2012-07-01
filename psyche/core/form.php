@@ -29,8 +29,6 @@ class Form
 		$parameters = static::fix_params($parameters);
 
 		$form  = '<form method="'.$request_type.'" enctype="multipart/form-data" action="'.$action.'" '.$parameters.'>';
-
-		/* Token should be automatically generated per user session */ 
 		$form .= '<input type="hidden" name="token" value="'.htmlspecialchars(config('token')).'">';
 
 		return $form;

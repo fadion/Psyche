@@ -1361,12 +1361,7 @@ class Query
 	 */
 	protected function quote ($value)
 	{
-		if (!is_numeric($value))
-		{
-			$value = DB::quote($value);
-		}
-
-		return $value;
+		return DB::quote($value);
 	}
 
 	/**
