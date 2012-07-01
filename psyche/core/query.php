@@ -34,8 +34,9 @@ class Query
 		'right_join'  	=> array(),
 		'on'			=> array(),
 		'using'			=> array(),
-		'where'		 	=> '',
+		'where'		 	=> array(),
 		'group'			=> '',
+		'having'		=> array(),
 		'order'		  	=> '',
 		'limit'		  	=> ''
 	);
@@ -117,6 +118,29 @@ class Query
 	public static function delete ($fields)
 	{
 		return new static($fields, 'delete');
+	}
+
+	/**
+	 * Makes transactions. If any of the queries fails,
+	 * it will rollback changes.
+	 */
+	public static function transaction ($callback)
+	{
+		try
+		{
+			DB::connection()->beginTransaction();
+
+			call_user_func($callback, __CLASS__);
+
+			DB::connection()->commit();
+
+			return true;
+		}
+		catch(\PDOException $e)
+		{
+			DB::connection()->rollBack();
+			return false;
+		}
 	}
 
 	/**
@@ -254,6 +278,18 @@ class Query
 	protected function make_delete ($table)
 	{
 		$this->query['delete'] = 'DELETE FROM '.$this->tick($table);
+	}
+
+	/**
+	 * Adds DISTINCT to the SELECT clause.
+	 * 
+	 * @return object
+	 */
+	public function distinct ()
+	{
+		$this->query['distinct'] = 'distinct';
+
+		return $this;
 	}
 
 	/**
@@ -598,14 +634,20 @@ class Query
 	}
 
 	/**
-	 * Adds an OR modifier to the WHERE clause. The previous
-	 * clause with the next will be evaluated as a boolean OR.
+	 * Adds an OR modifier to the WHERE or HAVING clause.
 	 * 
 	 * @return object
 	 */
 	public function _or ()
 	{
-		$this->query['where'][] = 'OR';
+		if (count($this->query['having']))
+		{
+			$this->query['having'][] = 'OR';
+		}
+		else
+		{
+			$this->query['where'][] = 'OR';
+		}
 
 		return $this;
 	}
@@ -810,13 +852,52 @@ class Query
 	}
 
 	/**
-	 * Adds DISTINCT to the SELECT clause.
+	 * Makes a HAVING clause. It works almost like WHERE, but
+	 * a bit simpler as there is only comparison, boolean
+	 * and boolean groups.
+	 */
+	public function having ($having)
+	{
+		// Closures can be passed as a single parameter
+		// for boolean groups. This comes as an alternative
+		// to calling having_group().
+		if (is_callable($having))
+		{
+			return $this->having_group($having);
+		}
+
+		if(strpos($having, '=') !== false or strpos($having, '>') !== false or strpos($having, '<') !== false)
+		{
+			list($field, $operand) = explode(' ', $having);
+			list($field, $table) = $this->fix_dot($field);
+
+			$value = substr($having, strpos($having, $operand) + strlen($operand));
+
+			$having = $table.$this->tick($field).$operand.$this->quote(trim($value, '\'" '));
+		}
+
+		$this->query['having'][] = $having;
+
+		return $this;
+	}
+
+	/**
+	 * Makes boolean having groups using closures. Basically,
+	 * it allows unlimited nesting of having clauses.
+	 * 
+	 * @param closure $callback
 	 * 
 	 * @return object
 	 */
-	public function distinct ()
+	public function having_group ($callback)
 	{
-		$this->query['distinct'] = 'distinct';
+		$this->query['having'][] = '(';
+
+		// $this is passed as an argument so the closure can
+		// access the Query object.
+		call_user_func($callback, $this);
+
+		$this->query['having'][] = ')';
 
 		return $this;
 	}
@@ -1140,7 +1221,7 @@ class Query
 					}
 					break;
 				case 'where':
-					if (is_array($val))
+					if (count($val))
 					{
 						$i = 0;
 
@@ -1185,6 +1266,46 @@ class Query
 					if ($val != '')
 					{
 						$sql .= " GROUP BY $val";
+					}
+					break;
+				case 'having':
+					if (count($val))
+					{
+						$i = 0;
+
+						foreach ($val as $having)
+						{
+							$operand = '';
+
+							// An "OR" is just a modifier, so it's not considered.
+							if ($having != 'OR')
+							{
+								// If a previous condition exists, an operand (AND or OR)
+								// needs to be specified.
+								if (isset($val[$i-1]))
+								{
+									// The previous condition should not be a '(' (a group opening)
+									// and the actual condition should not be a ')' (a group closing).
+									if ($val[$i-1] != '(' and $having != ')')
+									{
+										// The default operand is AND.
+										// If the previous condition is "OR", the operand
+										// will become OR.
+										$operand = ' AND ';
+										if ($val[$i-1] == 'OR')
+										{
+											$operand = ' OR ';
+										}
+									}
+								}
+
+								$the_having .= $operand.$having;
+							}
+
+							$i++;
+						}
+
+						$sql .= " HAVING $the_having";
 					}
 					break;
 				case 'order':
@@ -1240,7 +1361,12 @@ class Query
 	 */
 	protected function quote ($value)
 	{
-		return DB::quote($value);
+		if (!is_numeric($value))
+		{
+			$value = DB::quote($value);
+		}
+
+		return $value;
 	}
 
 	/**
