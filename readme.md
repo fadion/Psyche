@@ -15,8 +15,8 @@ First, head over to the Issues tab. Check for any open or closed issues relevant
 The best way to get your work merged into the project:
 
 1. [Fork](http://help.github.com/fork-a-repo/) the project.
-2. Clone your fork ( `git clone git@github.com:<username>/Psyche.css.git` ).
-3. Add an `upstream` remote (`git remote add upstream git://github.com/fadion/Psyche.css.git`).
+2. Clone your fork ( `git clone git@github.com:<username>/Psyche.git` ).
+3. Add an `upstream` remote (`git remote add upstream git://github.com/fadion/Psyche.git`).
 4. Get the latest changes from upstream (`git pull upstream master`).
 5. Create a new topic branch to contain your feature, change, or fix ( `git checkout -b topic-name` ).
 6. Make sure that your changes adhere to the current coding conventions used throughout the project - indentation, accurate comments, etc.
