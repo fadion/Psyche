@@ -1,12 +1,13 @@
 <?php
 namespace Psyche\Core;
 
+
 /**
  * Authentication Class
  * 
  * Secure login/logout functionality 
  *
- * @package    Psyche\Core\Cookie
+ * @package    Psyche\Core\Auth
  * @author     Baki Goxhaj 
  * @since		1.0
  * @since		1.0
@@ -18,27 +19,30 @@ class Auth {
 	* @var Key - the first of two salts we will use in the class.
 	*/
 	private static $_key;
+	private static $_table;
 	
 	public function __construct() 
 	{
 		static::$_key = config('salt');	
+		static::$_table = config('table');	
 	}
 
+	/**
+	 * Generates a Random String
+	 *
+	 * The method makes use of the String class.
+	 * @return string
+	 */
 	private function random_string( $length = 50 )
 	{
 		return Core\String::random('mix', 40);
-		/*
-		$chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-		$str = '';
-		
-		for( $i = 0; $i < $length; $i++ ) {
-			$str .= $chars[mt_rand( 0 , strlen( $chars ) -1 )];
-		}
-		
-		return $str;
-		*/
 	}
 	
+	/**
+	 * Generates a keyed hash value using the HMAC method
+	 *
+	 * @return string
+	 */
 	private function generate_hash( $data ) 
 	{
 		return hash_hmac( 'sha512', $data, static::$_key ); 
@@ -49,9 +53,12 @@ class Auth {
 		/**
 		 * Select user raw from database based on username.
 		 */
-			$result = Db::prepared('SELECT * FROM users WHERE username = :username', array(':username' => $username ) );
+		echo '<pre>'; print_r( $_table );
+		
+		$username = Query::select()->from(static::$_table)->where('email = ' . $username)->first();
 
-		if( $result ) {		
+		
+		if( $username ) {		
 			
 			//Hash Password		
 			$hashword = $result['salt'] . $password;
