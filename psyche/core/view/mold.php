@@ -73,7 +73,7 @@ class Mold
 
 		// Matches the {use 'file'} syntax to check for any defined inheritance.
 		// From the returned matches, the parent's name and path are set.
-		if (preg_match("/\{\s*use\s+'(.+?)'\s*\}/i", static::$contents, $matches))
+		if (preg_match("|\{\s*use\s+'(.+?)'\s*\}|i", static::$contents, $matches))
 		{
 			static::$use = $matches[1];
 			static::$parent = config('views path').$matches[1];
@@ -123,7 +123,7 @@ class Mold
 			return;
 		}
 
-		static::$contents = preg_replace("/\{\s*use\s+'".static::$use."'\s*\}\n*/i", file_get_contents(static::$parent), static::$contents);
+		static::$contents = preg_replace("|\{\s*use\s+'".static::$use."'\s*\}\n*|i", file_get_contents(static::$parent), static::$contents);
 	}
 
 	/**
@@ -139,7 +139,7 @@ class Mold
 			return;
 		}
 
-		preg_match_all("/\{\s*partial\s+'(.+?)'\s*\}\n*(.+?)\n*\{\s*/partial\s*\}\n*/is", static::$contents, $matches);
+		preg_match_all("|\{\s*partial\s+'(.+?)'\s*\}\n*(.+?)\n*\{\s*/partial\s*\}\n*|is", static::$contents, $matches);
 
 		$find = $matches[0];
 		$partials = $matches[1];
@@ -152,9 +152,9 @@ class Mold
 			{
 				// Each partial is confronted with a {reserve} of the same name. If it exists,
 				// the partial content will be insterted into the parent.
-				if (preg_match("/\{\s*reserve\s+'".$partial."'\s*\}/i", static::$contents, $matches))
+				if (preg_match("|\{\s*reserve\s+'".$partial."'\s*\}|i", static::$contents, $matches))
 				{
-					static::$contents = preg_replace("/\{\s*reserve\s+'".$partial."'\s*\}(\n*(.+?)\n*\{/reserve\})?/is", $inner[$i], static::$contents);
+					static::$contents = preg_replace("|\{\s*reserve\s+'".$partial."'\s*\}(\n*(.+?)\n*\{/reserve\})?|is", $inner[$i], static::$contents);
 					static::$contents = str_replace($find[$i], '', static::$contents);
 				}
 
@@ -171,7 +171,7 @@ class Mold
 	 */
 	protected static function parse_reserves ()
 	{
-		static::$contents = preg_replace("/\{\s*reserve\s+'(.+?)'\s*\}\n*(.+?)\n*\{/reserve\}/is", '$2', static::$contents);
+		static::$contents = preg_replace("|\{\s*reserve\s+'(.+?)'\s*\}\n*(.+?)\n*\{/reserve\}|is", '$2', static::$contents);
 	}
 
 	/**
@@ -181,7 +181,7 @@ class Mold
 	 */
 	protected static function parse_echo ()
 	{
-		static::$contents = preg_replace('/\{\{\s*(.+?)\s*\}\}/', "<?= $1; ?>", static::$contents);
+		static::$contents = preg_replace('|\{\{\s*(.+?)\s*\}\}|', "<?= $1; ?>", static::$contents);
 	}
 
 	/**
@@ -193,10 +193,11 @@ class Mold
 	protected static function parse_structures ()
 	{
 		static::$contents = preg_replace('/\{\s*((if|elseif|foreach|for|while)\s*(.+?))\s*\}/i', "<?php $2 ($3): ?>", static::$contents);
-		static::$contents = preg_replace('/\{\s*\/if\s*\}/i', "<?php endif; ?>", static::$contents);
-		static::$contents = preg_replace('/\{\s*\/foreach\s*\}/i', "<?php endforeach; ?>", static::$contents);
-		static::$contents = preg_replace('/\{\s*\/for\s*\}/i', "<?php endfor; ?>", static::$contents);
-		static::$contents = preg_replace('/\{\s*\/while\s*\}/i', "<?php endwhile; ?>", static::$contents);
+		static::$contents = preg_replace('|\{\s*else\s*\}|i', "<?php else: ?>", static::$contents);
+		static::$contents = preg_replace('|\{\s*\/if\s*\}|i', "<?php endif; ?>", static::$contents);
+		static::$contents = preg_replace('|\{\s*\/foreach\s*\}|i', "<?php endforeach; ?>", static::$contents);
+		static::$contents = preg_replace('|\{\s*\/for\s*\}|i', "<?php endfor; ?>", static::$contents);
+		static::$contents = preg_replace('|\{\s*\/while\s*\}|i', "<?php endwhile; ?>", static::$contents);
 		static::$contents = preg_replace('/\{\s*(continue|break)\s*\}/i', "<?php $1; ?>", static::$contents);
 	}
 
@@ -210,7 +211,7 @@ class Mold
 	 */
 	protected static function parse_includes ()
 	{
-		if (preg_match_all("/\{\s*include\s+'(.+?)'\s*\}/i", static::$contents, $matches))
+		if (preg_match_all("|\{\s*include\s+'(.+?)'\s*\}|i", static::$contents, $matches))
 		{
 			$finds = $matches[0];
 			$includes = $matches[1];
@@ -246,20 +247,20 @@ class Mold
 	 */
 	protected static function parse_comments ()
 	{
-		static::$contents = preg_replace('/\{\s*\*(.+?)\*\s*\}/', "<?php //$1; ?>", static::$contents);
+		static::$contents = preg_replace('|\{\s*\*(.+?)\*\s*\}|', "<?php //$1; ?>", static::$contents);
 	}
 
 	/**
-	 * Parses generic variables with the syntax {$var}, {$var = 'value'}, etc. It's here mostly
+	 * Parses generic variables with the syntax {$var}, {$var++}, {$var = 'value'}, etc. It's here mostly
 	 * to provide an option to set variables in the view file, something that should be avoided
-	 * and done in the controller (where the logic resides). However, this framework doesn't
-	 * restrict anyone's coding style.
+	 * and done in the controller (where the logic resides). However, it can be useful on those cases
+	 * when a where() needs to be used and the variable is incremented/decremented dynamically in the view.
 	 * 
 	 * @return void
 	 */
 	protected static function parse_setters ()
 	{
-		static::$contents = preg_replace('/\{\s*\$(.+?)\s*\}/', "<?php $$1; ?>", static::$contents);
+		static::$contents = preg_replace('|\{\s*\$(.+?)\s*\}|', "<?php $$1; ?>", static::$contents);
 	}
 
 	/**
