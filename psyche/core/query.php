@@ -369,7 +369,18 @@ class Query
 			$field = $this->tick($field);
 		}
 
-		$this->query['select'] .= ', '.strtoupper($type).'('.$table.$field.')'.$as;
+		$aggregate = strtoupper($type).'('.$table.$field.')'.$as;
+
+		// If the select was started with a '*', there's not point
+		// to add an aggregate function after it, so it is removed.
+		if ($this->query['select'] == '*')
+		{
+			$this->query['select'] = $aggregate;
+		}
+		else
+		{
+			$this->query['select'] .= ', '.$aggregate;
+		}
 
 		return $this;
 	}
@@ -1388,17 +1399,10 @@ class Query
 	{
 		$as = '';
 
-		if (strpos($field, 'AS') !== false)
+		if (preg_match('|(.+) AS (.+)|i', $field, $matches) or preg_match('|(.+)\s+(.+)|', $field, $matches))
 		{
-			list($field, $as) = explode(' AS ', $field);
-		}
-		elseif (strpos($field, 'as') !== false)
-		{
-			list($field, $as) = explode(' as ', $field);
-		}
-		elseif (strpos($field, ' ') !== false)
-		{
-			list($field, $as) = explode(' ', $field);
+			$field = trim($matches[1]);
+			$as = trim($matches[2]);
 		}
 
 		if ($as !== '')
