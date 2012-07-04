@@ -36,6 +36,11 @@ class Locale
 	protected static $language = null;
 
 	/**
+	 * @var string The temporary active language for inline calls.
+	 */
+	protected static $temp_language = null;
+
+	/**
 	 * @var string The text that will be outputted
 	 */
 	protected $text;
@@ -149,8 +154,14 @@ class Locale
 		$text = $args[0];
 
 		// When the language is set, read it's file. Otherwise, the base
-		// locale will be read.
-		if (isset(static::$language))
+		// locale will be read. Temporary language is maintained for a single
+		// call, as it's used only via the from() method.
+		if (isset(static::$temp_language))
+		{
+			$file = 'locale/'.static::$temp_language.'/'.$this->file.'.php';
+			static::$temp_language = null;
+		}
+		elseif (isset(static::$language))
 		{
 			$file = 'locale/'.static::$language.'/'.$this->file.'.php';
 		}
@@ -227,7 +238,7 @@ class Locale
 	{
 		if (trim($language) != '')
 		{
-			static::$language = $language;
+			static::$temp_language = $language;
 
 			// Runs the localize() again with the active language
 			// changed.
