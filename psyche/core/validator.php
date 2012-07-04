@@ -93,7 +93,7 @@ class Validator
 	 * @param array $inputs List of inputs to be validated
 	 * @param array $rules List of rules for each input
 	 * 
-	 * @return object 
+	 * @return Validator 
 	 */
 	public static function run ($inputs, $rules)
 	{

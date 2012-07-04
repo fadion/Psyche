@@ -41,7 +41,7 @@ class Cache
 	 * 
 	 * @param string $key
 	 * 
-	 * @return object
+	 * @return void|Query
 	 */
 	public static function get ($key)
 	{

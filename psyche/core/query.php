@@ -48,8 +48,6 @@ class Query
 	 * @param string|array $fields
 	 * @param string $type
 	 * @param string|array $parameters
-	 * 
-	 * @return object
 	 */
 	public function __construct ($fields, $type, $parameters = null)
 	{
@@ -75,7 +73,7 @@ class Query
 	 * 
 	 * @param string|array $fields
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public static function select ($fields = '*')
 	{
@@ -88,7 +86,7 @@ class Query
 	 * @param string $table
 	 * @param string|array $fields
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public static function insert ($table, $fields)
 	{
@@ -101,7 +99,7 @@ class Query
 	 * @param string $table
 	 * @param string|array $fields
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public static function update ($table, $fields)
 	{
@@ -113,7 +111,7 @@ class Query
 	 * 
 	 * @param string|array $fields
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public static function delete ($fields)
 	{
@@ -283,7 +281,7 @@ class Query
 	/**
 	 * Adds DISTINCT to the SELECT clause.
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function distinct ()
 	{
@@ -297,7 +295,7 @@ class Query
 	 * 
 	 * @param string $field
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function count ($field = '*')
 	{
@@ -309,7 +307,7 @@ class Query
 	 * 
 	 * @param string $field
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function sum ($field)
 	{
@@ -321,7 +319,7 @@ class Query
 	 * 
 	 * @param string $field
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function avg ($field)
 	{
@@ -333,7 +331,7 @@ class Query
 	 * 
 	 * @param string $field
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function max ($field)
 	{
@@ -345,7 +343,7 @@ class Query
 	 * 
 	 * @param string $field
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function min ($field)
 	{
@@ -358,6 +356,8 @@ class Query
 	 * 
 	 * @param string $field
 	 * @param string $type Type of aggregate function
+	 * 
+	 * @return Query
 	 */
 	protected function make_aggregate ($field, $type)
 	{
@@ -390,7 +390,7 @@ class Query
 	 * 
 	 * @param string|array $table
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function from ($table)
 	{
@@ -428,9 +428,9 @@ class Query
 	 * for automating query escaping and it supports enough keywords
 	 * for any practical application.
 	 * 
-	 * @param string $where The WHERE clause
+	 * @param string|closure $where The WHERE clause
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function where ($where)
 	{
@@ -515,7 +515,7 @@ class Query
 	 * Magic method __call(). Allows to construct where clauses via
 	 * method calls. Ex: where_id_or_id(10, 15).
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function __call ($method, $arguments)
 	{
@@ -567,7 +567,7 @@ class Query
 	 * 
 	 * @param closure $callback
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function where_group ($callback)
 	{
@@ -589,7 +589,7 @@ class Query
 	 * @param string $field
 	 * @param string $subquery
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function subquery ($field, $subquery = null)
 	{
@@ -647,7 +647,7 @@ class Query
 	/**
 	 * Adds an OR modifier to the WHERE or HAVING clause.
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function _or ()
 	{
@@ -668,7 +668,7 @@ class Query
 	 * does nothing, as AND is the default modifier, but it's here
 	 * just for readibility. It can be ommited.
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function _and ()
 	{
@@ -681,7 +681,7 @@ class Query
 	 * @param string $field
 	 * @param string $like
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function like ($field, $like)
 	{
@@ -696,7 +696,7 @@ class Query
 	 * @param string $field
 	 * @param string $like
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function not_like ($field, $like)
 	{
@@ -709,7 +709,7 @@ class Query
 	 * @param string $field
 	 * @param string $value
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function starts ($field, $value)
 	{
@@ -722,7 +722,7 @@ class Query
 	 * @param string $field
 	 * @param string $value
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function ends ($field, $value)
 	{
@@ -735,7 +735,7 @@ class Query
 	 * @param string $field
 	 * @param string $value
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function has ($field, $value)
 	{
@@ -747,7 +747,7 @@ class Query
 	 * 
 	 * @param int $id
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function id ($id)
 	{
@@ -760,7 +760,7 @@ class Query
 	 * 
 	 * @param int|string $what
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function find ($what)
 	{
@@ -779,7 +779,7 @@ class Query
 	 * 
 	 * @param string $field
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function is_empty ($field)
 	{
@@ -791,7 +791,7 @@ class Query
 	 * 
 	 * @param string $field
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function not_empty ($field)
 	{
@@ -803,7 +803,7 @@ class Query
 	 * 
 	 * @param string $field
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function is_null ($field)
 	{
@@ -815,7 +815,7 @@ class Query
 	 * 
 	 * @param string $field
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function not_null ($field)
 	{
@@ -828,7 +828,7 @@ class Query
 	 * @param string $field
 	 * @param array $in
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function in ($field, $in)
 	{
@@ -841,7 +841,7 @@ class Query
 	 * @param string $field
 	 * @param array $in
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function not_in ($field, $in)
 	{
@@ -855,7 +855,7 @@ class Query
 	 * @param int $from
 	 * @param int $to
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function between ($field, $from, $to)
 	{
@@ -866,6 +866,10 @@ class Query
 	 * Makes a HAVING clause. It works almost like WHERE, but
 	 * a bit simpler as there is only comparison, boolean
 	 * and boolean groups.
+	 * 
+	 * @param string|closure $having
+	 * 
+	 * @return Query
 	 */
 	public function having ($having)
 	{
@@ -898,7 +902,7 @@ class Query
 	 * 
 	 * @param closure $callback
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function having_group ($callback)
 	{
@@ -924,7 +928,7 @@ class Query
 	 * @param string|array $match
 	 * @param string $against
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function match ($match, $against)
 	{
@@ -953,7 +957,7 @@ class Query
 	 * 
 	 * @param string|array $group
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function group ($group)
 	{
@@ -985,7 +989,7 @@ class Query
 	 * 
 	 * @param string $field
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function asc ($field)
 	{
@@ -997,7 +1001,7 @@ class Query
 	 * 
 	 * @param string $field
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function desc ($field)
 	{
@@ -1010,7 +1014,7 @@ class Query
 	 * @param string $field
 	 * @param string $type Order type: ASC or DESC
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function order ($field, $type)
 	{
@@ -1051,7 +1055,7 @@ class Query
 	 * @param int $start
 	 * @param int $offset
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function limit ($start, $offset = '')
 	{
@@ -1072,7 +1076,7 @@ class Query
 	 * 
 	 * @param string $table
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function join ($table)
 	{
@@ -1084,7 +1088,7 @@ class Query
 	 * 
 	 * @param string $table
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function left_join ($table)
 	{
@@ -1096,7 +1100,7 @@ class Query
 	 * 
 	 * @param string $table
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function right_join ($table)
 	{
@@ -1109,7 +1113,7 @@ class Query
 	 * @param string $table
 	 * @param string $type Join type: join, left_join, right_join, outer_join
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	protected function make_join ($table, $type)
 	{
@@ -1125,7 +1129,7 @@ class Query
 	 * 
 	 * @param string $table
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function on ($clause)
 	{
@@ -1144,7 +1148,7 @@ class Query
 	 * 
 	 * @param string $table
 	 * 
-	 * @return object
+	 * @return Query
 	 */
 	public function using ($clause)
 	{

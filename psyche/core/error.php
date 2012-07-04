@@ -27,7 +27,7 @@ class Error
 	/**
 	 * Factory static method.
 	 * 
-	 * @return object
+	 * @return Error
 	 */
 	public static function start ()
 	{

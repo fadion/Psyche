@@ -100,7 +100,7 @@ class View
 	 * @param string $file Template filename
 	 * @param array $vars Template variables to assign
 	 * 
-	 * @return object
+	 * @return View
 	 */
 	public static function open ($file, $vars = null)
 	{
@@ -124,7 +124,7 @@ class View
 	 * Assings template variables. Parameters are dynamic and can be
 	 * either a single pair of name and value, or an associative array.
 	 * 
-	 * @return object
+	 * @return View
 	 */
 	public function set ()
 	{

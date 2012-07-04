@@ -94,7 +94,7 @@ class Drill
 	 * @param string $name
 	 * @param string $value
 	 * 
-	 * @return object
+	 * @return Drill
 	 */
 	public function set ($name, $value)
 	{
@@ -126,8 +126,6 @@ class Drill
 	 * 
 	 * @param string $name
 	 * @param string $value
-	 * 
-	 * @return object
 	 */
 	public function __set ($name, $value)
 	{
@@ -279,6 +277,11 @@ class Drill
 	 * of generating database objects, but it
 	 * doesn't offer any of the flexibilites of using
 	 * Model classes.
+	 * 
+	 * @param string $table
+	 * @param int $id
+	 * 
+	 * @return Drill
 	 */
 	public static function create ($table, $id = null)
 	{
@@ -440,6 +443,8 @@ class Drill
 	 * Makes the table name. The model can override the name
 	 * via a static property in it's class definition. Otherwise
 	 * the name is computed automatically.
+	 * 
+	 * @return string
 	 */
 	protected static function table ()
 	{

@@ -35,7 +35,7 @@ class Autoload
 	/**
 	 * Factory static method.
 	 * 
-	 * @return object
+	 * @return Autoload
 	 */
 	public static function start ()
 	{

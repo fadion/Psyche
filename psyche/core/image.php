@@ -60,7 +60,7 @@ class Image
 	 * 
 	 * @param string $file Path to the image file
 	 * 
-	 * @return object
+	 * @return Image
 	 */
 	public static function open ($file)
 	{
@@ -75,7 +75,7 @@ class Image
 	 * @param string $height
 	 * @param string $ratio Can be: 'auto', 'width' or 'height'
 	 * 
-	 * @return object
+	 * @return Image
 	 */
 	public function resize ($width, $height = null, $ratio = 'auto')
 	{
@@ -141,7 +141,7 @@ class Image
 	 * @param int $x X-coordinate of the crop
 	 * @param int $y Y-coordinate of the crop
 	 * 
-	 * @return object
+	 * @return Image
 	 */
 	public function crop ($width, $height, $x = 0, $y = 0)
 	{
@@ -165,7 +165,7 @@ class Image
 	 * 
 	 * @param float $angle Angle of rotation
 	 * 
-	 * @return object
+	 * @return Image
 	 */
 	public function rotate ($angle)
 	{
@@ -185,7 +185,7 @@ class Image
 	 * @param string|array $position Position of the watermak
 	 * @param int $opacity Transparency of the watermak
 	 * 
-	 * @return object
+	 * @return Image
 	 */
 	public function watermark ($file, $position = null, $opacity = 100)
 	{
@@ -273,7 +273,7 @@ class Image
 	 * 
 	 * @param string $file Path to the image file
 	 * 
-	 * @return resource
+	 * @return GD Resource
 	 */
 	protected function create ($file)
 	{
