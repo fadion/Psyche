@@ -4,7 +4,7 @@ return array (
 	// Default and rollback locales
 	// The rollback will be used when a key is not found
 	'base locale' => 'en',
-	'rollback locale' => 'en',
+	'rollback locale' => 'sq',
 	
 	// Active/Deactive debugging features
 	// Change to 0 for production sites

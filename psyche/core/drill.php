@@ -1,8 +1,8 @@
 <?php
 namespace Psyche\Core;
-use Psyche\Core\Query;
-use Psyche\Core\DB;
-use Psyche\Core\Drill\Cache;
+use Psyche\Core\DB,
+	Psyche\Core\Drill\Cache,
+	Psyche\Core\Drill\Validator;
 
 /**
  * Drill ORM
@@ -18,7 +18,7 @@ use Psyche\Core\Drill\Cache;
  * @version 1.0
  * @since 1.0
  */
-class Drill extends \Psyche\Core\Drill\Query
+class Drill
 {
 
 	/**

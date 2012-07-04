@@ -1,7 +1,7 @@
 <?php
 namespace Psyche\Core;
-use Psyche\Core\Response;
-use Psyche\Core\View\Mold;
+use Psyche\Core\Response,
+	Psyche\Core\View\Mold;
 
 /**
  * View Engine

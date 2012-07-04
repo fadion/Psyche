@@ -9,6 +9,7 @@ return array (
 	'String'  => 'Psyche\Core\String',
 	'Number'  => 'Psyche\Core\Number',
 	'Uri'     => 'Psyche\Core\Uri',
-	'Partial' => 'Psyche\Core\View\Partial'
+	'Partial' => 'Psyche\Core\View\Partial',
+	'Date'	  => 'Psyche\Core\Data'
 
 );
