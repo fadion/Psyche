@@ -12,32 +12,7 @@ require_once 'core/autoload.php';
 Psyche\Core\Autoload::start();
 Psyche\Core\Error::start();
 
-/**
- * A global helper to print localized strings.
- * 
- * @return string
- */
-function __ ()
-{
-	return call_user_func_array('Psyche\Core\Localizer::get', func_get_args());
-}
-
-/**
- * A global helper to get configuration keys.
- * 
- * @return string
- */
-function config ($key, $value = null)
-{
-	if (is_null($value))
-	{
-		return Psyche\Core\Config::get($key);
-	}
-	else
-	{
-		return Psyche\Core\Config::set($key, $value);
-	}
-}
+require_once 'functions.php';
 
 // Set error levels depending on the DEBUG option.
 if (config('debug') == 1)
