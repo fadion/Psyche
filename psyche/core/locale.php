@@ -178,7 +178,7 @@ class Locale
 		{
 			if (file_exists($file))
 			{
-				static::$cache[$file] = include $file;
+				static::$cache[$file] = include_once $file;
 			}
 		}
 
@@ -188,7 +188,7 @@ class Locale
 		{
 			if (file_exists($rollback))
 			{
-				static::$rollback[$file] = include $rollback;
+				static::$rollback[$file] = include_once $rollback;
 			}
 		}
 
