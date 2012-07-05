@@ -42,6 +42,11 @@ class Query
 	);
 
 	/**
+	 * @var bool Activates temporarly for raw data.
+	 */
+	protected static $raw = false;
+
+	/**
 	 * Constructor. Calls the appropriate method depending on
 	 * the type (select, insert, update and delete).
 	 * 
@@ -139,6 +144,19 @@ class Query
 			DB::connection()->rollBack();
 			return false;
 		}
+	}
+
+	/**
+	 * Adds raw data to a clause. No ticking or escaping
+	 * will occurr.
+	 * 
+	 * @param string $raw
+	 * @return string
+	 */
+	public static function raw ($raw)
+	{
+		static::$raw = true;
+		return $raw;
 	}
 
 	/**
@@ -442,6 +460,15 @@ class Query
 			return $this->where_group($where);
 		}
 
+		// If it's a raw input, stop any further proccessing
+		// and reset the $raw var.
+		if (static::$raw)
+		{
+			static::$raw = 0;
+			$this->query['where'][] = $where;
+			return $this;
+		}
+
 		// Check if it's a simple comparison (a = 10, a > 10, etc).
 		if(strpos($where, '=') !== false or strpos($where, '>') !== false or strpos($where, '<') !== false)
 		{
@@ -532,7 +559,7 @@ class Query
 			// The "where_" part is removed and fields are
 			// retrieved by splitting the string by probable operands.
 			$fields = str_replace('where_', '', $method);
-			$fields = preg_split('/(_and_|_or_)|/', $fields, -1, PREG_SPLIT_DELIM_CAPTURE);
+			$fields = preg_split('/(_and_|_or_)/i', $fields, -1, PREG_SPLIT_DELIM_CAPTURE);
 
 			$i = 0;
 			foreach ($fields as $field)
@@ -1027,7 +1054,7 @@ class Query
 
 		$type = strtolower($type);
 
-		if ($type != 'asc' and $type != 'desc')
+		if (!in_array($type, array('asc', 'desc')))
 		{
 			$type = 'asc';
 		}
@@ -1037,9 +1064,16 @@ class Query
 		{
 			$field = trim($field);
 
-			list($field, $table) = $this->fix_dot($field);
-
-			$field_pieces[] = $table.$this->tick($field).$as;
+			// If the field is a function (ex: RAND()), leave it as is.
+			if (preg_match('/([a-zA-z^\(]+)\((.*)\)/i', $field))
+			{
+				$field_pieces[] = $field;
+			}
+			else
+			{
+				list($field, $table) = $this->fix_dot($field);
+				$field_pieces[] = $table.$this->tick($field).$as;
+			}
 		}
 
 		$field = implode(', ', $field_pieces);
