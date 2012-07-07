@@ -50,7 +50,6 @@ class String
 	 * 
 	 * @param string $type Type of characters: alphanumeric|alpha|hex|num|symbols
 	 * @param int $size Size of the generated string
-	 * 
 	 * @return string
 	 */
 	public static function random ($type = 'alphanumeric', $size = 16)
@@ -88,7 +87,6 @@ class String
 	 * A direct interface to PHP's nl2br().
 	 * 
 	 * @param string $string
-	 * 
 	 * @return string
 	 */
 	public static function nl2br ($string)
@@ -100,7 +98,6 @@ class String
 	 * Converts <br> to newlines.
 	 * 
 	 * @param string $string
-	 * 
 	 * @return string
 	 */
 	public static function br2nl ($string)
@@ -112,7 +109,6 @@ class String
 	 * Converts text seperated by double new lines to paragraphs.
 	 * 
 	 * @param string $string
-	 * 
 	 * @return string|void
 	 */
 	public static function nl2p ($string)
@@ -128,7 +124,6 @@ class String
 	 * String should be: string_number. Ex: file_1, file_10, etc.
 	 * 
 	 * @param string $string
-	 * 
 	 * @return string
 	 */
 	public static function increment ($string)
@@ -150,7 +145,6 @@ class String
 	 * String should be: string_number. Ex: file_1, file_10, etc.
 	 * 
 	 * @param string $string
-	 * 
 	 * @return string|void
 	 */
 	public static function decrement ($string)
@@ -181,7 +175,6 @@ class String
 	 * @param string $string
 	 * @param int $limit
 	 * @param string $append Characters to append to the end of the string
-	 * 
 	 * @return string
 	 */
 	public static function limit ($string, $limit = 100, $append = '...')
@@ -200,7 +193,6 @@ class String
 	 * @param string $string
 	 * @param int $limit
 	 * @param string $append Characters to append to the end of the string
-	 * 
 	 * @return string
 	 */
 	public static function limit_words ($string, $limit = 20, $append = '...')
@@ -220,7 +212,6 @@ class String
 	 * 
 	 * @param string $string
 	 * @param string $mask Mask character
-	 * 
 	 * @return string
 	 */
 	public static function mask ($string, $mask = '*')
@@ -235,7 +226,6 @@ class String
 	 * 
 	 * @param string $string
 	 * @param string $spaces How spaces should be treated
-	 * 
 	 * @return string
 	 */
 	public static function sef ($string, $spaces = '-')
@@ -253,7 +243,6 @@ class String
 	 * @param string $string
 	 * @param string $highlight Substring to be highlighted
 	 * @param array $delimiters An array with two elements, one for the open tag and the second for the closing tag
-	 * 
 	 * @return string
 	 */
 	public static function highlight ($string, $highlight, $delimiters = null)

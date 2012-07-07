@@ -20,7 +20,6 @@ class Log
 	 * 
 	 * @param string $message
 	 * @param string $type Message type
-	 * 
 	 * @return bool
 	 */
 	public static function write ($message, $type = null)
@@ -61,7 +60,6 @@ class Log
 	 * Writes a FATAL type message.
 	 * 
 	 * @param string $message
-	 * 
 	 * @return bool
 	 */
 	public static function fatal ($message)
@@ -73,7 +71,6 @@ class Log
 	 * Writes a DEBUG type message.
 	 * 
 	 * @param string $message
-	 * 
 	 * @return bool
 	 */
 	public static function debug ($message)
@@ -85,7 +82,6 @@ class Log
 	 * Writes an ERROR type message.
 	 * 
 	 * @param string $message
-	 * 
 	 * @return bool
 	 */
 	public static function error ($message)
@@ -97,7 +93,6 @@ class Log
 	 * Writes a WARNING type message.
 	 * 
 	 * @param string $message
-	 * 
 	 * @return bool
 	 */
 	public static function warning ($message)
@@ -109,7 +104,6 @@ class Log
 	 * Writes a NOTICE type message.
 	 * 
 	 * @param string $message
-	 * 
 	 * @return bool
 	 */
 	public static function notice ($message)
@@ -121,7 +115,6 @@ class Log
 	 * Writes a SECURITY type message.
 	 * 
 	 * @param string $message
-	 * 
 	 * @return bool
 	 */
 	public static function security ($message)
@@ -133,7 +126,6 @@ class Log
 	 * Writes an INFO type message.
 	 * 
 	 * @param string $message
-	 * 
 	 * @return bool
 	 */
 	public static function info ($message)
@@ -145,7 +137,6 @@ class Log
 	 * Writes a CRITICAL type message.
 	 * 
 	 * @param string $message
-	 * 
 	 * @return bool
 	 */
 	public static function critical ($message)

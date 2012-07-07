@@ -24,7 +24,6 @@ class Cookie
 	 * @param string $domain
 	 * @param bool $secure
 	 * @param bool $httponly
-	 * 
 	 * @return void
 	 */
 	public static function set ($name, $value, $expire = 0, $path = '/', $domain = null, $secure = false, $httponly = false)
@@ -42,7 +41,6 @@ class Cookie
 	 * 
 	 * @param string $name
 	 * @param string $default
-	 * 
 	 * @return void|mixed
 	 */
 	public static function val ($name, $default = null)
@@ -68,7 +66,6 @@ class Cookie
 	 * Deletes a cookie.
 	 * 
 	 * @param string $name
-	 * 
 	 * @return void
 	 */
 	public static function delete ($name)
@@ -81,7 +78,6 @@ class Cookie
 	 * 
 	 * @param string $name
 	 * @param string $value
-	 * 
 	 * @return void
 	 */
 	public static function forever ($name, $value)
@@ -95,7 +91,6 @@ class Cookie
 	 * Checks if a cookie with the given name exists.
 	 * 
 	 * @param string $name
-	 * 
 	 * @return bool
 	 */
 	public static function has ($name)

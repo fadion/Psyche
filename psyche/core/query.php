@@ -77,7 +77,6 @@ class Query
 	 * Factory static method. Initializes a select.
 	 * 
 	 * @param string|array $fields
-	 * 
 	 * @return Query
 	 */
 	public static function select ($fields = '*')
@@ -90,7 +89,6 @@ class Query
 	 * 
 	 * @param string $table
 	 * @param string|array $fields
-	 * 
 	 * @return Query
 	 */
 	public static function insert ($table, $fields)
@@ -103,7 +101,6 @@ class Query
 	 * 
 	 * @param string $table
 	 * @param string|array $fields
-	 * 
 	 * @return Query
 	 */
 	public static function update ($table, $fields)
@@ -115,7 +112,6 @@ class Query
 	 * Factory static method. Initializes a delete.
 	 * 
 	 * @param string|array $fields
-	 * 
 	 * @return Query
 	 */
 	public static function delete ($fields)
@@ -126,6 +122,9 @@ class Query
 	/**
 	 * Makes transactions. If any of the queries fails,
 	 * it will rollback changes.
+	 * 
+	 * @param closure $callback
+	 * @return bool
 	 */
 	public static function transaction ($callback)
 	{
@@ -163,7 +162,6 @@ class Query
 	 * Makes the SELECT part of the query.
 	 * 
 	 * @param string|array $fields
-	 * 
 	 * @return void
 	 */
 	protected function make_select ($fields)
@@ -240,7 +238,6 @@ class Query
 	 * 
 	 * @param string|array $fields
 	 * @param string $table
-	 * 
 	 * @return void
 	 */
 	protected function make_insert ($fields, $table)
@@ -267,7 +264,6 @@ class Query
 	 * 
 	 * @param string|array $fields
 	 * @param string $table
-	 * 
 	 * @return void
 	 */
 	protected function make_update ($fields, $table)
@@ -288,7 +284,6 @@ class Query
 	 * where() or another "where" helper function to delete specific row(s).
 	 * 
 	 * @param string $table
-	 * 
 	 * @return void
 	 */
 	protected function make_delete ($table)
@@ -312,7 +307,6 @@ class Query
 	 * Adds a COUNT($field) to the SELECT clause.
 	 * 
 	 * @param string $field
-	 * 
 	 * @return Query
 	 */
 	public function count ($field = '*')
@@ -324,7 +318,6 @@ class Query
 	 * Adds a SUM($field) to the SELECT clause.
 	 * 
 	 * @param string $field
-	 * 
 	 * @return Query
 	 */
 	public function sum ($field)
@@ -336,7 +329,6 @@ class Query
 	 * Adds an AVG($field) to the SELECT clause.
 	 * 
 	 * @param string $field
-	 * 
 	 * @return Query
 	 */
 	public function avg ($field)
@@ -348,7 +340,6 @@ class Query
 	 * Adds a MAX($field) to the SELECT clause.
 	 * 
 	 * @param string $field
-	 * 
 	 * @return Query
 	 */
 	public function max ($field)
@@ -360,7 +351,6 @@ class Query
 	 * Adds a MIN($field) to the SELECT clause.
 	 * 
 	 * @param string $field
-	 * 
 	 * @return Query
 	 */
 	public function min ($field)
@@ -374,7 +364,6 @@ class Query
 	 * 
 	 * @param string $field
 	 * @param string $type Type of aggregate function
-	 * 
 	 * @return Query
 	 */
 	protected function make_aggregate ($field, $type)
@@ -407,7 +396,6 @@ class Query
 	 * Makes the FROM part of the query.
 	 * 
 	 * @param string|array $table
-	 * 
 	 * @return Query
 	 */
 	public function from ($table)
@@ -447,7 +435,6 @@ class Query
 	 * for any practical application.
 	 * 
 	 * @param string|closure $where The WHERE clause
-	 * 
 	 * @return Query
 	 */
 	public function where ($where)
@@ -541,7 +528,7 @@ class Query
 	/**
 	 * Magic method __call(). Allows to construct where clauses via
 	 * method calls. Ex: where_id_or_id(10, 15).
-	 * 
+
 	 * @return Query
 	 */
 	public function __call ($method, $arguments)
@@ -593,7 +580,6 @@ class Query
 	 * it allows unlimited nesting of where clauses.
 	 * 
 	 * @param closure $callback
-	 * 
 	 * @return Query
 	 */
 	public function where_group ($callback)
@@ -615,7 +601,6 @@ class Query
 	 * 
 	 * @param string $field
 	 * @param string $subquery
-	 * 
 	 * @return Query
 	 */
 	public function subquery ($field, $subquery = null)
@@ -707,7 +692,6 @@ class Query
 	 * 
 	 * @param string $field
 	 * @param string $like
-	 * 
 	 * @return Query
 	 */
 	public function like ($field, $like)
@@ -722,7 +706,6 @@ class Query
 	 * 
 	 * @param string $field
 	 * @param string $like
-	 * 
 	 * @return Query
 	 */
 	public function not_like ($field, $like)
@@ -735,7 +718,6 @@ class Query
 	 * 
 	 * @param string $field
 	 * @param string $value
-	 * 
 	 * @return Query
 	 */
 	public function starts ($field, $value)
@@ -748,7 +730,6 @@ class Query
 	 * 
 	 * @param string $field
 	 * @param string $value
-	 * 
 	 * @return Query
 	 */
 	public function ends ($field, $value)
@@ -761,7 +742,6 @@ class Query
 	 * 
 	 * @param string $field
 	 * @param string $value
-	 * 
 	 * @return Query
 	 */
 	public function has ($field, $value)
@@ -773,7 +753,6 @@ class Query
 	 * Makes: id = $id
 	 * 
 	 * @param int $id
-	 * 
 	 * @return Query
 	 */
 	public function id ($id)
@@ -786,7 +765,6 @@ class Query
 	 * make an ID or a normal where query.
 	 * 
 	 * @param int|string $what
-	 * 
 	 * @return Query
 	 */
 	public function find ($what)
@@ -805,7 +783,6 @@ class Query
 	 * Makes: $field = ''
 	 * 
 	 * @param string $field
-	 * 
 	 * @return Query
 	 */
 	public function is_empty ($field)
@@ -817,7 +794,6 @@ class Query
 	 * Makes: $field != ''
 	 * 
 	 * @param string $field
-	 * 
 	 * @return Query
 	 */
 	public function not_empty ($field)
@@ -829,7 +805,6 @@ class Query
 	 * Makes: $field IS NULL
 	 * 
 	 * @param string $field
-	 * 
 	 * @return Query
 	 */
 	public function is_null ($field)
@@ -841,7 +816,6 @@ class Query
 	 * Makes: $field IS NOT NULL
 	 * 
 	 * @param string $field
-	 * 
 	 * @return Query
 	 */
 	public function not_null ($field)
@@ -854,7 +828,6 @@ class Query
 	 * 
 	 * @param string $field
 	 * @param array $in
-	 * 
 	 * @return Query
 	 */
 	public function in ($field, $in)
@@ -867,7 +840,6 @@ class Query
 	 * 
 	 * @param string $field
 	 * @param array $in
-	 * 
 	 * @return Query
 	 */
 	public function not_in ($field, $in)
@@ -881,7 +853,6 @@ class Query
 	 * @param string $field
 	 * @param int $from
 	 * @param int $to
-	 * 
 	 * @return Query
 	 */
 	public function between ($field, $from, $to)
@@ -895,7 +866,6 @@ class Query
 	 * and boolean groups.
 	 * 
 	 * @param string|closure $having
-	 * 
 	 * @return Query
 	 */
 	public function having ($having)
@@ -928,7 +898,6 @@ class Query
 	 * it allows unlimited nesting of having clauses.
 	 * 
 	 * @param closure $callback
-	 * 
 	 * @return Query
 	 */
 	public function having_group ($callback)
@@ -954,7 +923,6 @@ class Query
 	 * 
 	 * @param string|array $match
 	 * @param string $against
-	 * 
 	 * @return Query
 	 */
 	public function match ($match, $against)
@@ -983,7 +951,6 @@ class Query
 	 * Makes a GROUP BY clause.
 	 * 
 	 * @param string|array $group
-	 * 
 	 * @return Query
 	 */
 	public function group ($group)
@@ -1015,7 +982,6 @@ class Query
 	 * Makes an ORDER BY $field ASC clause.
 	 * 
 	 * @param string $field
-	 * 
 	 * @return Query
 	 */
 	public function asc ($field)
@@ -1027,7 +993,6 @@ class Query
 	 * Makes an ORDER BY $field DESC clause.
 	 * 
 	 * @param string $field
-	 * 
 	 * @return Query
 	 */
 	public function desc ($field)
@@ -1040,7 +1005,6 @@ class Query
 	 * 
 	 * @param string $field
 	 * @param string $type Order type: ASC or DESC
-	 * 
 	 * @return Query
 	 */
 	public function order ($field, $type)
@@ -1088,7 +1052,6 @@ class Query
 	 * 
 	 * @param int $start
 	 * @param int $offset
-	 * 
 	 * @return Query
 	 */
 	public function limit ($start, $offset = '')
@@ -1109,7 +1072,6 @@ class Query
 	 * Joins a table.
 	 * 
 	 * @param string $table
-	 * 
 	 * @return Query
 	 */
 	public function join ($table)
@@ -1121,7 +1083,6 @@ class Query
 	 * Left joins a table.
 	 * 
 	 * @param string $table
-	 * 
 	 * @return Query
 	 */
 	public function left_join ($table)
@@ -1133,7 +1094,6 @@ class Query
 	 * Right joins a table.
 	 * 
 	 * @param string $table
-	 * 
 	 * @return Query
 	 */
 	public function right_join ($table)
@@ -1146,7 +1106,6 @@ class Query
 	 * 
 	 * @param string $table
 	 * @param string $type Join type: join, left_join, right_join, outer_join
-	 * 
 	 * @return Query
 	 */
 	protected function make_join ($table, $type)
@@ -1162,7 +1121,6 @@ class Query
 	 * Adds an ON clause for joined tables.
 	 * 
 	 * @param string $table
-	 * 
 	 * @return Query
 	 */
 	public function on ($clause)
@@ -1181,7 +1139,6 @@ class Query
 	 * Adds a USING clause for joined tables.
 	 * 
 	 * @param string $table
-	 * 
 	 * @return Query
 	 */
 	public function using ($clause)
@@ -1379,7 +1336,6 @@ class Query
 	 * Executes the query using the DB class.
 	 * 
 	 * @param $params Bound parameters
-	 * 
 	 * @return int|array
 	 */
 	public function query ($params)
@@ -1392,7 +1348,6 @@ class Query
 	 * and returns only the first row.
 	 * 
 	 * @param $params Bound parameters
-	 * 
 	 * @return int|array
 	 */
 	public function first ($params)
@@ -1404,8 +1359,7 @@ class Query
 	 * Quotes and escapes a string using the
 	 * DB class.
 	 * 
-	 * @param $value
-	 * 
+	 * @param string $value
 	 * @return string
 	 */
 	protected function quote ($value)
@@ -1416,8 +1370,7 @@ class Query
 	/**
 	 * Adds ticks to a string.
 	 * 
-	 * @param $value
-	 * 
+	 * @param string $value
 	 * @return string
 	 */
 	protected function tick ($value)
@@ -1429,8 +1382,7 @@ class Query
 	 * Parses the "AS" keyword in queries. It supports
 	 * "field f" and "field AS f". 
 	 * 
-	 * @param $field
-	 * 
+	 * @param string $field
 	 * @return array
 	 */
 	protected function fix_as ($field)
@@ -1454,8 +1406,7 @@ class Query
 	/**
 	 * Parses dots, the table selector in queries.
 	 * 
-	 * @param $field
-	 * 
+	 * @param string $field
 	 * @return array
 	 */
 	protected function fix_dot ($field)
@@ -1478,8 +1429,7 @@ class Query
 	/**
 	 * Parses the "AS" keyword in subqueries.
 	 * 
-	 * @param $field
-	 * 
+	 * @param string $field
 	 * @return string
 	 */
 	protected function fix_subquery ($field)

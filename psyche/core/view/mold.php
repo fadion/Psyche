@@ -61,7 +61,6 @@ class Mold
 	 * Starts the Mold Engine.
 	 * 
 	 * @param string $file Template filename
-	 * 
 	 * @return string
 	 */
 	public static function run ($file)

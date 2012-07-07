@@ -46,7 +46,6 @@ class Autoload
 	 * Tries to include the class file.
 	 * 
 	 * @param string $class Class name
-	 * 
 	 * @return void
 	 */
 	protected function load ($class)
@@ -155,7 +154,6 @@ class Autoload
 	 * are translated into directories.
 	 * 
 	 * @param string $class Class name
-	 * 
 	 * @return string
 	 */
 	protected function clean ($class) {

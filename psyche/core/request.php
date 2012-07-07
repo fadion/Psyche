@@ -18,7 +18,6 @@ class Request {
 	 * GET parameters.
 	 * 
 	 * @param string $name GET key
-	 * 
 	 * @return string|array|bool
 	 */
 	public static function get ($name = null)
@@ -48,7 +47,6 @@ class Request {
 	 * POST parameters.
 	 * 
 	 * @param string $name POST key
-	 * 
 	 * @return string|array|bool
 	 */
 	public static function post ($name = null)
@@ -78,7 +76,6 @@ class Request {
 	 * PUT parameters.
 	 * 
 	 * @param string $name POST key
-	 * 
 	 * @return string|array|bool
 	 */
 	public static function put ($name = null)
@@ -115,7 +112,6 @@ class Request {
 	 * DELETE parameters.
 	 * 
 	 * @param string $name DELETE key
-	 * 
 	 * @return string|array|bool
 	 */
 	public static function delete ($name = null)
@@ -153,7 +149,6 @@ class Request {
 	 * with the "name.key" format.
 	 * 
 	 * @param string $name FILES key
-	 * 
 	 * @return string|array|bool
 	 */
 	public static function files ($name = null)
@@ -196,7 +191,7 @@ class Request {
 	/**
 	 * Returns any set HTTP request with the option
 	 * to exclude certain requests.
-	 * 
+
 	 * @return array
 	 */
 	public static function all ()
@@ -233,7 +228,6 @@ class Request {
 	 * provided.
 	 * 
 	 * @param string $name The request to be checked
-	 * 
 	 * @return bool
 	 */
 	public static function is ($name)
@@ -261,7 +255,6 @@ class Request {
 	 * SERVER parameters.
 	 * 
 	 * @param string $name SERVER key
-	 * 
 	 * @return string|array|bool
 	 */
 	public static function server ($name = null)

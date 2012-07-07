@@ -62,6 +62,7 @@ class Uri
 	 * Returns a URI segment where position 1 is the leftmost
 	 * part of the URI with the domain name discarded.
 	 * 
+	 * @param int $loc Segment position
 	 * @return bool|string
 	 */
 	public static function segment ($loc = 1)
@@ -81,7 +82,8 @@ class Uri
 	 * Returns a URI segment where position 1 is the rightmost
 	 * part of the URI with the domain name discarded.
 	 * 
-	 * return bool|string
+	 * @param int $loc Segment position
+	 * @return bool|string
 	 */
 	public static function rsegment ($loc = 1)
 	{
@@ -131,7 +133,6 @@ class Uri
 	 * Checks if the current URI is as specified.
 	 * 
 	 * @param string $search
-	 * 
 	 * @return bool
 	 */
 	public static function is ($search)
@@ -143,6 +144,8 @@ class Uri
 		print_r($search);
 		print_r($url);
 
+		// Number of uri pieces should be the same
+		// as those being searched for.
 		if (count($url) == count($search))
 		{
 			$i = 0;

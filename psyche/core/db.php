@@ -55,7 +55,6 @@ class Db {
 	 * Connects to the database via PDO using one of the defined templates.
 	 * 
 	 * @param string $template Configuration template
-	 * 
 	 * @return void
 	 */
 	public static function connect ($template = null)
@@ -89,7 +88,6 @@ class Db {
 	 * Makes a query where all the matched rows are returned.
 	 * 
 	 * @param string $sql
-	 * 
 	 * @return int|object
 	 */
 	public static function query ($sql)
@@ -102,7 +100,6 @@ class Db {
 	 * Makes a query where only the first row is required.
 	 * 
 	 * @param string $sql
-	 * 
 	 * @return int|object
 	 */
 	public static function first ($sql)
@@ -119,7 +116,6 @@ class Db {
 	 * or multi parameters: DB::query("UPDATE table SET a=?, b=?", $a, $b);
 	 * 
 	 * @param string $sql The raw SQL
-	 * 
 	 * @return int|object
 	 */
 	protected static function make_query ($sql)
@@ -226,7 +222,6 @@ class Db {
 	 * associated information.
 	 * 
 	 * @param strint $table
-	 * 
 	 * @return array
 	 */
 	public static function columns ($table)

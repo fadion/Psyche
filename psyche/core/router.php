@@ -68,7 +68,6 @@ class Router
 	 * Silently redirects responsability to another controller/method.
 	 * 
 	 * @param string $route The route to be redirected
-	 * 
 	 * @return void
 	 */
 	public static function reroute ($route)
@@ -263,7 +262,6 @@ class Router
 	 * 
 	 * @param string $route Route to be checked
 	 * @param closure $callback Closure to be executed
-	 * 
 	 * @return void
 	 */
 	public static function get ($route, $callback)
@@ -276,7 +274,6 @@ class Router
 	 * 
 	 * @param string $route Route to be checked
 	 * @param closure $callback Closure to be executed
-	 * 
 	 * @return void
 	 */
 	public static function post ($route, $callback)
@@ -289,7 +286,6 @@ class Router
 	 * 
 	 * @param string $route Route to be checked
 	 * @param closure $callback Closure to be executed
-	 * 
 	 * @return void
 	 */
 	public static function put ($route, $callback)
@@ -302,7 +298,6 @@ class Router
 	 * 
 	 * @param string $route Route to be checked
 	 * @param closure $callback Closure to be executed
-	 * 
 	 * @return void
 	 */
 	public static function any ($route, $callback)
@@ -317,7 +312,6 @@ class Router
 	 * @param string $route Route to be checked
 	 * @param closure $callback Closure to be executed
 	 * @param array $request_type The http request type/types
-	 * 
 	 * @return void
 	 */
 	protected static function manual_route ($route, $callback, $request_type = array('GET', 'POST', 'PUT'))
@@ -408,7 +402,6 @@ class Router
 	 * if it's a directory.
 	 * 
 	 * @param array $routes The manual route pieces
-	 * 
 	 * @return array
 	 */
 	protected static function analyze_manual_route ($routes)
@@ -447,7 +440,6 @@ class Router
 	 * 
 	 * @param string $param The route piece
 	 * @param string $value The url value corresponding to the route piece
-	 * 
 	 * @return bool
 	 */
 	protected static function parse_params ($param, $value)

@@ -19,7 +19,6 @@ class Session
 	 * 
 	 * @param string $name
 	 * @param string $value
-	 * 
 	 * @return void
 	 */
 	public static function set ($name, $value)
@@ -32,7 +31,6 @@ class Session
 	 * 
 	 * @param string $name
 	 * @param string $default
-	 * 
 	 * @return void|string
 	 */
 	public static function val ($name, $default = null)
@@ -58,7 +56,6 @@ class Session
 	 * Deletes a session variable.
 	 * 
 	 * @param string $name
-	 * 
 	 * @return void
 	 */
 	public static function delete ($name)
@@ -70,7 +67,6 @@ class Session
 	 * Checks if a session variable exists.
 	 * 
 	 * @param string $name
-	 * 
 	 * @return bool
 	 */
 	public static function has ($name)

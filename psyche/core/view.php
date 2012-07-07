@@ -99,7 +99,6 @@ class View
 	 * 
 	 * @param string $file Template filename
 	 * @param array $vars Template variables to assign
-	 * 
 	 * @return View
 	 */
 	public static function open ($file, $vars = null)
@@ -112,7 +111,6 @@ class View
 	 * 
 	 * @param string $name Variable name
 	 * @param mixed $value Variable value
-	 * 
 	 * @return void
 	 */
 	public function __set ($name, $value)

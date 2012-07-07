@@ -20,7 +20,6 @@ class Number
 	 * @param int $number
 	 * @param string $currency
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	public static function currency ($number, $currency = 'usd', $parameters = null)
@@ -85,7 +84,6 @@ class Number
 	 * 
 	 * @param int $number
 	 * @param string $format The pattern. It can contain # or 0 (zeros).
-	 * 
 	 * @return bool|string
 	 */
 	public static function format ($number, $format)
@@ -112,7 +110,6 @@ class Number
 	 * 
 	 * @param int $bytes
 	 * @param int $precision The required floating point precision
-	 * 
 	 * @return string
 	 */
 	public static function bytes ($bytes, $precision = 2)

@@ -116,7 +116,6 @@ class Locale
 	 * argument is passed.
 	 * 
 	 * @param string $language
-	 * 
 	 * @return void|string
 	 */
 	public static function language ($language = null)
@@ -213,7 +212,6 @@ class Locale
 	 * It's supposed to be chained after the get() static method.
 	 * 
 	 * @param strinf $file
-	 * 
 	 * @return Locale
 	 */
 	public function in ($file)
@@ -233,6 +231,8 @@ class Locale
 	/**
 	 * Chooses the active language. It's supposed to be chained
 	 * after the get() static method.
+	 * 
+	 * @return Locale
 	 */
 	public function from ($language)
 	{
@@ -255,7 +255,6 @@ class Locale
 	 * 
 	 * @param string $text The language string
 	 * @param array $vars Variables passed
-	 * 
 	 * @return string
 	 */
 	protected function parse_variables ($text, $vars)
@@ -289,7 +288,6 @@ class Locale
 	 * 
 	 * @param string $text The language string
 	 * @param array $vars Variable passed
-	 * 
 	 * @return string
 	 */
 	protected function parse_case ($text, $vars)

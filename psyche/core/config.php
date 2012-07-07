@@ -23,7 +23,6 @@ class Config
 	 * Returns a config option.
 	 * 
 	 * @param string $key The key of the config option
-	 * 
 	 * @return string|bool
 	 */
 	public static function get ($key)
@@ -46,7 +45,6 @@ class Config
 	 * 
 	 * @param string $key The key to be created
 	 * @param string $value Value of the key
-	 * 
 	 * @return bool
 	 */
 	public static function set ($key, $value)

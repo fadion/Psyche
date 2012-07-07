@@ -92,7 +92,6 @@ class Validator
 	 * 
 	 * @param array $inputs List of inputs to be validated
 	 * @param array $rules List of rules for each input
-	 * 
 	 * @return Validator 
 	 */
 	public static function run ($inputs, $rules)
@@ -134,7 +133,6 @@ class Validator
 	 * Returns the list of errors.
 	 * 
 	 * @param string $input Input name to be returned specifically
-	 * 
 	 * @return string|array
 	 */
 	public function errors ($input = null)
@@ -157,7 +155,6 @@ class Validator
 	 * 
 	 * @param string $value Value of the input
 	 * @param string $rule The rule for the input to be checked
-	 * 
 	 * @return void
 	 */
 	protected function validate ($value, $rule)
@@ -210,7 +207,6 @@ class Validator
 	 * Ex: name, Full Name => '...'
 	 * 
 	 * @param array $rules List of rules
-	 * 
 	 * @return array
 	 */
 	protected function parse_labels ($rules)
@@ -243,7 +239,6 @@ class Validator
 	 * Ex: required, email
 	 * 
 	 * @param string $rule A single input rule
-	 * 
 	 * @return array
 	 */
 	protected function parse_rule ($rule)
@@ -258,7 +253,6 @@ class Validator
 	 * Adds an error.
 	 * 
 	 * @param string $message Error message
-	 * 
 	 * @return void
 	 */
 	protected function add_error ($message)
@@ -279,7 +273,6 @@ class Validator
 	 * Validates a "required" rule.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_required ($value)
@@ -299,7 +292,6 @@ class Validator
 	 * Validates an "email" rule.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_email ($value)
@@ -317,7 +309,6 @@ class Validator
 	 * Validates a "length" rule. The value's length should be exactly the same.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_length ($value)
@@ -339,7 +330,6 @@ class Validator
 	 * 
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_min ($value)
@@ -371,7 +361,6 @@ class Validator
 	 * specified. If it's a string, it's length should smaller.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_max ($value)
@@ -399,7 +388,6 @@ class Validator
 	 * Validates a "between" rule. Value's length should be between the specified range.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_between ($value)
@@ -420,7 +408,6 @@ class Validator
 	 * Validates an "alpha" rule. Value should have only alphabetic characters.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_alpha ($value)
@@ -437,7 +424,6 @@ class Validator
 	 * Validates an "alphanumeric" rule. Value should have only alphanumeric characters.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_alphanumeric ($value)
@@ -456,7 +442,6 @@ class Validator
 	 * and dash characters.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_alpha_dash ($value)
@@ -474,7 +459,6 @@ class Validator
 	 * Validates a "url" rule.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_url ($value)
@@ -492,7 +476,6 @@ class Validator
 	 * Validates a "numeric" rule.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_numeric ($value)
@@ -510,7 +493,6 @@ class Validator
 	 * Validates an "integer" rule.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_integer ($value)
@@ -529,7 +511,6 @@ class Validator
 	 * confirmation field.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_same ($value)
@@ -550,7 +531,6 @@ class Validator
 	 * specified field.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_different ($value)
@@ -570,7 +550,6 @@ class Validator
 	 * Validates an "in" rule. Value should be as one of the list.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_in ($value)
@@ -591,7 +570,6 @@ class Validator
 	 * Validates an "out" rule. Value shouldn't be as one of the list.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_out ($value)
@@ -611,7 +589,6 @@ class Validator
 	 * Validates a "match" rule. Value should match a regular expression.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_match ($value)
@@ -633,7 +610,6 @@ class Validator
 	 * not be checked for uniqueness.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_unique ($value)
@@ -663,7 +639,6 @@ class Validator
 	 * Validates an "exists" rule. Value should exists in the database.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_exists ($value)
@@ -687,7 +662,6 @@ class Validator
 	 * the specified one.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_before ($value)
@@ -708,7 +682,6 @@ class Validator
 	 * the specified one.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_after ($value)
@@ -728,7 +701,6 @@ class Validator
 	 * Validates a "type" rule. Value should have an extension from the list.
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_type ($value)
@@ -751,7 +723,6 @@ class Validator
 	 * characters for the strength (easy|normal|strong).
 	 * 
 	 * @param string $value The input's value
-	 * 
 	 * @return bool
 	 */
 	protected function validate_password ($value)

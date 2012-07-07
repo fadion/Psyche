@@ -18,7 +18,6 @@ class Asset
 	 * Outputs a <script src="file"> tag.
 	 * 
 	 * @param string $file JS file to be opened. Just the filename, with or without extension
-	 * 
 	 * @return string
 	 */
 	public static function js ($file)
@@ -40,7 +39,6 @@ class Asset
 	 * Outputs a <link rel="stylesheet" href="file"> tag.
 	 * 
 	 * @param string $file CSS file to be opened. Just the filename, with or without extension
-	 * 
 	 * @return string
 	 */
 	public static function css ($file)
@@ -63,7 +61,6 @@ class Asset
 	 * 
 	 * @param string $file Image file to be opened. Just the filename, with or without extension
 	 * @param string $alt Alternative text
-	 * 
 	 * @return string
 	 */
 	public static function img ($file, $alt = '', $parameters = null)
@@ -92,7 +89,6 @@ class Asset
 	 * Ex: Asset::img('image', '', array('class=photo'));
 	 * 
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	protected static function fix_params ($parameters)

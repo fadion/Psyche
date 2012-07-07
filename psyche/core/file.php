@@ -18,7 +18,6 @@ class File
 	 * Checks if a file exists.
 	 * 
 	 * @param string $file File path
-	 * 
 	 * @return bool
 	 */
 	public static function exists ($file)
@@ -30,7 +29,6 @@ class File
 	 * Reads a file if it exists.
 	 * 
 	 * @param string $file File path
-	 * 
 	 * @return bool|string
 	 */
 	public static function read ($file)
@@ -50,7 +48,6 @@ class File
 	 * 
 	 * @param string $file File path
 	 * @param strint $contents The contents to be written
-	 * 
 	 * @return bool|int file_put_contents() returns boolen FALSE on failure
 	 */
 	public static function write ($file, $contents = '')
@@ -63,7 +60,6 @@ class File
 	 * 
 	 * @param string $file File path
 	 * @param string $contents The contents to be written
-	 * 
 	 * @return bool|int
 	 */
 	public static function append ($file, $contents)
@@ -76,7 +72,6 @@ class File
 	 * 
 	 * @param string $file File path
 	 * @param string $contents The contents to be written
-	 * 
 	 * @return bool|int
 	 */
 	public static function prepend ($file, $contents)
@@ -90,7 +85,6 @@ class File
 	 * Gets the file extension.
 	 * 
 	 * @param string $file File path
-	 * 
 	 * @return string
 	 */
 	public static function extension ($file)
@@ -103,7 +97,6 @@ class File
 	 * 
 	 * @param string $extension The extension the file will be checked for
 	 * @param string $file File path
-	 * 
 	 * @return bool
 	 */
 	public static function is ($extension, $file)
@@ -124,7 +117,6 @@ class File
 	 * Gets the size in bytes of a file.
 	 * 
 	 * @param string $file File path
-	 * 
 	 * @return bool|int
 	 */
 	public static function size ($file)
@@ -143,7 +135,6 @@ class File
 	 * Gets the modification time of a file.
 	 * 
 	 * @param string $file File path
-	 * 
 	 * @return bool|int
 	 */
 	public static function modified ($file)
@@ -162,7 +153,6 @@ class File
 	 * Gets or sets the file permissions as an octal value.
 	 * 
 	 * @param string $file File path
-	 * 
 	 * @return bool|int
 	 */
 	public static function permissions ($file, $permission = null)
@@ -189,7 +179,6 @@ class File
 	 * 
 	 * @param string $file File path
 	 * @param string $target Destination path
-	 * 
 	 * @return bool
 	 */
 	public static function move ($file, $target)
@@ -209,7 +198,6 @@ class File
 	 * 
 	 * @param string $file File path
 	 * @param string $target Destination path
-	 * 
 	 * @return bool
 	 */
 	public static function copy ($file, $target)
@@ -228,7 +216,6 @@ class File
 	 * Deletes a file from the file system.
 	 * 
 	 * @param string $file File path
-	 * 
 	 * @return bool
 	 */
 	public static function delete ($file)
@@ -250,7 +237,6 @@ class File
 	 * @param string $file File path
 	 * @param string $path Path to upload the file to
 	 * @param string $name Rename the file
-	 * 
 	 * @return bool|string
 	 */
 	public static function upload ($file, $path, $name = null)

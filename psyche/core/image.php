@@ -59,7 +59,6 @@ class Image
 	 * Factory static method.
 	 * 
 	 * @param string $file Path to the image file
-	 * 
 	 * @return Image
 	 */
 	public static function open ($file)
@@ -74,7 +73,6 @@ class Image
 	 * @param string $width
 	 * @param string $height
 	 * @param string $ratio Can be: 'auto', 'width' or 'height'
-	 * 
 	 * @return Image
 	 */
 	public function resize ($width, $height = null, $ratio = 'auto')
@@ -140,7 +138,6 @@ class Image
 	 * @param string $height
 	 * @param int $x X-coordinate of the crop
 	 * @param int $y Y-coordinate of the crop
-	 * 
 	 * @return Image
 	 */
 	public function crop ($width, $height, $x = 0, $y = 0)
@@ -164,7 +161,6 @@ class Image
 	 * Rotates the image clock-wise.
 	 * 
 	 * @param float $angle Angle of rotation
-	 * 
 	 * @return Image
 	 */
 	public function rotate ($angle)
@@ -184,7 +180,6 @@ class Image
 	 * @param string $file Path to the watermark image file
 	 * @param string|array $position Position of the watermak
 	 * @param int $opacity Transparency of the watermak
-	 * 
 	 * @return Image
 	 */
 	public function watermark ($file, $position = null, $opacity = 100)
@@ -260,7 +255,6 @@ class Image
 	 * Gets the width and height of an image.
 	 * 
 	 * @param resource $image
-	 * 
 	 * @return array
 	 */
 	protected function dimensions ($image)
@@ -272,7 +266,6 @@ class Image
 	 * Creates an image resource handler based on the image type.
 	 * 
 	 * @param string $file Path to the image file
-	 * 
 	 * @return GD Resource
 	 */
 	protected function create ($file)
@@ -304,7 +297,6 @@ class Image
 	 * 
 	 * @param string $file Path to the image file
 	 * @param int $quality Quality the JPEG image will be saved
-	 * 
 	 * @return void
 	 */
 	public function save ($file, $quality = 80)

@@ -35,7 +35,6 @@ class Partial
 	 * 
 	 * @param string $name
 	 * @param string $default
-	 * 
 	 * @return string
 	 */
 	public static function reserve ($name, $default = null)
@@ -59,8 +58,7 @@ class Partial
 	 * the active one and starts output buffering.
 	 * 
 	 * @param string $name
-	 * 
-	 * return void
+	 * @return void
 	 */
 	public static function begin ($name)
 	{
@@ -87,8 +85,7 @@ class Partial
 	 * 
 	 * @param $name
 	 * @param $content
-	 * 
-	 * return void
+	 * @return void
 	 */
 	public static function inline ($name, $content)
 	{

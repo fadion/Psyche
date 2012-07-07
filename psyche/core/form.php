@@ -21,7 +21,6 @@ class Form
 	 * @param string $request_type
 	 * @param string $action
 	 * @param array $parameters List of extra parameters
-	 * 
 	 * @return string
 	 */
 	public static function open ($request_type = 'post', $action = '', $parameters = null)
@@ -49,7 +48,6 @@ class Form
 	 * Opens a fieldset.
 	 * 
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	public static function fieldset ($parameters = null)
@@ -74,7 +72,6 @@ class Form
 	 * 
 	 * @param string $value Legend's label
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	public static function legend ($value, $parameters = null)
@@ -90,7 +87,6 @@ class Form
 	 * @param string $name Name of the input
 	 * @param string $value Value of the input
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	public static function hidden ($name, $value, $parameters = null)
@@ -106,7 +102,6 @@ class Form
 	 * @param string $name
 	 * @param string $value
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	public static function text ($name, $value = '', $parameters = null)
@@ -122,7 +117,6 @@ class Form
 	 * @param string $name
 	 * @param string $value
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	public static function textarea ($name, $value = '', $parameters = null)
@@ -138,7 +132,6 @@ class Form
 	 * @param string $display Label's text
 	 * @param string $for Element to be linked with
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	public static function label ($display, $for = null, $parameters = null)
@@ -159,7 +152,6 @@ class Form
 	 * @param string $name
 	 * @param string $value
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	public static function password ($name, $value = '', $parameters = null)
@@ -176,7 +168,6 @@ class Form
 	 * @param string $label Label's text that will automatically be linked with
 	 * @param string|bool $checked State of the checkbox
 	 * @param array $parameters
-	 * 
 	 * @return string 
 	 */
 	public static function checkbox ($name, $label = null, $checked = null, $parameters = null)
@@ -204,7 +195,6 @@ class Form
 	 * @param string $name
 	 * @param array $data The data source with the checkbox values
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	public static function checkbox_group ($name, $data, $parameters = null)
@@ -266,7 +256,6 @@ class Form
 	 * @param string $label Label's text that will automatically be linked with
 	 * @param string|bool $checked State of the radio
 	 * @param array $parameters
-	 * 
 	 * @return string 
 	 */
 	public static function radio ($name, $label = null, $checked = null, $parameters = null)
@@ -295,7 +284,6 @@ class Form
 	 * @param string $name
 	 * @param array $data The data source with the checkbox values
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	public static function radio_group ($name, $data, $parameters = null)
@@ -349,7 +337,6 @@ class Form
 	 * @param string $name
 	 * @param array $data The data source with the <option> values
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	public static function select ($name, $data, $parameters = null)
@@ -399,7 +386,6 @@ class Form
 	 * 
 	 * @param string $name
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	public static function file ($name, $parameters = null)
@@ -414,7 +400,6 @@ class Form
 	 * 
 	 * @param string $display Button label
 	 * @param srray $parameters List of extra parameters
-	 * 
 	 * @return string
 	 */
 	public static function button ($display = 'Submit', $parameters = null)
@@ -429,7 +414,6 @@ class Form
 	 * 
 	 * @param string $display Button label
 	 * @param srray $parameters List of extra parameters
-	 * 
 	 * @return string
 	 */
 	public static function reset ($display = 'Reset', $parameters = null)
@@ -445,7 +429,6 @@ class Form
 	 * Ex: Form::text('email', '', array('class=email', 'size=20'));
 	 * 
 	 * @param array $parameters
-	 * 
 	 * @return string
 	 */
 	protected static function fix_params ($parameters)
