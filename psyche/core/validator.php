@@ -1,6 +1,6 @@
 <?php
 namespace Psyche\Core;
-use Psyche\Core\DB;
+use Psyche\Core\Query;
 
 /**
  * Form Validator
@@ -621,12 +621,18 @@ class Validator
 		if ((bool) strpos($field, ';') === true)
 		{
 			list($field, $except) = explode(';', $field);
-			$except = 'AND ' . str_replace('=', "!='", $except) . "'";
 		}
 
-		$results = DB::query("SELECT $field FROM $table WHERE $field=? $except", $value);
+		$results = Query::select($field)->from($table)->where("$field = $value");
 
-		if (count($results))
+		if ($except)
+		{
+			$results->where("$field != $except");
+		}
+
+		$results->query();
+
+		if ($results)
 		{
 			$this->add_error(__('should be unique')->in('errors'));
 			return false;
@@ -646,9 +652,9 @@ class Validator
 		$table = $this->extra;
 		list($table, $field) = explode('.', $table);
 
-		$results = DB::query("SELECT $field FROM $table WHERE $field=?", $value);
+		$results = Query::select($field)->from($table)->where("$field = $value");
 
-		if (!count($results))
+		if (!$results)
 		{
 			$this->add_error(__('should be a correct value')->in('errors'));
 			return false;
