@@ -2,7 +2,8 @@
 namespace Psyche\Core;
 use Psyche\Core\DB,
 	Psyche\Core\Drill\Cache,
-	Psyche\Core\Drill\Validator;
+	Psyche\Core\Drill\Validator,
+	Psyche\Core\Drill\Relation;
 
 /**
  * Drill ORM
@@ -32,6 +33,16 @@ class Drill
 	protected static $p_key = 'id';
 
 	/**
+	 * @var string Foreign key suffix.
+	 */
+	protected static $f_key_suffix = '_id';
+
+	/**
+	 * @var bool Cache status (on|off).
+	 */
+	protected static $cache_status = false;
+
+	/**
 	 * @var array Table columns.
 	 */
 	protected $vars = array();
@@ -52,6 +63,11 @@ class Drill
 	protected $id;
 
 	/**
+	 * @var bool Sets if the raw should be allowed to be saved or not.
+	 */
+	protected $read_only = false;
+
+	/**
 	 * Constructor. Sets if it's a new row or not, takes the ID
 	 * and hydrates column data.
 	 * 
@@ -68,9 +84,9 @@ class Drill
 
 			$query = Query::select()->from(static::table())->where(static::$p_key.' = '.$this->id);
 
-			// Check first for a cached result with the built
-			// query. If yes, get it from cache. Otherwise, run it.
-			if (Cache::has($query))
+			// If cache is active, check for a cached result set.
+			// Otherwise, run the query as normal.
+			if (static::$cache_status and Cache::has($query))
 			{
 				$results = Cache::get($query);
 			}
@@ -93,7 +109,6 @@ class Drill
 	 * 
 	 * @param string $name
 	 * @param string $value
-	 * 
 	 * @return Drill
 	 */
 	public function set ($name, $value)
@@ -108,7 +123,6 @@ class Drill
 	 * Gets column values.
 	 * 
 	 * @param string $name
-	 * 
 	 * @return string|bool
 	 */
 	public function get ($name)
@@ -136,7 +150,6 @@ class Drill
 	 * Gets column values.
 	 * 
 	 * @param string $name
-	 * 
 	 * @return string|bool
 	 */
 	public function __get ($name)
@@ -148,7 +161,6 @@ class Drill
 	 * Fills column values with data.
 	 * 
 	 * @param array|object $data
-	 * 
 	 * @return void
 	 */
 	public function hydrate ($data)
@@ -176,7 +188,6 @@ class Drill
 	 * Checks if a column is modified or not.
 	 * 
 	 * @param string $name
-	 * 
 	 * @return bool
 	 */
 	public function is_dirty ($name)
@@ -188,7 +199,6 @@ class Drill
 	 * Marks a column or all as modified.
 	 * 
 	 * @param string $name
-	 * 
 	 * @return void
 	 */
 	public function make_dirty ($name = null)
@@ -201,6 +211,16 @@ class Drill
 		{
 			$this->dirty = $this->vars;
 		}
+	}
+
+	/**
+	 * Activates read-only for the current row(s).
+	 * 
+	 * @return void
+	 */
+	public function read_only ()
+	{
+		$this->read_only = true;
 	}
 
 	/**
@@ -242,6 +262,11 @@ class Drill
 		// Update
 		else
 		{
+			if ($this->read_only)
+			{
+				throw new \Exception("Can't save a read-only dataset.");
+			}
+
 			// Checks if an update time field is specified.
 			if (isset(static::$update_time))
 			{
@@ -272,6 +297,60 @@ class Drill
 	}
 
 	/**
+	 * Makes a one to one relationship.
+	 * 
+	 * @param string $table
+	 * @param string $f_key
+	 * @return Model
+	 */
+	public function has_one ($table, $f_key = null)
+	{
+		return Relation::has_one_or_many($table, $f_key);
+	}
+
+	/**
+	 * Makes a one to many relationship.
+	 * 
+	 * @param string $table
+	 * @param string $f_key
+	 * @return Model
+	 */
+	public function has_many ($table, $f_key = null)
+	{
+		return Relation::has_one_or_many($table, $f_key, true);
+	}
+
+	/**
+	 * Makes a relationship where the foreign key is in the model.
+	 * 
+	 * @param string $table
+	 * @param string $f_key
+	 * @return Model
+	 */
+	protected function belongs_to ($table, $f_key = null)
+	{
+		return Relation::belongs_to($table, $f_key);
+	}
+
+	/**
+	 * Builds the foreign key.
+	 * 
+	 * @param string $table
+	 * @return string
+	 */
+	protected function make_foreign_key ($table = null)
+	{
+		$f_key = $table;
+
+		if (!isset($table))
+		{
+			$f_key = static::table();
+		}
+
+		return $f_key.static::$f_key_suffix;
+	}
+
+	/**
 	 * Creates an instance of the Drill class.
 	 * It's intended to be used as a simple way
 	 * of generating database objects, but it
@@ -280,7 +359,6 @@ class Drill
 	 * 
 	 * @param string $table
 	 * @param int $id
-	 * 
 	 * @return Drill
 	 */
 	public static function create ($table, $id = null)
@@ -294,7 +372,6 @@ class Drill
 	 * Finds and returns one result.
 	 * 
 	 * @param string $what
-	 * 
 	 * @return object
 	 */
 	public static function find_one ($what)
@@ -306,7 +383,6 @@ class Drill
 	 * Finds and returns one or more results.
 	 * 
 	 * @param string $what
-	 * 
 	 * @return object
 	 */
 	public static function find_many ($what)
@@ -330,7 +406,6 @@ class Drill
 	 * 
 	 * @param string $what
 	 * @param bool $many Find one or many
-	 * 
 	 * @return void
 	 */
 	public static function find ($what, $many = true, $all = false)
@@ -341,7 +416,17 @@ class Drill
 		// the where clause.
 		if (!$all)
 		{
-			$query = $query->where($what);
+			// If the WHERE part is a single, numeric value, it means
+			// it's being called with an ID. Otherwise, it's a normal
+			// where clause.
+			if (is_numeric($what))
+			{
+				$query = $query->where(static::$p_key.' = '.$what);
+			}
+			else
+			{
+				$query = $query->where($what);
+			}
 		}
 
 		// If it is a closure, get the query from it's return value.
@@ -357,15 +442,15 @@ class Drill
 		$method = 'first';
 		$instance = 'single_instance';
 
-		if ($many)
+		// Multiple results will be returned only if $many is true
+		// and the value is not numeric (ID).
+		if ($many and !is_numeric($what))
 		{
 			$method = 'query';
 			$instance = 'multi_instance';
 		}
 
-		// First check if the query exists in the cache. Otherwise,
-		// run it.
-		if (Cache::has($query.$many))
+		if (static::$cache_status and Cache::has($query.$many))
 		{
 			$results = Cache::get($query.$many);
 		}
@@ -392,7 +477,6 @@ class Drill
 	 * Creates multiple object instances in case of find_many.
 	 * 
 	 * @param object $results Query object
-	 * 
 	 * @return array
 	 */
 	protected static function multi_instance ($results)
@@ -417,7 +501,6 @@ class Drill
 	 * Creates a single object instance in case of find_one.
 	 * 
 	 * @param object $results Query object
-	 * 
 	 * @return object
 	 */
 	protected static function single_instance ($results)
@@ -430,13 +513,37 @@ class Drill
 	}
 
 	/**
+	 * Enables or disables the cache.
+	 * 
+	 * @param bool $status
+	 * @return void|bool
+	 */
+	public static function cache ($status = null)
+	{
+		if (isset($status))
+		{
+			static::$cache_status = (bool) $status;
+		}
+		else
+		{
+			return static::$cache_status;
+		}
+	}
+
+	/**
 	 * Makes the model class name.
 	 * 
+	 * @param string $name
 	 * @return string
 	 */
-	protected static function class_name ()
+	protected static function class_name ($name = null)
 	{
-		return '\\Psyche\\Models\\'.static::table();
+		if (!isset($name))
+		{
+			$name = static::table();
+		}
+
+		return '\\Psyche\\Models\\'.$name;
 	}
 
 	/**

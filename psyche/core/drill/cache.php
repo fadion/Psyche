@@ -9,7 +9,7 @@ namespace Psyche\Core\Drill;
  * external, permanent storage solution, queries will
  * obviously be available during a single instance
  * of the application. Drill uses it to store and
- * retrieve results from select queries.
+ * retrieve results for select queries.
  *
  * @package Psyche\Core\Drill\Cache
  * @author Fadion Dashi
@@ -28,7 +28,6 @@ class Cache
 	 * Checks if a key exists.
 	 * 
 	 * @param string $key
-	 * 
 	 * @return bool
 	 */
 	public static function has ($key)
@@ -40,7 +39,6 @@ class Cache
 	 * Returns a query object.
 	 * 
 	 * @param string $key
-	 * 
 	 * @return void|Query
 	 */
 	public static function get ($key)
@@ -57,7 +55,6 @@ class Cache
 	 * 
 	 * @param string $key
 	 * @param object $value
-	 * 
 	 * @return void
 	 */
 	public static function add ($key, $value)
