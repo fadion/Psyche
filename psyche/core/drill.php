@@ -1,8 +1,8 @@
 <?php
 namespace Psyche\Core;
 use Psyche\Core\DB,
+	Psyche\Core\Validator,
 	Psyche\Core\Drill\Cache,
-	Psyche\Core\Drill\Validator,
 	Psyche\Core\Drill\Relation;
 
 /**
@@ -43,6 +43,11 @@ class Drill
 	protected static $cache_status = false;
 
 	/**
+	 * @var array Validation rules.
+	 */
+	protected static $rules = null;
+
+	/**
 	 * @var array Table columns.
 	 */
 	protected $vars = array();
@@ -68,6 +73,11 @@ class Drill
 	protected $read_only = false;
 
 	/**
+	 * @var false|array Holds the validation errors.
+	 */
+	protected $errors = false;
+
+	/**
 	 * Constructor. Sets if it's a new row or not, takes the ID
 	 * and hydrates column data.
 	 * 
@@ -75,6 +85,8 @@ class Drill
 	 */
 	public function __construct ($id = null)
 	{
+		//Callback::observe('creation', $this);
+
 		// When ID is set, it's an update request.
 		// Otherwise it's an insert.
 		if (isset($id))
@@ -157,6 +169,11 @@ class Drill
 		return $this->get($name);
 	}
 
+	public function __isset ($name)
+	{
+		return isset($this->vars[$name]);
+	}
+
 	/**
 	 * Fills column values with data.
 	 * 
@@ -227,7 +244,7 @@ class Drill
 	 * Saves the model in the database, depending
 	 * on the request type (insert or delete).
 	 * 
-	 * @return void
+	 * @return bool|void
 	 */
 	public function save ()
 	{
@@ -235,6 +252,19 @@ class Drill
 		if (!count($this->dirty))
 		{
 			return true;
+		}
+
+		// If any rule is set in the model, run the Validator.
+		if (static::$rules)
+		{
+			// The fields to be checked are the dirty values. Rules
+			// are retrieved from the child model.
+			$validator = Validator::run($this->dirty, static::$rules);
+			if ($validator->failed())
+			{
+				$this->errors = $validator->errors();
+				return false;
+			}
 		}
 
 		// Insert
@@ -348,6 +378,28 @@ class Drill
 		}
 
 		return $f_key.static::$f_key_suffix;
+	}
+
+	/**
+	 * Returns error messages or false if no errors have
+	 * been triggered.
+	 * 
+	 * @param string $field Returns a single error message for a specific field
+	 * @return bool|string|array
+	 */
+	public function errors ($field = null)
+	{
+		if (!count($this->errors))
+		{
+			return false;
+		}
+
+		if (isset($field) and isset($this->errors[ucfirst($field)]))
+		{
+			return $this->errors[ucfirst($field)];
+		}
+
+		return $this->errors;
 	}
 
 	/**
