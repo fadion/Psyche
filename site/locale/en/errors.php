@@ -1,7 +1,7 @@
 <?php
 return array (
 
-	'is required'                                                                          => 'is a required',
+	'is required'                                                                          => 'is required',
 	'should be a valid email address'                                                      => 'should be a valid email address',
 	'should be exactly :1 character{1:|s}'                                                 => 'should be exactly :1 character{1:|s}',
 	'should be higher than :1'                                                             => 'should be higher than :1',

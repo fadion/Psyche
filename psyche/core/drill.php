@@ -3,7 +3,8 @@ namespace Psyche\Core;
 use Psyche\Core\DB,
 	Psyche\Core\Validator,
 	Psyche\Core\Drill\Cache,
-	Psyche\Core\Drill\Relation;
+	Psyche\Core\Drill\Relation,
+	Psyche\Core\Drill\Callback;
 
 /**
  * Drill ORM
@@ -85,7 +86,7 @@ class Drill
 	 */
 	public function __construct ($id = null)
 	{
-		//Callback::observe('creation', $this);
+		Callback::observe('after_create', $this);
 
 		// When ID is set, it's an update request.
 		// Otherwise it's an insert.
@@ -109,6 +110,8 @@ class Drill
 			}
 
 			$this->hydrate($results);
+
+			Callback::observe('after_hydrate', $this);
 		}
 		else
 		{
@@ -248,6 +251,8 @@ class Drill
 	 */
 	public function save ()
 	{
+		Callback::observe('before_save', $this);
+
 		// When no column was modified, do nothing.
 		if (!count($this->dirty))
 		{
@@ -257,9 +262,14 @@ class Drill
 		// If any rule is set in the model, run the Validator.
 		if (static::$rules)
 		{
+			Callback::observe('before_validation', $this);
+
 			// The fields to be checked are the dirty values. Rules
 			// are retrieved from the child model.
 			$validator = Validator::run($this->dirty, static::$rules);
+
+			Callback::observe('after_validation', $this);
+
 			if ($validator->failed())
 			{
 				$this->errors = $validator->errors();
@@ -270,6 +280,8 @@ class Drill
 		// Insert
 		if ($this->is_new)
 		{
+			Callback::observe('before_insert', $this);
+
 			// Checks if an insertion time field is specified.
 			if (isset(static::$insert_time))
 			{
@@ -285,6 +297,8 @@ class Drill
 
 			Query::insert(static::table(), $this->dirty)->query();
 
+			Callback::observe('after_insert', $this);
+
 			// Upon insertion, the insert ID is returned and the
 			// model is opened for update.
 			$this->id = DB::last_insert();
@@ -292,6 +306,8 @@ class Drill
 		// Update
 		else
 		{
+			Callback::observe('before_update', $this);
+
 			if ($this->read_only)
 			{
 				throw new \Exception("Can't save a read-only dataset.");
@@ -309,10 +325,14 @@ class Drill
 			}
 
 			Query::update(static::table(), $this->dirty)->where(static::$p_key.' = '.$this->id)->query();
+
+			Callback::observe('after_update', $this);
 		}
 
 		$this->is_new = false;
 		$this->dirty = array();
+
+		Callback::observe('after_save', $this);
 	}
 
 	/**
@@ -322,8 +342,12 @@ class Drill
 	 */
 	public function delete ()
 	{
+		Callback::observe('before_delete', $this);
+
 		Query::delete(static::table())->where(static::$p_key.' = '.$this->id)->query();
 		$this->clean();
+
+		Callback::observe('after_delete', $this);
 	}
 
 	/**
