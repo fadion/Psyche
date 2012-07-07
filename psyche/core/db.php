@@ -86,6 +86,32 @@ class Db {
 	}
 
 	/**
+	 * Makes a query where all the matched rows are returned.
+	 * 
+	 * @param string $sql
+	 * 
+	 * @return int|object
+	 */
+	public static function query ($sql)
+	{
+		static::$type = 'many';
+		return static::make_query($sql);
+	}
+
+	/**
+	 * Makes a query where only the first row is required.
+	 * 
+	 * @param string $sql
+	 * 
+	 * @return int|object
+	 */
+	public static function first ($sql)
+	{
+		static::$type = 'first';
+		return static::make_query($sql);
+	}
+
+	/**
 	 * Makes the SQL query. Any parameter after the SQL code is treated
 	 * as a parameter to be bound.
 	 * 
@@ -96,7 +122,7 @@ class Db {
 	 * 
 	 * @return int|object
 	 */
-	public static function query ($sql)
+	protected static function make_query ($sql)
 	{
 		try
 		{
@@ -151,19 +177,6 @@ class Db {
 		{
 			throw new \Exception('Database: '.$e->getMessage());
 		}
-	}
-
-	/**
-	 * Makes a query where only the first row is required.
-	 * 
-	 * @param string $sql
-	 * 
-	 * @return int|object
-	 */
-	public static function first ($sql)
-	{
-		static::$type = 'first';
-		return static::query($sql);
 	}
 
 	/**
