@@ -57,91 +57,15 @@ class Log
 	}
 
 	/**
-	 * Writes a FATAL type message.
+	 * Adds message types dynamically.
 	 * 
-	 * @param string $message
+	 * @param string $name
+	 * @param array $args
 	 * @return bool
 	 */
-	public static function fatal ($message)
+	public static function __callStatic($name, $args)
 	{
-		return static::write($message, 'fatal');
-	}
-
-	/**
-	 * Writes a DEBUG type message.
-	 * 
-	 * @param string $message
-	 * @return bool
-	 */
-	public static function debug ($message)
-	{
-		return static::write($message, 'debug');
-	}
-
-	/**
-	 * Writes an ERROR type message.
-	 * 
-	 * @param string $message
-	 * @return bool
-	 */
-	public static function error ($message)
-	{
-		return static::write($message, 'error');
-	}
-
-	/**
-	 * Writes a WARNING type message.
-	 * 
-	 * @param string $message
-	 * @return bool
-	 */
-	public static function warning ($message)
-	{
-		return static::write($message, 'warning');
-	}
-
-	/**
-	 * Writes a NOTICE type message.
-	 * 
-	 * @param string $message
-	 * @return bool
-	 */
-	public static function notice ($message)
-	{
-		return static::write($message, 'notice');
-	}
-
-	/**
-	 * Writes a SECURITY type message.
-	 * 
-	 * @param string $message
-	 * @return bool
-	 */
-	public static function security ($message)
-	{
-		return static::write($message, 'security');
-	}
-
-	/**
-	 * Writes an INFO type message.
-	 * 
-	 * @param string $message
-	 * @return bool
-	 */
-	public static function info ($message)
-	{
-		return static::write($message, 'info');
-	}
-
-	/**
-	 * Writes a CRITICAL type message.
-	 * 
-	 * @param string $message
-	 * @return bool
-	 */
-	public static function critical ($message)
-	{
-		return static::write($message, 'critical');
+		static::write($args[0], $name);
 	}
 
 }
