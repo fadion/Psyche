@@ -53,7 +53,7 @@ class Validator
 			// of an array. Mostly for $_FILES that return a multi-dimensional
 			// array and each item can be accessed as: input.name, input.size,
 			// input.tmp_name, etc.
-			if ((bool) strpos($input, '.') === true)
+			if (strpos($input, '.') !== false)
 			{
 				list($input, $sub) = explode('.', $input);
 			}
@@ -169,9 +169,9 @@ class Validator
 				// A colon in the rule means it's a rule with values (extras).
 				// That value is passed to the $extra property.
 				// Ex: length:10
-				if ((bool) strpos($rule, ':') === true)
+				if (strpos($rule, ':') !== false)
 				{
-					$this->$extra = substr($rule, strpos($rule, ':') + 1);
+					$this->extra = substr($rule, strpos($rule, ':') + 1);
 					$rule = substr($rule, 0, strpos($rule, ':'));
 				}
 
@@ -216,7 +216,7 @@ class Validator
 			unset($rules[$name]);
 
 			// If it contains a label, the rule's name is modified.
-			if ((bool) strpos($name, ','))
+			if (strpos($name, ',') !== false)
 			{
 				list($new_name, $label) = explode(',', $name);
 				
@@ -281,7 +281,7 @@ class Validator
 
 		if ($value == '' or !isset($value) or $value === false)
 		{
-			$this->add_error(__('is required')->in('errors'));
+			$this->add_error((string) __('is required')->in('errors'));
 			return false;
 		}
 
@@ -298,7 +298,7 @@ class Validator
 	{
 		if (!filter_var($value, FILTER_VALIDATE_EMAIL))
 		{
-			$this->add_error(__('should be a valid email address')->in('errors'));
+			$this->add_error((string) __('should be a valid email address')->in('errors'));
 			return false;
 		}
 
@@ -317,7 +317,7 @@ class Validator
 
 		if (strlen($value) != $length)
 		{
-			$this->add_error(__('should be exactly :1 character{1:|s}', $length)->in('errors'));
+			$this->add_error((string) __('should be exactly :1 character{1:|s}', $length)->in('errors'));
 			return false;
 		}
 
@@ -340,7 +340,7 @@ class Validator
 		{
 			if ($value < $min)
 			{
-				$this->add_error(__('should be higher than :1', $min)->in('errors'));
+				$this->add_error((string) __('should be higher than :1', $min)->in('errors'));
 				return false;
 			}
 		}
@@ -348,7 +348,7 @@ class Validator
 		{
 			if (strlen($value) < $min)
 			{
-				$this->add_error(__('should be longer than :1 character{1:|s}', $min)->in('errors'));
+				$this->add_error((string) __('should be longer than :1 character{1:|s}', $min)->in('errors'));
 				return false;
 			}
 		}
@@ -371,13 +371,13 @@ class Validator
 		{
 			if (!is_numeric($value) or $value > $max)
 			{
-				$this->add_error(__('should be smaller than :1', $max)->in('errors'));
+				$this->add_error((string) __('should be smaller than :1', $max)->in('errors'));
 				return false;
 			}
 		}
 		elseif (strlen($value) > $max)
 		{
-			$this->add_error(__('should be shorter than :1 character{1:|s}', $max)->in('errors'));
+			$this->add_error((string) __('should be shorter than :1 character{1:|s}', $max)->in('errors'));
 			return false;
 		}
 
@@ -397,7 +397,7 @@ class Validator
 
 		if (strlen($value) < $min or strlen($value) > $max)
 		{
-			$this->add_error(__('should be between :1 and :2 characters', $min, $max)->in('errors'));
+			$this->add_error((string) __('should be between :1 and :2 characters', $min, $max)->in('errors'));
 			return false;
 		}
 
@@ -413,7 +413,7 @@ class Validator
 	protected function validate_alpha ($value)
 	{
 		if (!preg_match('|^([a-z])+$|i', $value)) {
-			$this->add_error(__('should contain only letters')->in('errors'));
+			$this->add_error((string) __('should contain only letters')->in('errors'));
 			return false;
 		}
 
@@ -430,7 +430,7 @@ class Validator
 	{
 		if (!preg_match('|^([a-z0-9])+$|i', $value))
 		{
-			$this->add_error(__('should contain only letters and numbers')->in('errors'));
+			$this->add_error((string) __('should contain only letters and numbers')->in('errors'));
 			return false;
 		}
 
@@ -448,7 +448,7 @@ class Validator
 	{
 		if (!preg_match('|^([a-z0-9_-])+$|i', $value))
 		{
-			$this->add_error(__('should contain only letters, numbers, underscores and hyphens')->in('errors'));
+			$this->add_error((string) __('should contain only letters, numbers, underscores and hyphens')->in('errors'));
 			return false;
 		}
 
@@ -465,7 +465,7 @@ class Validator
 	{
 		if (!filter_var($value, FILTER_VALIDATE_URL))
 		{
-			$this->add_error(__('should be a valid web address')->in('errors'));
+			$this->add_error((string) __('should be a valid web address')->in('errors'));
 			return false;
 		}
 
@@ -482,7 +482,7 @@ class Validator
 	{
 		if (!is_numeric($value))
 		{
-			$this->add_error(__('should be numeric')->in('errors'));
+			$this->add_error((string) __('should be numeric')->in('errors'));
 			return false;
 		}
 
@@ -499,7 +499,7 @@ class Validator
 	{
 		if (!filter_var($value, FILTER_VALIDATE_INT))
 		{
-			$this->add_error(__('should be integer')->in('errors'));
+			$this->add_error((string) __('should be integer')->in('errors'));
 			return false;
 		}
 
@@ -519,7 +519,7 @@ class Validator
 
 		if (!isset($_POST[$field]) and $value != $_POST[$field])
 		{
-			$this->add_error(__('should match the confirmation field')->in('errors'));
+			$this->add_error((string) __('should match the confirmation field')->in('errors'));
 			return false;
 		}
 
@@ -539,7 +539,7 @@ class Validator
 
 		if (!isset($_POST[$field]) and $value == $_POST[$field])
 		{
-			$this->add_error(__('should not match the confirmation field')->in('errors'));
+			$this->add_error((string) __('should not match the confirmation field')->in('errors'));
 			return false;
 		}
 
@@ -559,7 +559,7 @@ class Validator
 
 		if (!in_array($value, $values))
 		{
-			$this->add_error(__('should be a correct value')->in('errors'));
+			$this->add_error((string) __('should be a correct value')->in('errors'));
 			return false;
 		}
 
@@ -578,7 +578,7 @@ class Validator
 
 		if (in_array($value, $values))
 		{
-			$this->add_error(__('should be a correct value')->in('errors'));
+			$this->add_error((string) __('should be a correct value')->in('errors'));
 			return false;
 		}
 
@@ -597,7 +597,7 @@ class Validator
 
 		if (!preg_match($match, $value))
 		{
-			$this->add_error(__('should be a correct value')->in('errors'));
+			$this->add_error((string) __('should be a correct value')->in('errors'));
 			return false;
 		}
 
@@ -618,7 +618,7 @@ class Validator
 		list($table, $field) = explode('.', $table);
 		$except = '';
 
-		if ((bool) strpos($field, ';') === true)
+		if (strpos($field, ';') !== false)
 		{
 			list($field, $except) = explode(';', $field);
 		}
@@ -634,7 +634,7 @@ class Validator
 
 		if ($results)
 		{
-			$this->add_error(__('should be unique')->in('errors'));
+			$this->add_error((string) __('should be unique')->in('errors'));
 			return false;
 		}
 
@@ -656,7 +656,7 @@ class Validator
 
 		if (!$results)
 		{
-			$this->add_error(__('should be a correct value')->in('errors'));
+			$this->add_error((string) __('should be a correct value')->in('errors'));
 			return false;
 		}
 
@@ -676,7 +676,7 @@ class Validator
 
 		if (strtotime($value) > strtotime($before))
 		{
-			$this->add_error(__('should be a lower date')->in('errors'));
+			$this->add_error((string) __('should be a lower date')->in('errors'));
 			return false;
 		}
 
@@ -696,7 +696,7 @@ class Validator
 
 		if (strtotime($value) < strtotime($before))
 		{
-			$this->add_error(__('should be a higher date')->in('errors'));
+			$this->add_error((string) __('should be a higher date')->in('errors'));
 			return false;
 		}
 
@@ -717,7 +717,7 @@ class Validator
 
 		if (!in_array($ext, $types))
 		{
-			$this->add_error(__('should be {2:|one of} the following format{2:|s}: :1', implode(', ', $types), count($types))->in('errors'));
+			$this->add_error((string) __('should be {2:|one of} the following format{2:|s}: :1', implode(', ', $types), count($types))->in('errors'));
 			return false;
 		}
 
@@ -739,7 +739,7 @@ class Validator
 		{
 			if (strlen($value) < 5)
 			{
-				$this->add_error(__('should be at least 5 characters')->in('errors'));
+				$this->add_error((string) __('should be at least 5 characters')->in('errors'));
 				return false;
 			}
 		}
@@ -747,7 +747,7 @@ class Validator
 		{
 			if (strlen($value) < 5 or !preg_match('|([A-Z])+([0-9])+|', $value))
 			{
-				$this->add_error(__('should be at least 5 characters, contain an upper case letter and a number')->in('errors'));
+				$this->add_error((string) __('should be at least 5 characters, contain an upper case letter and a number')->in('errors'));
 				return false;
 			}
 		}
@@ -755,7 +755,7 @@ class Validator
 		{
 			if (strlen($value) < 5 or !preg_match('|([A-Z])+([0-9])+|', $value) or !preg_match('|.[!,@,#,$,%,^,&,*,?,_,~,-,£,(,)]+|', $value))
 			{
-				$this->add_error(__('should be at least 5 characters, contain an upper case letter, a number and a symbol')->in('errors'));
+				$this->add_error((string) __('should be at least 5 characters, contain an upper case letter, a number and a symbol')->in('errors'));
 				return false;
 			}
 		}
