@@ -92,12 +92,12 @@ class Config
 	protected static function auto_path () {
 		if (isset(static::$keys['path']) and static::$keys['path'] == 'auto')
 		{
-			static::$keys['path'] = 'http://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['SCRIPT_NAME']) . '/';
+			static::$keys['path'] = 'http://'.$_SERVER['SERVER_NAME'].dirname($_SERVER['SCRIPT_NAME']) . '/';
 		}
 
 		if (isset(static::$keys['absolute path']) and static::$keys['absolute path'] == 'auto')
 		{
-			static::$keys['absolute path'] = realpath('.') . '/';
+			static::$keys['absolute path'] = realpath('.').'/';
 		}
 	}
 

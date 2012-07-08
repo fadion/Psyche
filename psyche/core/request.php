@@ -84,7 +84,7 @@ class Request {
 
 		if (static::is('put'))
 		{
-			// Gets PUT data from the stream and parses it
+			// Gets data from the stream and parses it
 			// into an array.
 			parse_str(file_get_contents("php://input"), $put);
 
@@ -120,7 +120,7 @@ class Request {
 
 		if (static::is('delete'))
 		{
-			// Gets PUT data from the stream and parses it
+			// Gets data from the stream and parses it
 			// into an array.
 			parse_str(file_get_contents("php://input"), $delete);
 
@@ -191,7 +191,7 @@ class Request {
 	/**
 	 * Returns any set HTTP request with the option
 	 * to exclude certain requests.
-
+	 * 
 	 * @return array
 	 */
 	public static function all ()

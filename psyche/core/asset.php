@@ -22,7 +22,7 @@ class Asset
 	 */
 	public static function js ($file)
 	{
-		$file = config('assets path') . config('js path') . $file;
+		$file = config('assets path').config('js path').$file;
 
 		if (pathinfo($file, PATHINFO_EXTENSION) == '')
 		{
@@ -31,7 +31,7 @@ class Asset
 
 		if (file_exists($file))
 		{
-			return '<script src="' . config('path') . $file . '"></script>';
+			return '<script src="'.config('path').$file.'"></script>';
 		}
 	}
 
@@ -43,7 +43,7 @@ class Asset
 	 */
 	public static function css ($file)
 	{
-		$file = config('assets path') . config('css path') . $file;
+		$file = config('assets path').config('css path') . $file;
 
 		if (pathinfo($file, PATHINFO_EXTENSION) == '')
 		{
@@ -52,7 +52,7 @@ class Asset
 
 		if (file_exists($file))
 		{
-			return '<link rel="stylesheet" href="' . config('path') . $file . '">';
+			return '<link rel="stylesheet" href="'.config('path').$file.'">';
 		}
 	}
 
@@ -72,10 +72,10 @@ class Asset
 		// Defaults to '.png' if no extension is set
 		if ($extension == '')
 		{
-			$file = $file . '.png';
+			$file = $file.'.png';
 		}
 
-		$file = config('assets path') . config('img path') . $file;
+		$file = config('assets path').config('img path') . $file;
 
 		if (file_exists($file))
 		{
@@ -99,7 +99,7 @@ class Asset
 			{
 				list($name, $value) = explode('=', $param);
 				$value = htmlspecialchars(trim($value, '"'));
-				$param = $name . '="' . $value . '"';
+				$param = $name.'="'.$value.'"';
 			}
 
 			$parameters = implode(' ', $parameters);
