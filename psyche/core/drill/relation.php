@@ -45,7 +45,7 @@ class Relation extends Drill
 		}
 
 		// Builds a call to the model with find_one or find_many.
-		// It looks like: return \Psyche\Models\ModelName::find_*('x = y')
+		// It looks like: return \Psyche\Models\ModelName::find_*('f_id = id')
 		return $class_name::$method("$f_key = $this->id");
 	}
 	

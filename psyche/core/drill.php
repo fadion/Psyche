@@ -375,7 +375,7 @@ class Drill
 	}
 
 	/**
-	 * Makes a relationship where the foreign key is in the model.
+	 * Makes a relationship where the foreign key is in the actual model.
 	 * 
 	 * @param string $table
 	 * @param string $f_key
