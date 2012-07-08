@@ -10,6 +10,6 @@ return array (
 	'Number'  => 'Psyche\Core\Number',
 	'Uri'     => 'Psyche\Core\Uri',
 	'Partial' => 'Psyche\Core\View\Partial',
-	'Date'	  => 'Psyche\Core\Data'
+	'Tag'	  => 'Psyche\Core\Tag'
 
 );
