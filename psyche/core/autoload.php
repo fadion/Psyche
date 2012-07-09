@@ -72,6 +72,11 @@ class Autoload
 		{
 			$path = str_replace('models/', config('models path'), $path);
 		}
+		// As with Models, base controllers need the correct path set.
+		elseif (strpos($path, 'base/') !== false)
+		{
+			$path = str_replace('base/', config('base controllers path'), $path);
+		}
 		// Psyche's folder relative path is appended to the class name.
 		else
 		{

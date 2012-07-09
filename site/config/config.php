@@ -22,6 +22,7 @@ return array (
 	'models path' => 'application/models/',
 	'views path' => 'application/views/',
 	'locale path' => 'locale/',
+	'base controllers path' => 'application/base/',
 	
 	'assets path' => 'application/assets/',
 	'js path' => 'js/',

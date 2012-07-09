@@ -1,14 +1,15 @@
 <?php
 namespace Psyche\Controllers;
 use Psyche\Core,
-	Psyche\Models;
+	Psyche\Models,
+	Psyche\Base;
 
-class Index
+class Index extends Base\Main
 {
 
 	public function action_index ()
 	{
-		Core\View::open('tag')->render();
+		echo 'Framework';
 	}
 
 }
