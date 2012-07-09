@@ -719,11 +719,11 @@ class Tag
 	 */
 	public static function find ($selector)
 	{
-		$selectors = explode(' ', $selector);
+		$selectors = explode(',', $selector);
 
 		foreach ($selectors as $sel)
 		{
-			static::make_find($sel);
+			static::make_find(trim($sel));
 		}
 
 		return new static;
