@@ -577,6 +577,64 @@ class Tag
 	}
 
 	/**
+	 * Discards elements from find() results that match the selector.
+	 * The selector offers the same options as find() for class, id
+	 * and element matching.
+	 * 
+	 * @param string $what
+	 * @return Tag
+	 */
+	public function not ($what)
+	{	
+		// If it's an ID search, get the ID.
+		if (strpos($what, '#') !== false)
+		{
+			list($what, $id) = explode('#', $what);
+		}
+		// Or if it's a class search, get the class.
+		elseif (strpos($what, '.') !== false)
+		{
+			list($what, $class) = explode('.', $what);
+		}
+
+		$results = static::$results;
+
+		foreach ($results as $key => $node)
+		{
+			if (isset($id) and $node->get()->attributes['id'] == $id)
+			{
+				unset($results[$key]);
+				break;
+			}
+			// If it's a class search but without the element set ('.class'),
+			// check if the element's class is the same as the one searched for.
+			elseif (empty($what) and isset($class) and $node->get()->attributes['class'] == $class)
+			{
+				unset($results[$key]);
+			}
+			// Finally, check if the tag is the same as the one searched for.
+			elseif ($node->get()->tag == $what)
+			{
+				// When the class isn't set, it's an element search ('p', 'h1', etc).
+				if (!isset($class))
+				{
+					unset($results[$key]);
+				}
+				// Otherwise, it's an element with class ('p.class') search and it
+				// should match the class too.
+				elseif ($node->get()->attributes['class'] == $class)
+				{
+					unset($results[$key]);
+				}
+			}
+		}
+
+		static::$results = $results;
+
+		return $this;
+	}
+
+	/**
 	 * Searches for elements inside the tree and returns the results
 	 * via one of the above mentioned methods. It supports element,
 	 * id (::find('#id')) and class (::find('.class') or ::find('el.class'))
