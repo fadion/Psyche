@@ -237,7 +237,33 @@ class Tag
 	}
 
 	/**
-	 * Prepends HTML to an element. As with the html()
+	 * Helper to set a Style attribute.
+	 * 
+	 * @param string $value
+	 * @return Tag
+	 */
+	public function css ($value)
+	{
+		$this->attr('style', $value);
+
+		return $this;
+	}
+
+	/**
+	 * Helper to set a Title attribute.
+	 * 
+	 * @param string $value
+	 * @return Tag
+	 */
+	public function title ($value)
+	{
+		$this->attr('title', $value);
+
+		return $this;
+	}
+
+	/**
+	 * Appends HTML to an element. As with the html()
 	 * method, objects can be added too. This is useful
 	 * when the contents of an element are already set
 	 * and others need to be added.
@@ -245,7 +271,7 @@ class Tag
 	 * @param string|object $html
 	 * @return Tag
 	 */
-	public function add ($html)
+	public function append ($html)
 	{
 		// If an object is passed, it's hide and parent
 		// properties are set.
@@ -262,7 +288,42 @@ class Tag
 	}
 
 	/**
-	 * Retrieves the contents of an element.
+	 * Prepends HTML to an element. It works the same
+	 * as append(), but HTML is added as the first
+	 * child of the element's contents.
+	 * 
+	 * @param string|object $html
+	 * @return Tag
+	 */
+	public function prepend ($html)
+	{
+		// If an object is passed, it's hide and parent
+		// properties are set.
+		if (is_object($html))
+		{
+			$html->hide = true;
+			$html->parent = $this->id;
+		}
+
+		// The element's contents are set.
+		array_unshift(static::$tree[$this->id]->contents, $html);
+
+		return $this;
+	}
+
+	/**
+	 * Alias of append().
+	 * 
+	 * @param string|object $html
+	 * @return Tag
+	 */
+	public function add ($html)
+	{
+		return $this->append($html);
+	}
+
+	/**
+	 * Returns the contents of an element.
 	 * 
 	 * @return array
 	 */
@@ -581,20 +642,27 @@ class Tag
 	 * The selector offers the same options as find() for class, id
 	 * and element matching.
 	 * 
-	 * @param string $what
+	 * @param string $selector
 	 * @return Tag
 	 */
-	public function not ($what)
+	public function not ($selector)
 	{	
 		// If it's an ID search, get the ID.
-		if (strpos($what, '#') !== false)
+		if (strpos($selector, '#') !== false)
 		{
-			list($what, $id) = explode('#', $what);
+			list($selector, $id) = explode('#', $selector);
 		}
 		// Or if it's a class search, get the class.
-		elseif (strpos($what, '.') !== false)
+		elseif (strpos($selector, '.') !== false)
 		{
-			list($what, $class) = explode('.', $what);
+			list($selector, $class) = explode('.', $selector);
+		}
+		// Finally check if it's an attribute selector.
+		elseif (preg_match('|(.+)\[(.+)="(.+)"\]|', $selector, $matches))
+		{
+			$selector = $matches[1];
+			$attr_key = $matches[2];
+			$attr_value = $matches[3];
 		}
 
 		$results = static::$results;
@@ -608,21 +676,27 @@ class Tag
 			}
 			// If it's a class search but without the element set ('.class'),
 			// check if the element's class is the same as the one searched for.
-			elseif (empty($what) and isset($class) and $node->get()->attributes['class'] == $class)
+			elseif (empty($selector) and isset($class) and $node->get()->attributes['class'] == $class)
 			{
 				unset($results[$key]);
 			}
 			// Finally, check if the tag is the same as the one searched for.
-			elseif ($node->get()->tag == $what)
+			elseif ($node->get()->tag == $selector)
 			{
-				// When the class isn't set, it's an element search ('p', 'h1', etc).
-				if (!isset($class))
+				// If no class or attribute selectors are set, it's a direct
+				// element selector.
+				if (!isset($class) and !isset($attr_key))
 				{
 					unset($results[$key]);
 				}
-				// Otherwise, it's an element with class ('p.class') search and it
-				// should match the class too.
-				elseif ($node->get()->attributes['class'] == $class)
+				// If the class selector is set, check if it matches the element's class ('p.class').
+				elseif (isset($class) and $node->get()->attributes['class'] == $class)
+				{
+					unset($results[$key]);
+				}
+				// If the attribute selector is set, check if it matches one of the element's
+				// attributes ('p[title="some title"]').
+				elseif (isset($attr_key) and $node->get()->attributes[$attr_key] == $attr_value)
 				{
 					unset($results[$key]);
 				}
@@ -640,12 +714,19 @@ class Tag
 	 * id (::find('#id')) and class (::find('.class') or ::find('el.class'))
 	 * searching.
 	 * 
-	 * @param string $what The search term.
+	 * @param string $selector The search term.
 	 * @return array|Tag
 	 */
-	public static function find ($what)
+	public static function find ($selector)
 	{
-		return static::make_find($what);
+		$selectors = explode(' ', $selector);
+
+		foreach ($selectors as $sel)
+		{
+			static::make_find($sel);
+		}
+
+		return new static;
 	}
 
 	/**
@@ -653,13 +734,13 @@ class Tag
 	 * that attributes aren't exposed to the client. This method will run
 	 * recursively until the last nested object is found.
 	 * 
-	 * @param string $what The search term.
+	 * @param string $selector The search term.
 	 * @param string $id
 	 * @param string $class
 	 * @param object $active_node
-	 * @return array|Tag
+	 * @return void
 	 */
-	protected static function make_find ($what, $id = null, $class = null, $active_node = null)
+	protected static function make_find ($selector, $id = null, $class = null, $active_node = null)
 	{
 		$node = static::$tree;
 		if (isset($active_node))
@@ -668,14 +749,21 @@ class Tag
 		}
 
 		// If it's an ID search, get the ID.
-		if (strpos($what, '#') !== false)
+		if (strpos($selector, '#') !== false)
 		{
-			list($what, $id) = explode('#', $what);
+			list($selector, $id) = explode('#', $selector);
 		}
 		// Or if it's a class search, get the class.
-		elseif (strpos($what, '.') !== false)
+		elseif (strpos($selector, '.') !== false)
 		{
-			list($what, $class) = explode('.', $what);
+			list($selector, $class) = explode('.', $selector);
+		}
+		// Finally check if it's an attribute selector.
+		elseif (preg_match('|(.+)\[(.+)="(.+)"\]|', $selector, $matches))
+		{
+			$selector = $matches[1];
+			$attr_key = $matches[2];
+			$attr_value = $matches[3];
 		}
 
 		foreach ($node as $tag)
@@ -696,21 +784,27 @@ class Tag
 			}
 			// If it's a class search but without the element set ('.class'),
 			// check if the element's class is the same as the one searched for.
-			elseif (empty($what) and isset($class) and $tag->attributes['class'] == $class)
+			elseif (empty($selector) and isset($class) and $tag->attributes['class'] == $class)
 			{
 				static::$results[] = new static($tag->id);
 			}
 			// Finally, check if the tag is the same as the one searched for.
-			elseif ($tag->tag == $what)
+			elseif ($tag->tag == $selector)
 			{
-				// When the class isn't set, it's an element search ('p', 'h1', etc).
-				if (!isset($class))
+				// If no class or attribute selectors are set, it's a direct
+				// element selector.
+				if (!isset($class) and !isset($attr_key))
 				{
 					static::$results[] = new static($tag->id);
 				}
-				// Otherwise, it's an element with class ('p.class') search and it
-				// should match the class too.
-				elseif ($tag->attributes['class'] == $class)
+				// If the class selector is set, check if it matches the element's class ('p.class').
+				elseif (isset($class) and $tag->attributes['class'] == $class)
+				{
+					static::$results[] = new static($tag->id);
+				}
+				// If the attribute selector is set, check if it matches one of the element's
+				// attributes ('p[title="some title"]').
+				elseif (isset($attr_key) and $tag->attributes[$attr_key] == $attr_value)
 				{
 					static::$results[] = new static($tag->id);
 				}
@@ -723,12 +817,10 @@ class Tag
 			{
 				if (is_object($content))
 				{
-					static::make_find($what, $id, $class, array($content));
+					static::make_find($selector, $id, $class, array($content));
 				}
 			}
 		}
-
-		return new static;
 	}
 
 	/**
