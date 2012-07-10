@@ -1,6 +1,8 @@
 <?php
 return array (
 
+	// Multiple database configurations can be
+	// created and used when connecting.
 	'fw' => array (
 		'type' => 'mysql',
 		'host' => 'localhost',
