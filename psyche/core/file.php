@@ -48,11 +48,16 @@ class File
 	 * 
 	 * @param string $file File path
 	 * @param strint $contents The contents to be written
-	 * @return bool|int file_put_contents() returns boolen FALSE on failure
+	 * @return bool
 	 */
 	public static function write ($file, $contents = '')
 	{
-		return file_put_contents($file, $contents);
+		if (file_put_contents($file, $contents) !== false)
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -60,11 +65,16 @@ class File
 	 * 
 	 * @param string $file File path
 	 * @param string $contents The contents to be written
-	 * @return bool|int
+	 * @return bool
 	 */
 	public static function append ($file, $contents)
 	{
-		return file_put_contents($file, $contents, FILE_APPEND);
+		if (file_put_contents($file, $contents, FILE_APPEND !== false))
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -72,7 +82,7 @@ class File
 	 * 
 	 * @param string $file File path
 	 * @param string $contents The contents to be written
-	 * @return bool|int
+	 * @return bool
 	 */
 	public static function prepend ($file, $contents)
 	{
