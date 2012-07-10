@@ -107,7 +107,7 @@ class View
 	}
 
 	/**
-	 * Magic method. Assigns template variables.
+	 * Assigns template variables.
 	 * 
 	 * @param string $name Variable name
 	 * @param mixed $value Variable value
@@ -119,6 +119,29 @@ class View
 	}
 
 	/**
+	 * Assigns template variables.
+	 * 
+	 * @param string $name Variable name
+	 * @return string
+	 */
+	public function __get ($name)
+	{
+		return $this->vars[$name];
+	}
+
+	/**
+	 * Returns a correct result when
+	 * isset() is run on a property.
+	 * 
+	 * @param string $name
+	 * return bool
+	 */
+	public function __isset ($name)
+	{
+		return isset($this->vars[$name]);
+	}
+
+	/**
 	 * Assings template variables. Parameters are dynamic and can be
 	 * either a single pair of name and value, or an associative array.
 	 * 
@@ -126,26 +149,28 @@ class View
 	 */
 	public function set ()
 	{
-		if (func_num_args())
+		$args = func_get_args();
+
+		// Elements can be an associative array, where
+		// the key is the name of the variable.
+		if (is_array($args[0]))
 		{
-			$args = func_get_args();
-			$arg1 = $args[0];
-			$arg2 = @$args[1];
-			
-			if (is_array($arg1))
-			{
-				foreach ($arg1 as $key=>$val)
-				{
-					$this->vars[$key] = $val;
-				}
-			}
-			else
-			{
-				if (!empty($arg1))
-				{
-					$this->vars[$arg1] = $arg2;
-				}
-			}
+			$args = $args[0];
+		}
+		// Or pairs.
+		else
+		{
+			$_args = array();
+		    for ($i = 0, $count = count($args); $i < $count; $i += 2) { 
+		        $_args[$args[$i]] = $args[$i + 1]; 
+		    }
+
+			$args = $_args;
+		}
+
+		foreach ($args as $key=>$val)
+		{
+			$this->vars[$key] = $val;
 		}
 
 		return $this;
@@ -174,6 +199,8 @@ class View
 			extract($this->tpl_constants, EXTR_SKIP);
 		}
 
+		// Stores the included file in the buffer, without rendering it and
+		// returns the output in a variable. 
 		ob_start();
 		include($this->file);
 		$output = ob_get_clean();
