@@ -166,6 +166,15 @@ class Query
 	 */
 	protected function make_select ($fields)
 	{
+		// If it's a raw input, stop any further proccessing
+		// and reset the $raw var.
+		if (static::$raw)
+		{
+			static::$raw = 0;
+			$this->query['select'] = $fields;
+			return $this;
+		}
+
 		// Fields can be an array or just a string.
 		// If string is the case, it's exploded to an array.
 		if (!is_array($fields))
@@ -400,6 +409,15 @@ class Query
 	 */
 	public function from ($table)
 	{
+		// If it's a raw input, stop any further proccessing
+		// and reset the $raw var.
+		if (static::$raw)
+		{
+			static::$raw = 0;
+			$this->query['from'] = $table;
+			return $this;
+		}
+
 		$tables = $table;
 
 		// Table(s) can be passed as a string or an array.
@@ -1151,19 +1169,18 @@ class Query
 	}
 	
 	/**
-	 * Magic method __toString. It builds the query from the collected
-	 * pieces and return the SQL code when the class is treated as a string.
+	 * Builds the query from the collected pieces and returns the
+	 * correctly formatted, ticked and escaped SQL code as string.
 	 * 
 	 * @return string
 	 */
-	public function __toString ()
+	public function build ()
 	{
 		$query = $this->query;
 		$sql = '';
 		
-		// The query keywords are iterated and checks if any value is passed.
-		// The key is the keywords, while the value is the corresponding
-		// SQL code.
+		// The query keywords are iterated and checked if any value is passed.
+		// The key is the keywords, while the value is the corresponding SQL code.
 		foreach ($query as $key=>$val)
 		{
 			switch ($key)
@@ -1330,6 +1347,16 @@ class Query
 		}
 		
 		return $sql;
+	}
+
+	/**
+	 * Magic method __toString. It returns the build SQL code as string.
+	 * 
+	 * @return string
+	 */
+	public function __toString ()
+	{
+		return $this->build();
 	}
 
 	/**
