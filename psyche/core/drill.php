@@ -172,6 +172,13 @@ class Drill
 		return $this->get($name);
 	}
 
+	/**
+	 * Returns a correct result when
+	 * isset() is run on a property.
+	 * 
+	 * @param string $name
+	 * return bool
+	 */
 	public function __isset ($name)
 	{
 		return isset($this->vars[$name]);
