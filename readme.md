@@ -1,12 +1,13 @@
 # Psyche
 
-A simple, elegant and intuitive PHP framework
+A simple, elegant and intuitive PHP 5.3 framework that should be appealing to beginners and advanced programmers. It's still in early alpha stage.
 
 ## Installation
 
-1. Download and unzip/untar.
-2. Edit /site/config/config.php
-3. Go!
+1. Download and unzip.
+2. Set database credentials in site/config/database.php if you're using a database.
+3. Open http://project_path/site/index.php or just http://project_path/site/ if mod_rewrite is available.
+4. Enjoy!
 
 ## Contribution
 
