@@ -1,6 +1,7 @@
 <?php
 namespace Psyche\Core;
-use Psyche\Core\Response;
+use Psyche\Core\Response,
+	Psyche\Core\Uri;
 
 /**
  * Router
@@ -49,16 +50,11 @@ class Router
 	 */
 	public static function start ()
 	{
-		// URLs use a single GET parameter. It is retreived and turned
-		// into an array.
-		if (isset($_GET['s']))
-		{
-			$url = rtrim($_GET['s'], ' /');
+		$url = Uri::parse_url();
 
-			if ($url != '')
-			{
-				static::$pieces = explode('/', $url);
-			}
+		if ($url)
+		{
+			static::$pieces = $url;
 		}
 
 		static::run();

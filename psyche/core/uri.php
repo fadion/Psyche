@@ -173,23 +173,24 @@ class Uri
 	 * 
 	 * @return array
 	 */
-	private static function parse_url ()
+	public static function parse_url ()
 	{
-		if (isset($_GET['s']))
+		$self = $_SERVER['PHP_SELF'];
+
+		if (isset($self))
 		{
-			$url = rtrim($_GET['s'], ' /');
-			
+			// The "index.php" part is removed with anything before it. It needs just the
+			// actual pieces of the URL.
+			$url = trim(substr($self, strpos($self, 'index.php') + strlen('index.php')), ' /');
+
 			if ($url != '')
 			{
 				$url = explode('/', $url);
+				return $url;
 			}
-			else
-			{
-				$url = array();
-			}
-
-			return $url;
 		}
+
+		return false;
 	}
 
 }
