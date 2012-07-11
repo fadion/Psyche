@@ -148,7 +148,7 @@ class Asset
 			// Will print a file that isn't in the asset tree.
 			else
 			{
-				static::$output[$type][] = static::build_html($name, $type);	
+				return static::build_html($name, $type);	
 			}
 		}
 		// Otherwise, print them all.
@@ -203,13 +203,13 @@ class Asset
 		switch ($type)
 		{
 			case 'img':
-				return '<img src="'.config('assets path').config('img path').$file.'">';
+				return '<img src="'.config('path').config('assets path').config('img path').$file.'">';
 				break;
 			case 'css':
-				return '<link rel="stylesheet" href="'.config('assets path').config('css path').$file.'">';
+				return '<link rel="stylesheet" href="'.config('path').config('assets path').config('css path').$file.'">';
 				break;
 			case 'js':
-				return '<script src="'.config('assets path').config('js path').$file.'"></script>';
+				return '<script src="'.config('path').config('assets path').config('js path').$file.'"></script>';
 				break;
 		}
 	}
