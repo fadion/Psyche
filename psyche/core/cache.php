@@ -27,45 +27,19 @@ class Cache
 	 */
 	public static function open ($driver = null)
 	{
-		$config = static::read_config();
-
 		if (!isset($driver))
 		{
-			$driver = $config['driver'];
+			$driver = config('cache:driver');
 		}
 
 		switch ($driver)
 		{
 			case 'file':
-				return new \Psyche\Core\Cache\File($config['file path']);
+				return new \Psyche\Core\Cache\File(config('cache:file path'));
 				break;
 			default:
 				throw new \Exception(sprintf("The cache driver %s isn't supported.", $driver));
 		}
-	}
-
-	/**
-	 * Reads the cache config file.
-	 * 
-	 * @return string
-	 */
-	protected static function read_config ()
-	{
-		$file = 'config/cache.php';
-
-		if (!file_exists($file))
-		{
-			throw new \Exception("Cache config file doesn't exist.");
-		}
-
-		// If the config data is populated, there's no need
-		// to include the file again.
-		if (!isset(static::$config))
-		{
-			static::$config = require_once $file;
-		}
-
-		return static::$config;
 	}
 
 }

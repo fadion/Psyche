@@ -241,7 +241,7 @@ class View
 	 */
 	protected function custom_tpl_constants ()
 	{
-		$constants = include('config/constants.php');
+		$constants = config('constants:');
 
 		if (count($constants))
 		{

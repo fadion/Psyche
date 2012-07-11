@@ -473,8 +473,7 @@ class Router
 	 */
 	protected static function check_reroutes ()
 	{
-		$routes = 'config/routes.php';
-		$routes = include($routes);
+		$routes = config('routes:');
 
 		if (!count($routes))
 		{

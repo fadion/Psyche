@@ -22,11 +22,6 @@ class Db {
 	protected static $pdo;
 
 	/**
-	 * @var array Template file cache
-	 */
-	protected static $templates;
-
-	/**
 	 * @var object PDO statement object
 	 */
 	protected static $results;
@@ -59,17 +54,17 @@ class Db {
 	 */
 	public static function connect ($template = null)
 	{
-		static::read_templates();
+		$templates = config('database:');
 
 		// If a template is defined as parameter, check if it exists in the
 		// configuration cache. Otherwise gets the first template.
-		if (isset($template) and isset(static::$templates[$template]))
+		if (isset($template) and isset($templates[$template]))
 		{
-			$template = static::$templates[$template];
+			$template = $templates[$template];
 		}
 		else
 		{
-			$template = array_values(static::$templates);
+			$template = array_values($templates);
 			$template = $template[0];
 		}
 
@@ -237,28 +232,6 @@ class Db {
 		{
 			throw new \Exception('Database: '.$e->getMessage());
 		}        
-	}
-
-	/**
-	 * Reads the templates configuration file.
-	 * 
-	 * @return void
-	 */
-	protected static function read_templates ()
-	{
-		if (isset(static::$templates))
-		{
-			return;
-		}
-
-		$file = 'config/database.php';
-
-		if (!file_exists($file))
-		{
-			throw new \Exception('Database configuration not found');
-		}
-
-		static::$templates = include($file);
 	}
 
 }

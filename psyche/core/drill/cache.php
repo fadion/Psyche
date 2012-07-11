@@ -4,12 +4,13 @@ namespace Psyche\Core\Drill;
 /**
  * Drill ORM Caching
  * 
- * A very simple caching class for storing returned
+ * A very simple memory caching class for storing returned
  * objects from the database. As it doesn't use any
  * external, permanent storage solution, queries will
  * obviously be available during a single instance
  * of the application. Drill uses it to store and
- * retrieve results for select queries.
+ * retrieve results for select queries and is disabled
+ * by default.
  *
  * @package Psyche\Core\Drill\Cache
  * @author Fadion Dashi
