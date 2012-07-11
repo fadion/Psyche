@@ -25,7 +25,10 @@ else
 	ini_set('display_errors', 0);
 }
 
-Psyche\Core\DB::connect();
+if (count(config('database:')))
+{
+	Psyche\Core\DB::connect();
+}
 
 Psyche\Core\Router::start();
 Psyche\Core\Response::output();
