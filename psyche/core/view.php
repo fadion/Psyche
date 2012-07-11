@@ -47,7 +47,20 @@ class View
 	public function __construct ($file, $vars)
 	{
 		$this->filename = $file;
-		$file = config('views path').$file;
+
+		// The "custom:" keyword stops View from
+		// automatically building file paths. It allows
+		// the flexibility to open view files from anywhere
+		// in the file system.
+		if (stripos($file, 'custom:') === 0)
+		{
+			$file = substr($file, strlen('custom:'));
+		}
+		else
+		{
+			$file = config('views path').$file;
+		}
+
 		$exists = true;
 
 		// When no extension is set, it tries to find it
