@@ -1,5 +1,6 @@
 <?php
 namespace Psyche\Core;
+use Psyche\Core\Cache\File;
 
 /**
  * Cache Factory
@@ -15,11 +16,6 @@ class Cache
 {
 
 	/**
-	 * @var array $config Data from the cache config file.
-	 */
-	protected static $config;
-
-	/**
 	 * Returns an instance of a cache driver.
 	 * 
 	 * @param string $driver
@@ -32,14 +28,26 @@ class Cache
 			$driver = config('cache:driver');
 		}
 
-		switch ($driver)
+		$method = $driver.'_driver';
+
+		if (method_exists(__CLASS__, $method))
 		{
-			case 'file':
-				return new \Psyche\Core\Cache\File(config('cache:file path'));
-				break;
-			default:
-				throw new \Exception(sprintf("The cache driver %s isn't supported.", $driver));
+			return static::$method();
 		}
+		else
+		{
+			throw new \Exception(sprintf("The cache driver %s isn't supported.", $driver));
+		}
+	}
+
+	/**
+	 * Initializes the File cache driver.
+	 * 
+	 * @return Cache\File
+	 */
+	protected static function file_driver ()
+	{
+		return new File(config('cache:file path'));
 	}
 
 }
