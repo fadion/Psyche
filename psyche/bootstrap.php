@@ -32,4 +32,3 @@ if (count(config('database:')))
 
 Psyche\Core\Router::start();
 Psyche\Core\Response::output();
-?>

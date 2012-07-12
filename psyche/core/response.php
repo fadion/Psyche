@@ -1,5 +1,6 @@
 <?php
 namespace Psyche\Core;
+use Psyche\Core\Event;
 
 class Response
 {
@@ -50,6 +51,16 @@ class Response
 
 	public static function output ()
 	{
+		$filtered = Event::trigger('psyche output', static::$output);
+
+		if (count($filtered))
+		{
+			foreach ($filtered as $filter)
+			{
+				static::$output = $filter;
+			}
+		}
+
 		echo static::$output;
 	}
 
