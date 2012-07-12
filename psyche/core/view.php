@@ -1,7 +1,8 @@
 <?php
 namespace Psyche\Core;
 use Psyche\Core\Response,
-	Psyche\Core\View\Mold;
+	Psyche\Core\View\Mold,
+	ArrayAccess;
 
 /**
  * View Engine
@@ -15,7 +16,7 @@ use Psyche\Core\Response,
  * @version 1.0
  * @since 1.0
  */
-class View
+class View implements ArrayAccess
 {
 
 	/**
@@ -122,8 +123,6 @@ class View
 	/**
 	 * Assigns template variables.
 	 * 
-	 * @param string $name Variable name
-	 * @param mixed $value Variable value
 	 * @return void
 	 */
 	public function __set ($name, $value)
@@ -134,7 +133,6 @@ class View
 	/**
 	 * Assigns template variables.
 	 * 
-	 * @param string $name Variable name
 	 * @return string
 	 */
 	public function __get ($name)
@@ -146,7 +144,6 @@ class View
 	 * Returns a correct result when
 	 * isset() is run on a property.
 	 * 
-	 * @param string $name
 	 * return bool
 	 */
 	public function __isset ($name)
@@ -223,8 +220,7 @@ class View
 
 	/**
 	 * Calls the render() method when the class is treated as string,
-	 * either via echo or string casting. Output will be passed to
-	 * the Response class, so echoing is safe.
+	 * either via echo or string casting.
 	 * 
 	 * @return void
 	 */
@@ -261,5 +257,45 @@ class View
 			$this->tpl_constants = array_merge($this->tpl_constants, $constants);
 		}
 	}
+
+	/**
+	 * Implementation of ArrayAccess set.
+	 * 
+	 * @return void
+	 */
+	public function offsetSet($offset, $value)
+	{
+		$this->vars[$offset] = $value;
+    }
+
+    /**
+	 * Implementation of ArrayAccess exists.
+	 * 
+	 * @return bool
+	 */
+    public function offsetExists($offset) {
+        return isset($this->vars[$offset]);
+    }
+
+    /**
+	 * Implementation of ArrayAccess unset.
+	 * 
+	 * @return void
+	 */
+    public function offsetUnset($offset) {
+        unset($this->vars[$offset]);
+    }
+
+    /**
+	 * Implementation of ArrayAccess get.
+	 * 
+	 * @return void|string
+	 */
+    public function offsetGet($offset) {
+    	if (isset($this->vars[$offset]))
+    	{
+    		return $this->vars[$offset];
+    	}
+    }
 	
 }

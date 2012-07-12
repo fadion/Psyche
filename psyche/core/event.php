@@ -4,10 +4,9 @@ namespace Psyche\Core;
 /**
  * Gives Events to PHP
  * 
- * A very simple approach to event handling. It uses closures
- * for the actions of the event listeners and allows as
- * many arguments as needed for them. As such, it can be
- * thought of as a simple Observer for notifying observer
+ * A very simple approach to event handling. It uses closures for the actions
+ * of the event listeners and allows as many arguments as needed for them.
+ * As such, it can be thought of as a simple Observer for notifying observer
  * objects of changes.
  *
  * @package Psyche\Core\Event
