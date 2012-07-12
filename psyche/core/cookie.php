@@ -37,13 +37,13 @@ class Cookie
 	}
 
 	/**
-	 * Return the value of a cookie.
+	 * Returns the value of a cookie.
 	 * 
 	 * @param string $name
 	 * @param string $default
 	 * @return void|mixed
 	 */
-	public static function val ($name, $default = null)
+	public static function get ($name, $default = null)
 	{
 		$return = false;
 

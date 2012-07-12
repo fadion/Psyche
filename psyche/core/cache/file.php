@@ -44,7 +44,7 @@ class File implements Driver
 	 * @param int $expire Expiration date in minutes
 	 * @return bool
 	 */
-	public function save ($key, $data, $expire = 15)
+	public function set ($key, $data, $expire = 15)
 	{
 		if (!isset($key) or $data == '') 
 		{

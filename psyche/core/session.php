@@ -33,7 +33,7 @@ class Session
 	 * @param string $default
 	 * @return void|string
 	 */
-	public static function val ($name, $default = null)
+	public static function get ($name, $default = null)
 	{
 		$return = false;
 
