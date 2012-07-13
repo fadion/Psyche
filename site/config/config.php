@@ -38,6 +38,9 @@ return array (
 	// Default Mold Template Engine file extensions
 	'mold extension' => '.mold.php',
 
+	// Debug driver
+	'debug driver' => 'gizmo',
+
 	// Randomly generated SALT (for passwords) and TOKEN (for anything else)
 	'salt' => '$0R[Q4Cf6w$b?Ote+~RWu(u*n[gT#',
 	'token' => 'v8_]bQ4DT(<G3%Y+nFAT}1Y{#?Z!3'

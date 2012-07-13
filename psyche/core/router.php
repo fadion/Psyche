@@ -1,7 +1,8 @@
 <?php
 namespace Psyche\Core;
 use Psyche\Core\Response,
-	Psyche\Core\Uri;
+	Psyche\Core\Uri,
+	Psyche\Core\Event;
 
 /**
  * Router
@@ -108,25 +109,25 @@ class Router
 		$show_error = true;
 		$blocked_methods = array('route', 'before', 'after');
 
-		$controller = config('default controller');
+		$controller_name = config('default controller');
 
 		// If piece number 1 (controller piece) is set and it's file exists, it's a controller call.
 		// Otherwise, it may be a method of the index controller or an argument of index::action_index().
 		if (isset($pieces[0]) and file_exists(static::$path.static::$path_extra.$pieces[0].'.php'))
 		{
-			$controller = $pieces[0];
+			$controller_name = $pieces[0];
 
 			// Controller is removed from the params.
 			unset($params[0]);
 		}
 
-		$controller_path = static::$path.static::$path_extra.$controller.'.php';
+		$controller_path = static::$path.static::$path_extra.$controller_name.'.php';
 
 		if (file_exists($controller_path))
 		{
 			require_once $controller_path;
 
-			$controller = '\\Psyche\\Controllers\\'.$controller;
+			$controller = '\\Psyche\\Controllers\\'.$controller_name;
 
 			// It knows the file exists, but the controller class be be undefined.
 			// The "false" as second argument prevents class_exists() from calling
@@ -216,6 +217,13 @@ class Router
 						{
 							Response::write($controller, 'after');
 						}
+
+						// As Gizmo Toolbar is executed almost last, listen for it's event
+						// trigger to pass the active controller and method.
+						Event::on('psyche gizmo', function() use ($controller_name, $method)
+						{
+							return array($controller_name, $method);
+						});
 					}		
 				}
 			}

@@ -187,12 +187,32 @@ class View implements ArrayAccess
 	}
 
 	/**
-	 * The PHP template file is included and the buffered output is passed
-	 * into a variable. The Response class takes further responsability.
+	 * Sends the template output to the Response class.
 	 * 
 	 * @return void
 	 */
 	public function render ()
+	{
+		Response::write($this->make());
+	}
+
+	/**
+	 * Returns the raw output as string.
+	 * 
+	 * @return void
+	 */
+	public function output ()
+	{
+		return $this->make();
+	}
+
+	/**
+	 * The PHP template file is included and the buffered output is passed
+	 * into a variable.
+	 * 
+	 * @return void
+	 */
+	protected function make ()
 	{
 		$this->tpl_constants();
 		$this->custom_tpl_constants();
@@ -214,8 +234,8 @@ class View implements ArrayAccess
 		ob_start();
 		include($this->file);
 		$output = ob_get_clean();
-		
-		Response::write($output);
+
+		return $output;
 	}
 
 	/**

@@ -4,12 +4,12 @@ use Psyche\Core,
 	Psyche\Models,
 	Psyche\Base;
 
-class Index extends Base\Main
+class Index
 {
 
 	public function action_index ()
 	{
-		echo 'Framework';
+		_d('Printing the first debug message');
 	}
 
 }

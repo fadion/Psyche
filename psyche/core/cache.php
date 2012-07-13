@@ -5,7 +5,7 @@ use Psyche\Core\Cache\File;
 /**
  * Cache Factory
  * 
- * A simple factory for initializing cache drivers.
+ * Factory for initializing cache drivers.
  *
  * @package Psyche\Core\Cache
  * @author Fadion Dashi

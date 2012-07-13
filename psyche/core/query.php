@@ -546,7 +546,7 @@ class Query
 	/**
 	 * Magic method __call(). Allows to construct where clauses via
 	 * method calls. Ex: where_id_or_id(10, 15).
-
+	 * 
 	 * @return Query
 	 */
 	public function __call ($method, $arguments)

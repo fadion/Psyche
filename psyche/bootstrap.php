@@ -6,6 +6,7 @@ session_start();
 // default value is fine. If it's placed outside the document root
 // it can be set to: '../../psyche/'
 define('PSYCHE_PATH', '../psyche/');
+define('PSYCHE_START', microtime(true));
 
 require_once 'core/autoload.php';
 
@@ -31,4 +32,10 @@ if (count(config('database:')))
 }
 
 Psyche\Core\Router::start();
+
+if (config('debug') == 1 and config('debug driver') == 'gizmo')
+{
+	Psyche\Core\Debug::toolbar();
+}
+
 Psyche\Core\Response::output();
