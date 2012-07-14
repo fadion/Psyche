@@ -25,6 +25,26 @@ class Gizmo
 	protected static $messages = array();
 
 	/**
+	 * @var Gizmo singleton instance.
+	 */
+	protected static $instance;
+
+	/**
+	 * Returns the singleton instance.
+	 * 
+	 * @return Gizmo
+	 */
+	public static function get_instance ()
+	{
+		if (!isset(static::$instance))
+		{
+			static::$instance = new static;
+		}
+
+		return static::$instance;
+	}
+
+	/**
 	 * Log a message.
 	 * 
 	 * @param mixed $var

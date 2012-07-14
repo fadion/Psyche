@@ -33,5 +33,10 @@ function config ($key, $value = null)
  */
 function _d ($var, $label = null)
 {
+	if (!isset($label))
+	{
+		$label = '';
+	}
+	
 	Psyche\Core\Debug::open()->log($var, $label);
 }

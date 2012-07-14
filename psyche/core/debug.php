@@ -2,7 +2,8 @@
 namespace Psyche\Core;
 use Psyche\Core\Debug\Gizmo\Gizmo,
 	Psyche\Core\Debug\ChromePHP,
-	Psyche\Core\Debug\FirePHP;
+	Psyche\Core\Debug\FirePHP,
+	Psyche\Core\Debug\Disabled;
 
 /**
  * Debugger
@@ -35,6 +36,13 @@ class Debug
 	 */
 	public static function open ($driver = null)
 	{
+		// When debug is disabled, just return
+		// the catch-all, Disabled class.
+		if (config('debug') == 0)
+		{
+			return Disabled::get_instance();
+		}
+
 		if (!isset($driver))
 		{
 			$driver = config('debug driver');
@@ -59,7 +67,7 @@ class Debug
 	 */
 	protected static function gizmo_driver ()
 	{
-		return new Gizmo;
+		return Gizmo::get_instance();
 	}
 
 	/**
