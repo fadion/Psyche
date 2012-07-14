@@ -1145,6 +1145,9 @@ class Query
 	{
 		list($first, $second) = explode('=', $clause);
 
+		$first = trim($first);
+		$second = trim($second);
+
 		list($first, $table1) = $this->fix_dot($first);
 		list($second, $table2) = $this->fix_dot($second);
 		
