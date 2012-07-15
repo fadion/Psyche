@@ -20,7 +20,7 @@ interface Driver
 	 * @param int $expire Expiration date in minutes
 	 * @return bool
 	 */
-	public function set ($key, $data, $expire);
+	public function write ($key, $data, $expire);
 
 	/**
 	 * Gets data from the cache.
@@ -28,7 +28,7 @@ interface Driver
 	 * @param string $key
 	 * @return bool|mixed
 	 */
-	public function get ($key);
+	public function read ($key);
 
 	/**
 	 * Checks if a cache key exists.

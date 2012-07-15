@@ -1,6 +1,8 @@
 <?php
 namespace Psyche\Core;
-use Psyche\Core\Cache\File;
+use Psyche\Core\Cache\File,
+	Psyche\Core\Cache\APC,
+	Psyche\Core\Cache\Database;
 
 /**
  * Cache Factory
@@ -21,8 +23,17 @@ class Cache
 	 * @param string $driver
 	 * @return object
 	 */
-	public static function open ($driver = null)
+	public static function open ($driver = null, $parameters = null)
 	{
+		// For easy of use, the first argument
+		// can be an array of parameters instead
+		// of the actual driver.
+		if (is_array($driver))
+		{
+			$parameters = $driver;
+			$driver = null;
+		}
+		
 		if (!isset($driver))
 		{
 			$driver = config('cache:driver');
@@ -32,7 +43,7 @@ class Cache
 
 		if (method_exists(__CLASS__, $method))
 		{
-			return static::$method();
+			return static::$method($parameters);
 		}
 		else
 		{
@@ -48,6 +59,26 @@ class Cache
 	protected static function file_driver ()
 	{
 		return new File(config('cache:file path'));
+	}
+
+	/**
+	 * Initializes the Database cache driver.
+	 * 
+	 * @return Cache\Database
+	 */
+	protected static function database_driver ()
+	{
+		return new Database();
+	}
+
+	/**
+	 * Initializes the APC cache driver.
+	 * 
+	 * @return Cache\APC
+	 */
+	protected static function apc_driver ($parameters)
+	{
+		return new APC($parameters);
 	}
 
 }

@@ -8,7 +8,7 @@ return array (
 
 	// Database table if a database
 	// cache is chosen
-	'database' => 'cache',
+	'database table' => 'cache',
 
 	// A prefix will be prepended to
 	// cache items prevent name collisions

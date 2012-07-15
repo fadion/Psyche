@@ -44,7 +44,7 @@ class File implements Driver
 	 * @param int $expire Expiration date in minutes
 	 * @return bool
 	 */
-	public function set ($key, $data, $expire = 15)
+	public function write ($key, $data, $expire = 15)
 	{
 		if (!isset($key) or $data == '') 
 		{
@@ -72,12 +72,12 @@ class File implements Driver
 	}
 
 	/**
-	 * Gets data from a cache file.
+	 * Reads data from a cache file.
 	 * 
 	 * @param string $key
 	 * @return bool|mixed
 	 */
-	public function get ($key)
+	public function read ($key)
 	{
 		$file = $this->file($key);
 
