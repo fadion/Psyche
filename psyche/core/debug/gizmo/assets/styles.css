@@ -1,6 +1,6 @@
 #gizmo-toolbar
 {
-	position: absolute;
+	position: fixed;
 	bottom: 10px;
 	right: 10px;
 	background: red;
@@ -36,7 +36,7 @@
 #gizmo-console
 {
 	display: none;
-	position: absolute;
+	position: fixed;
 	bottom: 40px;
 	right: 15px;
 	background: red;

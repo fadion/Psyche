@@ -68,12 +68,12 @@ class Autoload
 
 		// Models' path can't be translated from it's namespace. The correct
 		// path is set.
-		if (strpos($path, 'models/') !== false)
+		if (preg_match('/^models\//i', $path))
 		{
 			$path = str_replace('models/', config('models path'), $path);
 		}
 		// As with Models, base controllers need the correct path set.
-		elseif (strpos($path, 'base/') !== false)
+		elseif (preg_match('/^base\//i', $path))
 		{
 			$path = str_replace('base/', config('base controllers path'), $path);
 		}

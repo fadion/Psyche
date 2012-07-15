@@ -2,7 +2,7 @@
 namespace Psyche\Core\Debug;
 
 /**
- * Activates when debug is disabled.
+ * Activates when debug is disabled
  * 
  * Overrides any method call to a debug driver so that
  * no messages are printed.
