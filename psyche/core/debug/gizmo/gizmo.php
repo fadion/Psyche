@@ -178,7 +178,7 @@ class Gizmo
 		
 		// Triggers the event, listened by the Router, to get the
 		// active controller and method.
-		list($controller, $method) = Event::first('psyche gizmo');
+		list($controller, $method) = Event::first('psyche gizmo router');
 
 		if (isset($controller) and isset($method))
 		{
@@ -188,6 +188,9 @@ class Gizmo
 		{
 			$controller = 'none';
 		}
+
+		// Trigger the event for counting the number of SQL queries.
+		$queries = Event::trigger('psyche gizmo query');
 
 		$console = '';
 
@@ -217,10 +220,11 @@ class Gizmo
 		// of PSYCHE_START (defined at the top of the script) and the current
 		// timestamp.
 		$view->execution_time = round((microtime(true) - PSYCHE_START) * 1000).' ms';
-		$view->controller = $controller;
 
 		// Memory usage is converted to human readable bytes.
 		$view->memory = Number::bytes(memory_get_usage(true));
+		$view->queries = count($queries);
+		$view->controller = $controller;
 		$view->console = $console;
 		
 		$toolbar = $view->output();

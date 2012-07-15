@@ -220,7 +220,7 @@ class Router
 
 						// As Gizmo Toolbar is executed almost last, listen for it's event
 						// trigger to pass the active controller and method.
-						Event::on('psyche gizmo', function() use ($controller_name, $method)
+						Event::on('psyche gizmo router', function() use ($controller_name, $method)
 						{
 							return array($controller_name, $method);
 						});

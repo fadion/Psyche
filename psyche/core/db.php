@@ -1,6 +1,7 @@
 <?php
 namespace Psyche\Core;
-use \PDO;
+use PDO,
+	Psyche\Core\Event;
 
 /**
  * Database
@@ -114,6 +115,12 @@ class Db {
 	{
 		try
 		{
+			// Listen for Gizmo to count all made queries.
+			Event::on('psyche gizmo query', function()
+			{
+				return 1;
+			});
+
 			// Arguments are passed from query() or first() as an array.
 			$args = func_get_args();
 			$args = $args[0];

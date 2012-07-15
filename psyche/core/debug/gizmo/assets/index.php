@@ -8,6 +8,7 @@
 	<div class="gizmo-console">Debug Console</div>
 	<div class="gizmo-clock"><?= $execution_time; ?></div>
 	<div class="gizmo-ram"><?= $memory; ?> RAM</div>
+	<div class="gizmo-queries"><?= $queries; ?> Queries</div>
 	<div class="gizmo-controller"><?= $controller; ?></div>
 	<div class="gizmo-close">Close</div>
 </div>
