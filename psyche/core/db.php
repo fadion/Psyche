@@ -82,25 +82,23 @@ class Db {
 	/**
 	 * Makes a query where all the matched rows are returned.
 	 * 
-	 * @param string $sql
 	 * @return int|object
 	 */
-	public static function query ($sql)
+	public static function query ()
 	{
 		static::$type = 'many';
-		return static::make_query($sql);
+		return static::make_query(func_get_args());
 	}
 
 	/**
 	 * Makes a query where only the first row is required.
 	 * 
-	 * @param string $sql
 	 * @return int|object
 	 */
-	public static function first ($sql)
+	public static function first ()
 	{
 		static::$type = 'first';
-		return static::make_query($sql);
+		return static::make_query(func_get_args());
 	}
 
 	/**
@@ -110,21 +108,25 @@ class Db {
 	 * It can be a single array: DB::query("UPDATE table SET a=?, b=?", array($a, $b));
 	 * or multi parameters: DB::query("UPDATE table SET a=?, b=?", $a, $b);
 	 * 
-	 * @param string $sql The raw SQL
 	 * @return int|object
 	 */
-	protected static function make_query ($sql)
+	protected static function make_query ()
 	{
 		try
 		{
+			// Arguments are passed from query() or first() as an array.
+			$args = func_get_args();
+			$args = $args[0];
+
+			// SQL code is the first argument. Anything else are considered
+			// bount parameters.
+			$sql = $args[0];
+			unset($args[0]);
+
 			static::$results = static::$pdo->prepare($sql);
 
 			// Sets the return as object.
 			static::$results->setFetchMode(PDO::FETCH_OBJ);
-
-			// Received the dynamic args and unsets the first (SQL query)
-			$args = func_get_args();
-			unset($args[0]);
 
 			// If it's a single array, run it with execute().
 			// Otherwise bind every parameter.
