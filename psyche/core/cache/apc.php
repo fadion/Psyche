@@ -12,17 +12,11 @@ use Psyche\Core\Cache\Driver;
  * @version 1.0
  * @since 1.0
  */
-class APC implements Driver
+class APC extends Driver
 {
 
 	/**
-	 * @var bool Whether to auto-serialize data or not.
-	 */
-	protected $serialize = true;
-
-	/**
-	 * Constructor. Checkes if APC is installed and
-	 * sets the $serialize property.
+	 * Constructor. Checkes if APC is installed.
 	 */
 	public function __construct ($parameters)
 	{
@@ -31,12 +25,7 @@ class APC implements Driver
 			throw new \Exception("APC wasn't found. Make sure it was installed correctly.");
 		}
 
-		// Auto-serialization is specified as an array:
-		// array('serialize' => true)
-		if (isset($parameters) and isset($parameters['serialize']))
-		{
-			$this->serialize = $parameters['serialize'];
-		}
+		parent::__construct($parameters);
 	}
 
 	/**
@@ -63,7 +52,7 @@ class APC implements Driver
 			$data = serialize($data);
 		}
 
-		return apc_store($key, $data, $expire);
+		return apc_store($this->prefix.'.'.$key, $data, $expire);
 	}
 
 	/**
@@ -87,7 +76,7 @@ class APC implements Driver
 			$data = serialize($data);
 		}
 
-		return apc_add($key, $data, $expire);
+		return apc_add($this->prefix.'.'.$key, $data, $expire);
 	}
 
 	/**
@@ -98,7 +87,7 @@ class APC implements Driver
 	 */
 	public function read ($key)
 	{
-		$data = apc_fetch($key);
+		$data = apc_fetch($this->prefix.'.'.$key);
 
 		if ($this->serialize)
 		{
@@ -116,7 +105,7 @@ class APC implements Driver
 	 */
 	public function has ($key)
 	{
-		return apc_exists($key);
+		return apc_exists($this->prefix.'.'.$key);
 	}
 
 	/**
@@ -127,7 +116,7 @@ class APC implements Driver
 	 */
 	public function delete ($key)
 	{
-		return apc_delete($key);
+		return apc_delete($this->prefix.'.'.$key);
 	}
 
 	/**
@@ -139,7 +128,7 @@ class APC implements Driver
 	 */
 	public function inc ($key, $step = 1)
 	{
-		return apc_inc($key, $step);
+		return apc_inc($this->prefix.'.'.$key, $step);
 	}
 
 	/**
@@ -151,7 +140,7 @@ class APC implements Driver
 	 */
 	public function dec ($key, $step = 1)
 	{
-		return apc_dec($key, $step);
+		return apc_dec($this->prefix.'.'.$key, $step);
 	}
 
 	/**

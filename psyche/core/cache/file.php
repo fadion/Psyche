@@ -16,7 +16,7 @@ use Psyche\Core\Cache\Driver;
  * @version 1.0
  * @since 1.0
  */
-class File implements Driver
+class File extends Driver
 {
 
 	/**

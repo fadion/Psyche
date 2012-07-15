@@ -1,8 +1,9 @@
 <?php
 namespace Psyche\Core;
 use Psyche\Core\Cache\File,
+	Psyche\Core\Cache\Database,
 	Psyche\Core\Cache\APC,
-	Psyche\Core\Cache\Database;
+	Psyche\Core\Cache\XCache;
 
 /**
  * Cache Factory
@@ -79,6 +80,16 @@ class Cache
 	protected static function apc_driver ($parameters)
 	{
 		return new APC($parameters);
+	}
+
+	/**
+	 * Initializes the XCache cache driver.
+	 * 
+	 * @return Cache\XCache
+	 */
+	protected static function xcache_driver ($parameters)
+	{
+		return new XCache($parameters);
 	}
 
 }
