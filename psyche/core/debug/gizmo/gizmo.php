@@ -2,7 +2,8 @@
 namespace Psyche\Core\Debug\Gizmo;
 use Psyche\Core\View,
 	Psyche\Core\Event,
-	Psyche\Core\Number;
+	Psyche\Core\Number,
+	Psyche\Core\Request;
 
 /**
  * Gizmo Toolbar
@@ -171,6 +172,10 @@ class Gizmo
 	 */
 	public static function render_toolbar ()
 	{
+		// On AJAX requests, the toolbar would mess the output,
+		// so it's not rendered.
+		if (Request::ajax()) return;
+		
 		// Triggers the event, listened by the Router, to get the
 		// active controller and method.
 		list($controller, $method) = Event::first('psyche gizmo');
