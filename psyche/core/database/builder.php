@@ -958,9 +958,30 @@ class Builder
 		foreach ($groups as $group)
 		{
 			$group = trim($group);
-			list($group, $table) = $this->fix_dot($group);
 
-			$group_pieces[] = $table.$this->tick($group);
+			if (preg_match('/([a-zA-z^\(]+)\((.+)\)/i', $group))
+			{
+				$function = substr($group, 0, strrpos($group, '(') + 1);
+				$function_end = str_repeat(')', substr_count($function, '('));
+				$function = $function.'###'.$function_end;
+
+				$group = substr($group, strrpos($group, '(') + 1);
+				$group = str_replace(')', '', $group);
+			}
+
+			list($group, $table) = $this->fix_dot($group);
+			$group = $this->tick($group);
+
+			if ($function != '')
+			{
+				$group = str_replace('###', $table.$group, $function);
+			}
+			else
+			{
+				$group = $table.$group;
+			}
+
+			$group_pieces[] = $group;
 		}
 
 		$group = implode(', ', $group_pieces);
