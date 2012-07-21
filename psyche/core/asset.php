@@ -200,17 +200,37 @@ class Asset
 	 */
 	protected static function build_html ($file, $type)
 	{
-		switch ($type)
+		// An "url:" modifier means that the file should be
+		// left unchanged, as it points to a URL.
+		if (stripos($file, 'url:') === 0)
 		{
-			case 'img':
-				return '<img src="'.config('path').config('assets path').config('img path').$file.'">';
-				break;
-			case 'css':
-				return '<link rel="stylesheet" href="'.config('path').config('assets path').config('css path').$file.'">';
-				break;
-			case 'js':
-				return '<script src="'.config('path').config('assets path').config('js path').$file.'"></script>';
-				break;
+			$path = substr($file, 4);
+		}
+		// An "assets:" modifier will point to the "assets" folder,
+		// but not in any of the specific ones (ex: img, js, css).
+		// It's useful for loading resources that don't reside inside
+		// the typical asset folders.
+		elseif (stripos($file, 'assets:') === 0)
+		{
+			$path = config('path').config('assets path').substr($file, 7);
+		}
+		// No modifier set.
+		else
+		{
+			$path = config('path').config('assets path').config($type.' path').$file;
+		}
+
+		if ($type == 'css')
+		{
+			return '<link rel="stylesheet" href="'.$path.'">';
+		}
+		elseif ($type == 'js')
+		{
+			return '<script src="'.$path.'"></script>';
+		}
+		elseif ($type == 'img')
+		{
+			return '<img src="'.$path.'">';
 		}
 	}
 
