@@ -41,6 +41,11 @@ return array (
 	// Debug driver
 	'debug driver' => 'gizmo',
 
+	// Whether Gizmo should load the buil-tin jQuery library or not.
+	// Disable (set to 0) if planning to use jQuery yourself to prevent
+	// problems from loading it twice. Ignore if not using Gizmo.
+	'gizmo load jquery' => 1,
+
 	// Randomly generated SALT (for passwords) and TOKEN (for anything else)
 	'salt' => '$0R[Q4Cf6w$b?Ote+~RWu(u*n[gT#',
 	'token' => 'v8_]bQ4DT(<G3%Y+nFAT}1Y{#?Z!3'

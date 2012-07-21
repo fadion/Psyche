@@ -1,5 +1,7 @@
-<?= str_repeat("\n", 50); ?>
+<?php echo str_repeat("\n", 50); ?>
+<?php if (config('gizmo load jquery')): ?>
 <script type="text/javascript"><?php echo file_get_contents(__DIR__.'/jquery.js'); ?></script>
+<?php endif; ?>
 <script type="text/javascript"><?php echo file_get_contents(__DIR__.'/scripts.js'); ?></script>
 <style type="text/css"><?php echo file_get_contents(__DIR__.'/styles.css'); ?></style>
 
