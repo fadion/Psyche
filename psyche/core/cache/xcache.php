@@ -4,8 +4,6 @@ use Psyche\Core\Cache\Driver;
 
 /**
  * XCache Cache Driver
- * 
- * Uses XCache as the cache driver.
  *
  * @package Psyche\Core\Cache\APC
  * @author Fadion Dashi
@@ -34,9 +32,9 @@ class XCache extends Driver
 	 * @param string $key
 	 * @param mixed $data
 	 * @param int $expire Expiration in minutes
-	 * @return bool|array
+	 * @return bool
 	 */
-	public function write ($key, $data, $expire = 15)
+	public function write ($key, $data, $expire = 0)
 	{
 		// Expiration is converted to seconds, the right
 		// format used by XCache.
@@ -77,7 +75,7 @@ class XCache extends Driver
 	 * Checks if a key exists in the cache.
 	 * 
 	 * @param string $key
-	 * @return bool|array
+	 * @return bool
 	 */
 	public function has ($key)
 	{

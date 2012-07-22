@@ -7,7 +7,7 @@ use Psyche\Core\Cache\Driver,
  * Database Cache Driver
  * 
  * Uses a database table as key=>value caching solution,
- * with data serialization and expiration timestampt.
+ * with data serialization and expiration timestamp.
  * Due to the nature of queries and overhead of the
  * Query Builder, this solution should be considered
  * only for small applications or sections where performance
@@ -43,17 +43,18 @@ class Database extends Driver
 	 * @param int $expire Expiration in minutes
 	 * @return bool
 	 */
-	public function write ($key, $data, $expire = 15)
+	public function write ($key, $data, $expire = 0)
 	{
 		if (!isset($key) or $data == '') 
 		{
 			return false;
 		}
 
-		// Expiration can't be zero or negative.
-		if ($expire <= 0)
+		// If expiration is zero, it's set to expire after
+		// 30 days.
+		if ($expire == 0)
 		{
-			$expire = 15;
+			$expire = 60*24*30;
 		}
 
 		// Expiration is calculated from the current time
@@ -91,7 +92,7 @@ class Database extends Driver
 	 * Reads data from the cache.
 	 * 
 	 * @param string $key
-	 * @return bool|mixed
+	 * @return mixed
 	 */
 	public function read ($key)
 	{

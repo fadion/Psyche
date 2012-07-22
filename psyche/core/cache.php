@@ -3,7 +3,8 @@ namespace Psyche\Core;
 use Psyche\Core\Cache\File,
 	Psyche\Core\Cache\Database,
 	Psyche\Core\Cache\APC,
-	Psyche\Core\Cache\XCache;
+	Psyche\Core\Cache\XCache,
+	Psyche\Core\Cache\Memcached;
 
 /**
  * Cache Factory
@@ -90,6 +91,16 @@ class Cache
 	protected static function xcache_driver ($parameters)
 	{
 		return new XCache($parameters);
+	}
+
+	/**
+	 * Initializes the Memcached cache driver.
+	 * 
+	 * @return Cache\Memcached
+	 */
+	protected static function memcached_driver ()
+	{
+		return new Memcached();
 	}
 
 }
