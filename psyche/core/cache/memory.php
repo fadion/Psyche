@@ -21,7 +21,7 @@ class Memory extends Driver
 	/**
 	 * @var array Cache held in a variable.
 	 */
-	protected $cache = array();
+	protected static $cache = array();
 
 	/**
 	 * Constructor. In here just to override the parent's
@@ -50,7 +50,7 @@ class Memory extends Driver
 			$expire = time()+60*60*24;
 		}
 
-		$this->cache[$key] = array('data' => $data, 'expire' => $expire);
+		static::$cache[$key] = array('data' => $data, 'expire' => $expire);
 
 		return true;
 	}
@@ -63,15 +63,15 @@ class Memory extends Driver
 	 */
 	public function read ($key)
 	{
-		if (!isset($this->cache[$key])) return false;
+		if (!isset(static::$cache[$key])) return false;
 
-		if ($this->cache[$key]['expire'] > time())
+		if (static::$cache[$key]['expire'] < time())
 		{
 			$this->delete($key);
 			return false;
 		}
 
-		return $this->cache[$key]['data'];
+		return static::$cache[$key]['data'];
 	}
 
 	/**
@@ -93,9 +93,9 @@ class Memory extends Driver
 	 */
 	public function delete ($key)
 	{
-		if (isset($this->cache[$key]))
+		if (isset(static::$cache[$key]))
 		{
-			unset($this->cache[$key]);
+			unset(static::$cache[$key]);
 			return true;
 		}
 
@@ -109,7 +109,7 @@ class Memory extends Driver
 	 */
 	public function clear ()
 	{
-		$this->cache = array();
+		static::$cache = array();
 		return true;
 	}
 
