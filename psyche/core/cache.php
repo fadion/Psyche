@@ -4,7 +4,8 @@ use Psyche\Core\Cache\File,
 	Psyche\Core\Cache\Database,
 	Psyche\Core\Cache\APC,
 	Psyche\Core\Cache\XCache,
-	Psyche\Core\Cache\Memcached;
+	Psyche\Core\Cache\Memcached,
+	Psyche\Core\Cache\Memory;
 
 /**
  * Cache Factory
@@ -101,6 +102,16 @@ class Cache
 	protected static function memcached_driver ()
 	{
 		return new Memcached();
+	}
+
+	/**
+	 * Initializes the Memory cache driver.
+	 * 
+	 * @return Cache\Memcached
+	 */
+	protected static function memory_driver ()
+	{
+		return new Memory();
 	}
 
 }

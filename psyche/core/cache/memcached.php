@@ -13,14 +13,21 @@ use Psyche\Core\Cache\Driver;
 class Memcached extends Driver
 {
 
+	/**
+	 * @var array List of servers.
+	 */
 	protected static $servers;
+
+	/**
+	 * @var Memcached Memcached instance.
+	 */
 	protected $memcached;
 
 	/**
 	 * Constructor. Checkes if Memcached is installed and
 	 * adds server(s).
 	 */
-	public function __construct ($parameters)
+	public function __construct ()
 	{
 		if (!class_exists('\Memcached', false))
 		{
@@ -42,6 +49,8 @@ class Memcached extends Driver
 		{
 			$this->memcached->addServers(static::$servers);
 		}
+
+		parent::__construct();
 	}
 
 	/**
