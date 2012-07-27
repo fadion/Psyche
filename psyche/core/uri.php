@@ -175,18 +175,37 @@ class Uri
 	 */
 	public static function parse_url ()
 	{
-		$self = $_SERVER['PHP_SELF'];
-
-		if (isset($self))
+		// Get the URI from the server constants.
+		// Checks each until a valid one is found.
+		if (isset($_SERVER['PATH_INFO']))
 		{
-			// The "index.php" part is removed with anything before it. It needs just the
-			// actual pieces of the URL.
-			$url = trim(substr($self, strpos($self, 'index.php') + strlen('index.php')), ' /');
+			$uri = $_SERVER['PATH_INFO'];	
+		}
+		elseif (isset($_SERVER['ORIG_PATH_INFO']))
+		{
+			$uri = $_SERVER['ORIG_PATH_INFO'];
+		}
+		else
+		{
+			$uri = $_SERVER['PHP_SELF'];
+		}
 
-			if ($url != '')
+		if (isset($uri))
+		{
+			// When no rewrite is made (index.php is present), take anything
+			// that's after it.
+			if (strpos($uri, 'index.php') !== false)
 			{
-				$url = explode('/', $url);
-				return $url;
+				$uri = substr($uri, strpos($uri, 'index.php') + strlen('index.php'));
+			}
+
+			$uri = trim($uri, ' /');
+
+			// Explode to pieces if not empty.
+			if ($uri != '')
+			{
+				$uri = explode('/', $uri);
+				return $uri;
 			}
 		}
 
