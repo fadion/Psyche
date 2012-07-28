@@ -222,17 +222,29 @@ class String
 	}
 
 	/**
-	 * Makes a URL search engine friendly.
+	 * Makes a search engine friendly URI.
 	 * 
 	 * @param string $string
 	 * @param string $spaces How spaces should be treated
 	 * @return string
 	 */
-	public static function sef ($string, $spaces = '-')
+	public static function slug ($string, $spaces = '-')
 	{
 		$string = strtolower($string);
-		$string = preg_replace('|[^a-z0-9]|', $spaces, $string);
-		$string = preg_replace('|\\'.$spaces.'+|', $spaces, $string);
+		
+		// Tries to convert non-ascii characters to their ascii
+		// representation. It will run only if iconv is present.
+		if (function_exists('iconv'))
+		{
+			$string = iconv('UTF-8', 'ASCII//TRANSLIT', $string);
+		}
+
+		// Removes all non-alphanumeric characters (except of spaces, dashes and underscores).
+		// Next, replaces spaces, dashes and underscores with the $spaces character.
+		$string = preg_replace('/[^a-z0-9 _-]/', '', $string);
+		$string = preg_replace('/[_ -]+/', $spaces, $string);
+
+		$string = trim($string, '-');
 		
 		return $string;
 	}
