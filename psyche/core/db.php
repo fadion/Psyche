@@ -57,16 +57,23 @@ class Db {
 	{
 		$templates = config('database:');
 
-		// If a template is defined as parameter, check if it exists in the
-		// configuration cache. Otherwise gets the first template.
-		if (isset($template) and isset($templates[$template]))
-		{
-			$template = $templates[$template];
+		// If a template is defined as parameter.
+		if (isset($template))
+		{	
+			// If the template exists in the database config, read it.
+			// Otherwise throw an exception.
+			if (isset($templates['templates'][$template]))
+			{
+				$template = $templates['templates'][$template];
+			}
+			else
+			{
+				throw new \Exception(sprintf("Template %s doesn't exist", $template));
+			}
 		}
 		else
 		{
-			$template = array_values($templates);
-			$template = $template[0];
+			$template = $templates['templates'][$templates['use']];
 		}
 
 		try
