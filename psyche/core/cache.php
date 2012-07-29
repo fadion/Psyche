@@ -5,7 +5,8 @@ use Psyche\Core\Cache\File,
 	Psyche\Core\Cache\APC,
 	Psyche\Core\Cache\XCache,
 	Psyche\Core\Cache\Memcached,
-	Psyche\Core\Cache\Memory;
+	Psyche\Core\Cache\Memory,
+	Psyche\Core\Cache\Redis;
 
 /**
  * Cache Factory
@@ -112,6 +113,16 @@ class Cache
 	protected static function memory_driver ()
 	{
 		return new Memory();
+	}
+
+	/**
+	 * Initializes the Redis cache driver.
+	 * 
+	 * @return Cache\Redis
+	 */
+	protected static function redis_driver ($parameters)
+	{
+		return new Redis($parameters);
 	}
 
 }

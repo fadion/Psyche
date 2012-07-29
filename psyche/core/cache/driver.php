@@ -15,7 +15,12 @@ abstract class Driver
 	/**
 	 * @var bool Whether to auto-serialize data or not.
 	 */
-	protected $serialize;
+	protected $serialize = false;
+
+	/**
+	 * @var string Redis template
+	 */
+	protected $template = null;
 
 	/**
 	 * @var string Prefix that's added to cache keys.
@@ -26,9 +31,16 @@ abstract class Driver
 	{
 		// Auto-serialization is specified as an array:
 		// array('serialize' => true)
-		if (isset($parameters) and isset($parameters['serialize']))
+		if (isset($parameters['serialize']))
 		{
 			$this->serialize = $parameters['serialize'];
+		}
+
+		// The redis active template can be specified as an array:
+		// array('template' => 'name')
+		if (isset($parameters['template']))
+		{
+			$this->template = $parameters['template'];
 		}
 
 		$this->prefix = config('cache:prefix');
