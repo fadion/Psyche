@@ -170,6 +170,28 @@ class Tag
 	}
 
 	/**
+	 * Removes an attribute from an element.
+	 * 
+	 * @return Tag
+	 */
+	public function removeAttr ()
+	{
+		if (func_num_args())
+		{
+			// Multiple attributes can be passed as function arguments.
+			foreach (func_get_args() as $attr)
+			{
+				if (isset(static::$tree[$this->id]->attributes[$attr]))
+				{
+					unset(static::$tree[$this->id]->attributes[$attr]);	
+				}
+			}
+		}
+
+		return $this;
+	}
+
+	/**
 	 * Helper to set an ID attribute.
 	 * 
 	 * @param string $id
@@ -183,16 +205,58 @@ class Tag
 	}
 
 	/**
-	 * Helper to set a Class attribute. The underscore
-	 * appended to the method name wasn't a choice, but
-	 * a necessity as "class" is a reserved word.
+	 * Adds a class attribute.
 	 * 
-	 * @param string $class
 	 * @return Tag
 	 */
-	public function _class ($class)
+	public function addClass ()
 	{
-		$this->attr('class', $class);
+		$classes = array();
+		if (func_num_args())
+		{
+			// Multiple attributes can be passed as function arguments.
+			// Class is added to an array for further processing.
+			foreach (func_get_args() as $class)
+			{
+				$classes[] = $class;
+			}
+		}
+
+		$current_classes = explode(' ', static::$tree[$this->id]->attributes['class']);
+
+		// Makes sure no empty element is passed.
+		if (count($current_classes) and isset($current_classes[0]) and $current_classes[0] !== '')
+		{
+			$classes = array_merge($classes, $current_classes);
+		}
+
+		// Classes are appended to the current classes, seperated by spaces.
+		static::$tree[$this->id]->attributes['class'] = htmlspecialchars(implode(' ', $classes));
+
+		return $this;
+	}
+
+	/**
+	 * Removes a class from the element's attributes.
+	 * 
+	 * @return Tag
+	 */
+	public function removeClass ()
+	{
+		if (func_num_args())
+		{
+			$classes = static::$tree[$this->id]->attributes['class'];
+
+			// Iterates through the arguments and removes each class.
+			foreach (func_get_args() as $class)
+			{
+				// Found instances are replaced with an "@" to retain spaces.
+				$classes = preg_replace('/\s*'.preg_quote($class).'\s*/', '@', $classes);
+			}
+
+			$classes = str_replace('@', ' ', $classes);
+			static::$tree[$this->id]->attributes['class'] = $classes;
+		}
 
 		return $this;
 	}
