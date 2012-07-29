@@ -1,6 +1,6 @@
 <?php
-return array (
-
+return array
+(
 	// Default cache driver
 	'driver' => 'file',
 
@@ -22,5 +22,4 @@ return array (
 	// A prefix will be prepended to
 	// cache items to prevent name collisions
 	'prefix' => 'psyche'
-
 );

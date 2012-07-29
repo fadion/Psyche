@@ -63,9 +63,9 @@ class Log
 	 * @param array $args
 	 * @return bool
 	 */
-	public static function __callStatic($name, $args)
+	public static function __callStatic($method, $arguments)
 	{
-		static::write($args[0], $name);
+		static::write($arguments[0], $method);
 	}
 
 }

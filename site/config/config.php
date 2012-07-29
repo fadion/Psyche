@@ -1,6 +1,6 @@
 <?php
-return array (
-
+return array
+(
 	// Default and rollback locales
 	// The rollback will be used when a key is not found
 	'base locale' => 'en',
@@ -49,5 +49,4 @@ return array (
 	// Randomly generated SALT (for passwords) and TOKEN (for anything else)
 	'salt' => '$0R[Q4Cf6w$b?Ote+~RWu(u*n[gT#',
 	'token' => 'v8_]bQ4DT(<G3%Y+nFAT}1Y{#?Z!3'
-
 );

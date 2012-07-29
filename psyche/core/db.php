@@ -68,7 +68,7 @@ class Db {
 			}
 			else
 			{
-				throw new \Exception(sprintf("Template %s doesn't exist", $template));
+				throw new \Exception(sprintf("Template %s doesn't exist in the database configuration.", $template));
 			}
 		}
 		else

@@ -1,6 +1,6 @@
 <?php
-return array (
-
+return array
+(
 	'Asset'   => 'Psyche\Core\Asset',
 	'Form'    => 'Psyche\Core\Form',
 	'Request' => 'Psyche\Core\Request',
@@ -11,5 +11,4 @@ return array (
 	'Uri'     => 'Psyche\Core\Uri',
 	'Partial' => 'Psyche\Core\View\Partial',
 	'Tag'	  => 'Psyche\Core\Tag'
-
 );

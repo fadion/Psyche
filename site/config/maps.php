@@ -1,6 +1,5 @@
 <?php
-return array (
-
+return array
+(
 	'Some\Lib\TestLib' => 'testlib'
-
 );
