@@ -48,13 +48,18 @@ class Mold
 	/**
 	 * @var string Name of the parent without the path or extension
 	 */
-	protected static $use;
+	protected static $extends;
+
+	/**
+	 * @var array Holds temporarily contents of raw blocks
+	 */
+	protected static $raw = array();
 
 	/**
 	 * @var array List of available parses. Each one will call a class method
 	 */
 	protected static $parsers = array(
-		'comments', 'use', 'partials', 'reserves', 'includes', 'structures', 'echo', 'setters'
+		'start_raw', 'comments', 'includes', 'extends', 'uses', 'blocks', 'structures', 'echo', 'generics', 'end_raw'
 	);
 
 	/**
@@ -70,11 +75,11 @@ class Mold
 
 		static::$contents = file_get_contents(static::$file);
 
-		// Matches the {use 'file'} syntax to check for any defined inheritance.
+		// Matches the {% extends 'file' %} syntax to check for any defined inheritance.
 		// From the returned matches, the parent's name and path are set.
-		if (preg_match("|\{\s*use\s+'(.+?)'\s*\}|i", static::$contents, $matches))
+		if (preg_match("|\{%\s*extends\s+'(.+?)'\s*%\}|i", static::$contents, $matches))
 		{
-			static::$use = $matches[1];
+			static::$extends = $matches[1];
 			static::$parent = config('views path').$matches[1];
 			if (pathinfo(static::$parent, PATHINFO_EXTENSION) == '')
 			{
@@ -110,107 +115,128 @@ class Mold
 	}
 
 	/**
-	 * Parses {use 'file'} syntax for defining a parent.
+	 * Parses {% extends 'file' %} syntax for defining a parent.
 	 * 
 	 * @return null|void
 	 */
-	protected static function parse_use ()
+	protected static function parse_extends ()
 	{
-		// If @var $parent wasn't set in the constructore, no parent was specified.
+		// If @var $parent wasn't set in the constructor, no parent was specified.
 		if (!isset(static::$parent))
 		{
 			return;
 		}
 
-		static::$contents = preg_replace("|\{\s*use\s+'".static::$use."'\s*\}\n*|i", file_get_contents(static::$parent), static::$contents);
+		static::$contents = preg_replace("|\{%\s*extends\s+'{0,1}".preg_quote(static::$extends)."'{0,1}\s*%\}\n*|i", file_get_contents(static::$parent), static::$contents);
 	}
 
 	/**
-	 * Parses {partial 'name'} syntax for defining inheritance blocks.
-	 * The found instances will be put into their corresponding {reserve 'name'} blocks.
+	 * Parses {% use 'name' %} syntax for defining children blocks.
+	 * The found instances will be put into their corresponding {% use 'name' %} blocks.
 	 * 
 	 * @return null|void
 	 */
-	protected static function parse_partials ()
+	protected static function parse_uses ()
 	{
 		if (!isset(static::$parent))
 		{
 			return;
 		}
 
-		preg_match_all("|\{\s*partial\s+'(.+?)'\s*\}\n*(.+?)\n*\{\s*/partial\s*\}\n*|is", static::$contents, $matches);
-
-		$find = $matches[0];
-		$partials = $matches[1];
-		$inner = $matches[2];
-
-		if (count($partials))
+		if (preg_match_all("|\{%\s*use\s+'(.+?)'\s*%\}\n*(.+?)\n*\{%\s*enduse\s*%\}\n*|is", static::$contents, $matches))
 		{
-			$i = 0;
-			foreach ($partials as $partial)
-			{
-				// Each partial is confronted with a {reserve} of the same name. If it exists,
-				// the partial content will be insterted into the parent.
-				if (preg_match("|\{\s*reserve\s+'".$partial."'\s*\}|i", static::$contents, $matches))
-				{
-					static::$contents = preg_replace("|\{\s*reserve\s+'".$partial."'\s*\}(\n*(.+?)\n*\{/reserve\})?|is", $inner[$i], static::$contents);
-					static::$contents = str_replace($find[$i], '', static::$contents);
-				}
+			$find = $matches[0];
+			$replaces = $matches[1];
+			$inner = $matches[2];
 
-				$i++;
+			if (count($replaces))
+			{
+				$i = 0;
+				foreach ($replaces as $use)
+				{
+					// Each use block is confronted with a {% block %} of the same name. If it exists,
+					// the use block content will be insterted into the parent.
+					if (preg_match("|\{%\s*block\s+'".preg_quote($use)."'\s*%\}|i", static::$contents, $matches))
+					{
+						static::$contents = preg_replace("|\{%\s*block\s+'".$use."'\s*%\}(\n*(.+?)\n*\{%\s*endblock\s*%\})?|is", $inner[$i], static::$contents);
+						static::$contents = str_replace($find[$i], '', static::$contents);
+					}
+
+					$i++;
+				}
 			}
 		}
 	}
 
 	/**
-	 * Parses block reserves with the {reserve 'name'}default value{/reserve} syntax.
-	 * Those will be compiled only if no partial used them.
+	 * Parses block reserves with the {% block 'name' %}default value{% endblock %} syntax,
+	 * only if no {% use %} block used it.
 	 * 
 	 * @return void
 	 */
-	protected static function parse_reserves ()
+	protected static function parse_blocks ()
 	{
-		static::$contents = preg_replace("|\{\s*reserve\s+'(.+?)'\s*\}\n*(.+?)\n*\{/reserve\}|is", '$2', static::$contents);
+		static::$contents = preg_replace("|\{%\s*block\s+'(.+?)'\s*%\}\n*(.+?)\n*\{%\s*endblock\s*%\}|is", '$2', static::$contents);
 	}
 
 	/**
-	 * Parses variables echos with the {{$var}} syntax.
+	 * Parses echos with the {{ $var }} syntax.
 	 * 
 	 * @return void
 	 */
 	protected static function parse_echo ()
 	{
-		static::$contents = preg_replace('|\{\{\s*(.+?)\s*\}\}|', "<?= $1; ?>", static::$contents);
+		if (preg_match_all('|\{\{\s*(.+?)\s*\}\}|', static::$contents, $matches))
+		{
+			$finds = $matches[0];
+			$replaces = $matches[1];
+
+			for ($i = 0, $count = count($replaces); $i < $count; $i++)
+			{
+				$replace = $replaces[$i];
+
+				// Data is output raw only if a "raw" filter is set or automatic
+				// escaping is disabled.
+				if (strpos($replace, '|raw') or config('mold automatic escaping') == 0)
+				{
+					$replace = str_replace('|raw', '', $replace);
+					$replace = "<?php echo ".$replace." ?>";
+				}
+				else
+				{
+					// Data is escaped.
+					$replace = "<?php echo htmlspecialchars(stripslashes(".$replace."), ENT_QUOTES, 'UTF-8'); ?>";
+				}
+
+				static::$contents = str_replace($finds[$i], $replace, static::$contents);
+			}
+		}
 	}
 
 	/**
-	 * Parses control structures: if, elseif, else, foreach, for and while.
+	 * Parses control structures: {% if %}, elseif, else, foreach, for and while.
 	 * Parses endings, break and continue too.
 	 * 
 	 * @return void
 	 */
 	protected static function parse_structures ()
 	{
-		static::$contents = preg_replace('/\{\s*((if|elseif|foreach|for|while)\s*(.+?))\s*\}/i', "<?php $2 ($3): ?>", static::$contents);
-		static::$contents = preg_replace('|\{\s*else\s*\}|i', "<?php else: ?>", static::$contents);
-		static::$contents = preg_replace('|\{\s*\/if\s*\}|i', "<?php endif; ?>", static::$contents);
-		static::$contents = preg_replace('|\{\s*\/foreach\s*\}|i', "<?php endforeach; ?>", static::$contents);
-		static::$contents = preg_replace('|\{\s*\/for\s*\}|i', "<?php endfor; ?>", static::$contents);
-		static::$contents = preg_replace('|\{\s*\/while\s*\}|i', "<?php endwhile; ?>", static::$contents);
-		static::$contents = preg_replace('/\{\s*(continue|break)\s*\}/i', "<?php $1; ?>", static::$contents);
+		static::$contents = preg_replace('/\{%\s*((if|elseif|foreach|for|while)\s*\({0,1}(.+?)\)*){0,1}\s*%\}/i', "<?php $2 ($3): ?>", static::$contents);
+		static::$contents = preg_replace('|\{%\s*else\s*%\}|i', "<?php else: ?>", static::$contents);
+		static::$contents = preg_replace('/\{%\s*end(if|foreach|for|while)\s*%\}/', "<?php end$1; ?>", static::$contents);
+		static::$contents = preg_replace('/\{%\s*(continue|break)\s*%\}/i', "<?php $1; ?>", static::$contents);
 	}
 
 	/**
-	 * Parses includes with the {include 'file'} syntax. This doesn't get
-	 * compiled as a normal PHP include, as the included file's content
-	 * wouldn't be parsed. Instead, the file content is read and replaced
-	 * with the pseudo-function.
+	 * Parses includes with the {% include 'file' %} syntax. They don't get
+	 * compiled as normal PHP includes, as the included file's content
+	 * wouldn't be parsed. Instead, the file contents are read.
 	 * 
 	 * @return void
 	 */
 	protected static function parse_includes ()
 	{
-		if (preg_match_all("|\{\s*include\s+'(.+?)'\s*\}|i", static::$contents, $matches))
+		if (preg_match_all("|\{%\s*include\s+'{0,1}(.+?)'{0,1}\s*%\}|i", static::$contents, $matches))
 		{
 			$finds = $matches[0];
 			$includes = $matches[1];
@@ -239,27 +265,75 @@ class Mold
 	}
 
 	/**
-	 * Parses comments with the {* Some comment *} syntax. They are written as PHP comments, so
+	 * Parses comments with the {# Some comment #} syntax.
+	 * They are written as block PHP comments, so
 	 * there will be no trace of them in the HTML output.
 	 * 
 	 * @return void
 	 */
 	protected static function parse_comments ()
 	{
-		static::$contents = preg_replace('|\{\s*\*(.+?)\*\s*\}|', "<?php //$1; ?>", static::$contents);
+		static::$contents = preg_replace('|\{#\s*(.+?)\s*#\}|s', "<?php /*$1*/; ?>", static::$contents);
 	}
 
 	/**
-	 * Parses generic variables with the syntax {$var}, {$var++}, {$var = 'value'}, etc. It's here mostly
-	 * to provide an option to set variables in the view file, something that should be avoided
-	 * and done in the controller (where the logic resides). However, it can be useful on those cases
-	 * when a where() needs to be used and the variable is incremented/decremented dynamically in the view.
+	 * Parses generic PHP code.
 	 * 
 	 * @return void
 	 */
-	protected static function parse_setters ()
+	protected static function parse_generics ()
 	{
-		static::$contents = preg_replace('|\{\s*\$(.+?)\s*\}|', "<?php $$1; ?>", static::$contents);
+		static::$contents = preg_replace('|\{%\s*(.+?)\s*%\}|', "<?php $1; ?>", static::$contents);
+	}
+
+	/**
+	 * Parses raw output with the {% raw %}{% endraw %} syntax.
+	 * To prevent processing of the data inside a raw block, each
+	 * found instance is held in an array and output in the end
+	 * of parsing via parse_end_raw().
+	 * 
+	 * @return void
+	 */
+	protected static function parse_start_raw ()
+	{
+		if (preg_match_all("|\{%\s*raw\s*%\}\n*(.+?)\n*\{%\s*endraw\s*%\}|is", static::$contents, $matches))
+		{
+			$finds = $matches[0];
+			$replaces = $matches[1];
+
+			static::$raw = $replaces;
+
+			for ($i = 0, $count = count($replaces); $i < $count; $i++)
+			{
+				// Each raw block is replaced with a placeholder that's going to be replaced again
+				// in the end of parsing.
+				static::$contents = str_replace($finds[$i], '#####@raw'.$i.'@#####', static::$contents);
+			}
+		}
+	}
+
+	/**
+	 * Puts raw data in their place.
+	 * 
+	 * @return void
+	 */
+	protected static function parse_end_raw ()
+	{
+		if (count(static::$raw))
+		{
+			// Matches all the placeholders for raw data.
+			if (preg_match_all("|#####@raw(\d)@#####|", static::$contents, $matches))
+			{
+				$finds = $matches[0];
+				$replaces = static::$raw;
+
+				for ($i = 0, $count = count($replaces); $i < $count; $i++)
+				{
+					// Each placeholder is replaced with the correct raw data.
+					static::$contents = str_replace($finds[$i], $replaces[$i], static::$contents);
+				}
+			}
+		}
 	}
 
 	/**

@@ -38,6 +38,9 @@ return array
 	// Default Mold Template Engine file extensions
 	'mold extension' => '.mold.php',
 
+	// Whether Mold should automatically escape output
+	'mold automatic escaping' => 1,
+
 	// Debug driver
 	'debug driver' => 'gizmo',
 
