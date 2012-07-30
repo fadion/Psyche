@@ -59,6 +59,11 @@ class Drill
 	protected $dirty = array();
 
 	/**
+	 * @var bool Whether were the data hydrated or not.
+	 */
+	protected $hydrated = false;
+
+	/**
 	 * @var bool Determines if it's a new row (insert) or an existing one (update).
 	 */
 	protected $is_new = false;
@@ -95,22 +100,6 @@ class Drill
 			$this->id = $id;
 			$this->is_new = false;
 
-			$query = Query::select()->from(static::table())->where(static::$p_key.' = '.$this->id);
-
-			// If cache is active, check for a cached result set.
-			// Otherwise, run the query as normal.
-			if (static::$cache_status and Cache::has($query))
-			{
-				$results = Cache::get($query);
-			}
-			else
-			{
-				$results = $query->first();
-				Cache::add($query, $results);
-			}
-
-			$this->hydrate($results);
-
 			Callback::observe('after_hydrate', $this);
 		}
 		else
@@ -138,16 +127,38 @@ class Drill
 	 * Gets column values.
 	 * 
 	 * @param string $name
-	 * @return string|bool
+	 * @return string|null
 	 */
 	public function get ($name)
 	{
+		// SELECT queries to fill the model's fields are
+		// lazy loaded. It will run only once when a field
+		// is requested.
+		if (!$this->hydrated)
+		{
+			$query = Query::select()->from(static::table())->where(static::$p_key.' = '.$this->id);
+
+			// If cache is active, check for a cached result set.
+			// Otherwise, run the query as normal.
+			if (static::$cache_status and Cache::has($query))
+			{
+				$results = Cache::get($query);
+			}
+			else
+			{
+				$results = $query->first();
+				Cache::add($query, $results);
+			}
+
+			$this->hydrate($results);
+		}
+
 		if (isset($this->vars[$name]))
 		{
 			return $this->vars[$name];
 		}
 
-		return false;
+		return null;
 	}
 
 	/**
