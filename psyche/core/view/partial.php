@@ -29,7 +29,7 @@ class Partial
 	protected static $active;
 
 	/**
-	 * Replaces a reserve declaration with the appropriate
+	 * Replaces a block declaration with the appropriate
 	 * partial. When no partial block (or inline) exists,
 	 * the default value is returned.
 	 * 
@@ -37,7 +37,7 @@ class Partial
 	 * @param string $default
 	 * @return string
 	 */
-	public static function reserve ($name, $default = null)
+	public static function block ($name, $default = null)
 	{
 		if (isset(static::$partials[$name]))
 		{
@@ -60,7 +60,7 @@ class Partial
 	 * @param string $name
 	 * @return void
 	 */
-	public static function begin ($name)
+	public static function start ($name)
 	{
 		static::$partials[$name] = true;
 		static::$active = $name;
