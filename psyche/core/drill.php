@@ -468,7 +468,7 @@ class Drill
 	 * @param string $what
 	 * @return object
 	 */
-	public static function find_one ($what)
+	public static function one ($what)
 	{
 		return static::find($what, false);
 	}
@@ -479,7 +479,7 @@ class Drill
 	 * @param string $what
 	 * @return object
 	 */
-	public static function find_many ($what)
+	public static function many ($what)
 	{
 		return static::find($what);
 	}
@@ -489,7 +489,7 @@ class Drill
 	 * 
 	 * @return object
 	 */
-	public static function find_all ()
+	public static function all ()
 	{
 		return static::find('', true, true);
 	}
