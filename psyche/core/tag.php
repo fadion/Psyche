@@ -247,15 +247,66 @@ class Tag
 		{
 			$classes = static::$tree[$this->id]->attributes['class'];
 
-			// Iterates through the arguments and removes each class.
+			// Explode the classes so each element can be
+			// checked individually.
+			$classes = explode(' ', $classes);
+
+			// Iterates through the arguments.
 			foreach (func_get_args() as $class)
 			{
-				// Found instances are replaced with an "@" to retain spaces.
-				$classes = preg_replace('/\s*'.preg_quote($class).'\s*/', '@', $classes);
+				foreach ($classes as $key => $val)
+				{
+					if ($val == $class)
+					{
+						unset($classes[$key]);
+					}
+				}
 			}
 
-			$classes = str_replace('@', ' ', $classes);
-			static::$tree[$this->id]->attributes['class'] = $classes;
+			static::$tree[$this->id]->attributes['class'] = implode(' ', $classes);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Checks if an element has a class.
+	 * 
+	 * @param string $class
+	 * @return bool
+	 */
+	public function hasClass ($class)
+	{
+		$classes = static::$tree[$this->id]->attributes['class'];
+
+		// Explode the classes so each element can be
+		// checked individually.
+		$classes = explode(' ', $classes);
+
+		if (in_array($class, $classes))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Toggles an element's class. If it has the class,
+	 * it gets removed. Otherwise, it is added.
+	 * 
+	 * @param string $class
+	 * @return Tag
+	 */
+	public function toggleClass ($class)
+	{
+		if ($this->hasClass($class))
+		{
+			$this->removeClass($class);
+		}
+		else
+		{
+			$this->addClass($class);
 		}
 
 		return $this;
