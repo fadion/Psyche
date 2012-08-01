@@ -59,11 +59,6 @@ class Drill
 	protected $dirty = array();
 
 	/**
-	 * @var bool Whether were the data hydrated or not.
-	 */
-	protected $hydrated = false;
-
-	/**
 	 * @var bool Determines if it's a new row (insert) or an existing one (update).
 	 */
 	protected $is_new = false;
@@ -88,8 +83,9 @@ class Drill
 	 * and hydrates column data.
 	 * 
 	 * @param int $id
+	 * @param object $results Query results
 	 */
-	public function __construct ($id = null)
+	public function __construct ($id = null, $results = null)
 	{
 		Callback::observe('after_create', $this);
 
@@ -99,6 +95,8 @@ class Drill
 		{
 			$this->id = $id;
 			$this->is_new = false;
+
+			$this->hydrate($results);
 
 			Callback::observe('after_hydrate', $this);
 		}
@@ -131,28 +129,6 @@ class Drill
 	 */
 	public function get ($name)
 	{
-		// SELECT queries to fill the model's fields are
-		// lazy loaded. It will run only once when a field
-		// is requested.
-		if (!$this->hydrated)
-		{
-			$query = Query::select()->from(static::table())->where(static::$p_key.' = '.$this->id);
-
-			// If cache is active, check for a cached result set.
-			// Otherwise, run the query as normal.
-			if (static::$cache_status and Cache::has($query))
-			{
-				$results = Cache::get($query);
-			}
-			else
-			{
-				$results = $query->first();
-				Cache::add($query, $results);
-			}
-
-			$this->hydrate($results);
-		}
-
 		if (isset($this->vars[$name]))
 		{
 			return $this->vars[$name];
@@ -201,7 +177,7 @@ class Drill
 	 * @param array|object $data
 	 * @return void
 	 */
-	public function hydrate ($data)
+	protected function hydrate ($data)
 	{
 		if (is_object($data))
 		{
@@ -564,7 +540,7 @@ class Drill
 	 */
 	protected static function select_from ()
 	{
-		return Query::select(static::$p_key)->from(static::table());
+		return Query::select()->from(static::table());
 	}
 
 	/**
@@ -585,7 +561,7 @@ class Drill
 			// Creates a new model instance by passing
 			// the row ID.
 			$class_name = static::class_name();
-			$objects[] = new $class_name($id);
+			$objects[] = new $class_name($id, $row);
 		}
 
 		return $objects;
@@ -603,7 +579,7 @@ class Drill
 		$id = $results->$id;
 
 		$class_name = static::class_name();
-		return new $class_name($id);
+		return new $class_name($id, $results);
 	}
 
 	/**
