@@ -59,7 +59,7 @@ class Mold
 	 * @var array List of available parses. Each one will call a class method
 	 */
 	protected static $parsers = array(
-		'start_raw', 'comments', 'includes', 'extends', 'uses', 'blocks', 'structures', 'echo', 'generics', 'end_raw'
+		'start_raw', 'comments', 'extends', 'uses', 'blocks', 'includes', 'structures', 'echo', 'generics', 'end_raw'
 	);
 
 	/**
@@ -77,7 +77,7 @@ class Mold
 
 		// Matches the {% extends 'file' %} syntax to check for any defined inheritance.
 		// From the returned matches, the parent's name and path are set.
-		if (preg_match("|\{%\s*extends\s+'(.+?)'\s*%\}|i", static::$contents, $matches))
+		if (preg_match("/\{%\s*extends\s+(?:'|".'"'."){0,1}(.+?)(?:'|".'"'."){0,1}\s*%\}/i", static::$contents, $matches))
 		{
 			static::$extends = $matches[1];
 			static::$parent = config('views path').$matches[1];
@@ -127,7 +127,7 @@ class Mold
 			return;
 		}
 
-		static::$contents = preg_replace("|\{%\s*extends\s+'{0,1}".preg_quote(static::$extends)."'{0,1}\s*%\}\n*|i", file_get_contents(static::$parent), static::$contents);
+		static::$contents = preg_replace("/\{%\s*extends\s+(?:'|".'"'."){0,1}".preg_quote(static::$extends)."(?:'|".'"'."){0,1}\s*%\}\n*/i", file_get_contents(static::$parent), static::$contents);
 	}
 
 	/**
@@ -143,7 +143,7 @@ class Mold
 			return;
 		}
 
-		if (preg_match_all("|\{%\s*use\s+'(.+?)'\s*%\}\n*(.+?)\n*\{%\s*enduse\s*%\}\n*|is", static::$contents, $matches))
+		if (preg_match_all("/\{%\s*use\s+(?:'|".'"'."){0,1}(.+?)(?:'|".'"'."){0,1}\s*%\}\n*(.+?)\n*\{%\s*enduse\s*%\}\n*/is", static::$contents, $matches))
 		{
 			$find = $matches[0];
 			$replaces = $matches[1];
@@ -156,9 +156,9 @@ class Mold
 				{
 					// Each use block is confronted with a {% block %} of the same name. If it exists,
 					// the use block content will be insterted into the parent.
-					if (preg_match("|\{%\s*block\s+'".preg_quote($use)."'\s*%\}|i", static::$contents, $matches))
+					if (preg_match("/\{%\s*block\s+(?:'|".'"'."){0,1}".preg_quote($use)."(?:'|".'"'."){0,1}\s*%\}/i", static::$contents, $matches))
 					{
-						static::$contents = preg_replace("|\{%\s*block\s+'".$use."'\s*%\}(\n*(.+?)\n*\{%\s*endblock\s*%\})?|is", $inner[$i], static::$contents);
+						static::$contents = preg_replace("/\{%\s*block\s+(?:'|".'"'."){0,1}".$use."(?:'|".'"'."){0,1}\s*%\}(\n*(.+?)\n*\{%\s*endblock\s*%\})?/is", $inner[$i], static::$contents);
 						static::$contents = str_replace($find[$i], '', static::$contents);
 					}
 
@@ -170,13 +170,17 @@ class Mold
 
 	/**
 	 * Parses block reserves with the {% block 'name' %}default value{% endblock %} syntax,
-	 * only if no {% use %} block used it.
+	 * only if no {% use %} block used it. Finally, it removes unused blocks and use clauses
+	 * so no parse errors get thrown to the client.
 	 * 
 	 * @return void
 	 */
 	protected static function parse_blocks ()
 	{
-		static::$contents = preg_replace("|\{%\s*block\s+'(.+?)'\s*%\}\n*(.+?)\n*\{%\s*endblock\s*%\}|is", '$2', static::$contents);
+		static::$contents = preg_replace("/\{%\s*block\s+(?:'|".'"'."){0,1}(.+?)(?:'|".'"'."){0,1}\s*%\}\n*(.+?)\n*\{%\s*endblock\s*%\}/is", '$2', static::$contents);
+		static::$contents = preg_replace("/\{%\s*use\s+(?:'|".'"'."){0,1}(.+?)(?:'|".'"'."){0,1}\s*%\}\n*(.+?)\n*\{%\s*enduse\s*%\}\n*/is", '', static::$contents);
+		static::$contents = preg_replace("/\{%\s*block\s+(?:'|".'"'."){0,1}(.+?)(?:'|".'"'."){0,1}\s*%\}/i", '', static::$contents);
+		static::$contents = preg_replace("/\{%\s*extends\s+(?:'|".'"'."){0,1}(.+?)(?:'|".'"'."){0,1}\s*%\}\n*/i", '', static::$contents);
 	}
 
 	/**
@@ -186,7 +190,7 @@ class Mold
 	 */
 	protected static function parse_echo ()
 	{
-		if (preg_match_all('|\{\{\s*(.+?)\s*\}\}|', static::$contents, $matches))
+		if (preg_match_all('/\{\{\s*(.+?)\s*\}\}/', static::$contents, $matches))
 		{
 			$finds = $matches[0];
 			$replaces = $matches[1];
@@ -221,8 +225,8 @@ class Mold
 	 */
 	protected static function parse_structures ()
 	{
-		static::$contents = preg_replace('/\{%\s*((if|elseif|foreach|for|while)\s*\({0,1}(.+?)\)*){0,1}\s*%\}/i', "<?php $2 ($3): ?>", static::$contents);
-		static::$contents = preg_replace('|\{%\s*else\s*%\}|i', "<?php else: ?>", static::$contents);
+		static::$contents = preg_replace('/\{%\s*((if|elseif|foreach|for|while)\s*(.+?))\s*%\}/i', "<?php $2 ($3): ?>", static::$contents);
+		static::$contents = preg_replace('/\{%\s*else\s*%\}/i', "<?php else: ?>", static::$contents);
 		static::$contents = preg_replace('/\{%\s*end(if|foreach|for|while)\s*%\}/', "<?php end$1; ?>", static::$contents);
 		static::$contents = preg_replace('/\{%\s*(continue|break)\s*%\}/i', "<?php $1; ?>", static::$contents);
 	}
@@ -236,7 +240,7 @@ class Mold
 	 */
 	protected static function parse_includes ()
 	{
-		if (preg_match_all("|\{%\s*include\s+'{0,1}(.+?)'{0,1}\s*%\}|i", static::$contents, $matches))
+		if (preg_match_all("/\{%\s*include\s+(?:'|".'"'."){0,1}(.+?)(?:'|".'"'."){0,1}\s*%\}/i", static::$contents, $matches))
 		{
 			$finds = $matches[0];
 			$includes = $matches[1];
@@ -273,7 +277,7 @@ class Mold
 	 */
 	protected static function parse_comments ()
 	{
-		static::$contents = preg_replace('|\{#\s*(.+?)\s*#\}|s', "<?php /*$1*/; ?>", static::$contents);
+		static::$contents = preg_replace('/\{#\s*(.+?)\s*#\}/s', "<?php /*$1*/; ?>", static::$contents);
 	}
 
 	/**
@@ -283,7 +287,7 @@ class Mold
 	 */
 	protected static function parse_generics ()
 	{
-		static::$contents = preg_replace('|\{%\s*(.+?)\s*%\}|', "<?php $1; ?>", static::$contents);
+		static::$contents = preg_replace('/\{%\s*(.+?)\s*%\}/', "<?php $1; ?>", static::$contents);
 	}
 
 	/**
@@ -296,7 +300,7 @@ class Mold
 	 */
 	protected static function parse_start_raw ()
 	{
-		if (preg_match_all("|\{%\s*raw\s*%\}\n*(.+?)\n*\{%\s*endraw\s*%\}|is", static::$contents, $matches))
+		if (preg_match_all("/\{%\s*raw\s*%\}\n*(.+?)\n*\{%\s*endraw\s*%\}/is", static::$contents, $matches))
 		{
 			$finds = $matches[0];
 			$replaces = $matches[1];
@@ -322,7 +326,7 @@ class Mold
 		if (count(static::$raw))
 		{
 			// Matches all the placeholders for raw data.
-			if (preg_match_all("|#####@raw(\d)@#####|", static::$contents, $matches))
+			if (preg_match_all("/#####@raw(\d)@#####/", static::$contents, $matches))
 			{
 				$finds = $matches[0];
 				$replaces = static::$raw;
