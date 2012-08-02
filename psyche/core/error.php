@@ -38,7 +38,16 @@ class Error
 	 * The Exception Handler. Uncaught exceptions will be shown
 	 * with some useful information.
 	 */
-	public function exception_handler($exception) {
+	public function exception_handler($exception)
+	{
+		$debug = (bool) config('debug');
+
+		if (!$debug)
+		{
+			echo 'We are sorry but an error occurred. Please try again later.';
+			exit;
+		}
+
 		$trace = $exception->getTrace();
 
 		echo '<b>Uncaught exception</b> in ['.$trace[0]['file'].'] at line ['.$trace[0]['line'].']';

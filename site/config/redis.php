@@ -7,7 +7,7 @@ return array
 	(
 		'main' => array
 		(
-			'host' => '213.207.38.222',
+			'host' => 'localhost',
 			'port' => '6379',
 			'password' => '',
 			'db' => 0
