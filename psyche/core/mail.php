@@ -49,38 +49,6 @@ class Mail {
 	}
 
 	/**
-	 * Send method
-	 *
-	 * Checks everything is right and sends email to destination.
-	 */
-	 	
-	public static function send() 
-	{
-		if (is_null($this->$to)) 
-		{
-			trigger_error('No recipient specified.', E_USER_WARNING);
-		}
-		
-		if (is_null($this->$from)) 
-		{
-			trigger_error('No sender specified.', E_USER_WARNING);
-		}
-			
-		if (is_null($this->$message)) 		
-		{
-			trigger_error('Message is empty.', E_USER_WARNING);
-		}
-		
-		$this->headers();
-		$sent = mail($this->$to, $this->$subject, $this->$message, $this->$headers);
-		if(!$sent) {
-			trigger_error('Server cannot send the email.', E_USER_WARNING);
-		} else {
-			return true;
-		}
-	}
-	
-	/**
 	 * Recipients, comma-separated
 	 *
 	 * Can be direct email or in the form of: Sender Name <email@host.com>	 
@@ -251,4 +219,37 @@ class Mail {
 			$this->$message = $str;
 		}
 	}
+
+	/**
+	 * Send method
+	 *
+	 * Checks everything is right and sends email to destination.
+	 */
+	 	
+	public static function send() 
+	{
+		if (is_null($this->$to)) 
+		{
+			trigger_error('No recipient specified.', E_USER_WARNING);
+		}
+		
+		if (is_null($this->$from)) 
+		{
+			trigger_error('No sender specified.', E_USER_WARNING);
+		}
+			
+		if (is_null($this->$message)) 		
+		{
+			trigger_error('Message is empty.', E_USER_WARNING);
+		}
+		
+		$this->headers();
+		$sent = mail($this->$to, $this->$subject, $this->$message, $this->$headers);
+		if(!$sent) {
+			trigger_error('Server cannot send the email.', E_USER_WARNING);
+		} else {
+			return true;
+		}
+	}
+		
 }
