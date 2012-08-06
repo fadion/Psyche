@@ -154,7 +154,7 @@ class Mail {
 		return $this;
 	}
 	
-	private static function headers() 
+	protected function headers() 
 	{
 		if (!$this->$headers) {
 			$this->$headers = "MIME-Version: 1.0" . PHP_EOL;
