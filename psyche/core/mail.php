@@ -14,6 +14,7 @@ namespace Psyche\Core;
 
 class Mail {
 	
+	protected $from = null;
 	protected $to = null;
 	protected $subject = null;
 	protected $message = null;
@@ -21,17 +22,17 @@ class Mail {
 	
 	protected $cc = null;
 	protected $bcc = null;
-	protected $from = null;
 	protected $reply_to = null;
 	protected $attachments = array();
-	
+
+	/**
+	 * Constructor. Sets the email handler.
+	 * 
+	 * @param string $from Path to the image file
+	 */	
 	public function __construct ($from) 
 	{
-		$this->$from = $from . PHP_EOL;
-		
-		if(is_null($this->$reply_to)) {
-			$this->$reply_to = $from. PHP_EOL;
-		}
+		$this->from = $from . PHP_EOL;
 
 	}
 
@@ -44,7 +45,6 @@ class Mail {
 	 */
 	public static function from($from) 
 	{
-		return $this;
 		return new static($from);
 	}
 
@@ -55,9 +55,9 @@ class Mail {
 	 * @param string
 	 * @return string
 	 */
-	public static function to($address) 
+	public function to($address) 
 	{
-		$this->$to = $address;
+		$this->to = $address;
 		return $this;
 	}
 	
@@ -68,14 +68,14 @@ class Mail {
 	 * @param string
 	 * @return string
 	 */	
-	public static function cc($address) 
+	public function cc($address) 
 	{
-		$this->$cc = $address;
+		$this->cc = $address;
 		return $this;
 	}
 	
-	public static function bcc($address) {
-		$this->$bcc = $address;
+	public function bcc($address) {
+		$this->bcc = $address;
 		return $this;
 	}
 	
@@ -86,9 +86,9 @@ class Mail {
 	 * @param string
 	 * @return string
 	 */	
-	public static function reply_to($address) 
+	public function reply_to($address) 
 	{
-		$this->$reply_to = $address . PHP_EOL;
+		$this->reply_to = $address . PHP_EOL;
 		return $this;
 	}
 
@@ -98,9 +98,9 @@ class Mail {
 	 * @param string
 	 * @return string
 	 */	
-	public static function subject($subject) 
+	public function subject($subject) 
 	{
-		$this->$subject = $subject;
+		$this->subject = $subject;
 		return $this;
 	}
 
@@ -110,53 +110,59 @@ class Mail {
 	 * @param string
 	 * @return string
 	 */	
-	public static function message($message) 
+	public function message($message) 
 	{
-		$this->$message = $message;
+		$this->message = $message;
 		return $this;
 	}
-	
-	public static function attachment($file_path) 
+
+	/**
+	 * Email Attachments
+	 *
+	 * @param string
+	 * @return string
+	 */		
+	public function attachment($file_path) 
 	{
-		$this->$attachments[] = $file_path;
+		$this->attachments[] = $file_path;
 		return $this;
 	}
 	
 	protected function headers() 
 	{
-		if (!$this->$headers) {
-			$this->$headers = "MIME-Version: 1.0" . PHP_EOL;
-			$this->$headers .= "To: " . $this->$to . PHP_EOL;
-			$this->$headers .= "From: " . $this->$from . PHP_EOL;
-			$this->$headers .= "Reply-To: " . $this->$reply_to . PHP_EOL;
-			$this->$headers .= "Return-Path: " . $this->$from . PHP_EOL;
+		if (!$this->headers) {
+			$this->headers = "MIME-Version: 1.0" . PHP_EOL;
+			$this->headers .= "To: " . $this->to . PHP_EOL;
+			$this->headers .= "From: " . $this->from . PHP_EOL;
+			$this->headers .= "Reply-To: " . $this->reply_to . PHP_EOL;
+			$this->headers .= "Return-Path: " . $this->from . PHP_EOL;
 			
-			if ($this->$cc) {
-				$this->$headers .= "Cc: " . $this->$cc . PHP_EOL;
+			if ($this->cc) {
+				$this->headers .= "Cc: " . $this->cc . PHP_EOL;
 			}
 			
-			if ($this->$bcc) {
-				$this->$headers .= "Bcc: " . $this->$bcc . PHP_EOL;
+			if ($this->bcc) {
+				$this->headers .= "Bcc: " . $this->bcc . PHP_EOL;
 			}
 			
 			$str = "";
-			if ($this->$attachments) {
+			if ($this->attachments) {
 				$random_hash = md5(date('r', time()));
-				$this->$headers .= "Content-Type: multipart/mixed; boundary=\"PHP-mixed-".$random_hash."\"" . PHP_EOL;
+				$this->headers .= "Content-Type: multipart/mixed; boundary=\"PHP-mixed-".$random_hash."\"" . PHP_EOL;
 				
-				$pos = strpos($this->$message, "<html>");
+				$pos = strpos($this->message, "<html>");
 				if ($pos === false) {
 					$str .= "--PHP-mixed-$random_hash" . PHP_EOL;
 					$str .= "Content-Type: text/plain; charset=\"utf-8\"" . PHP_EOL;
 					$str .= "Content-Transfer-Encoding: 7bit" . PHP_EOL;
-					$str .= $this->$message . PHP_EOL;
+					$str .= $this->message . PHP_EOL;
 				}
 				
 				if ($pos == 0) {
 					$str .= "--PHP-mixed-$random_hash" . PHP_EOL;
 					$str .= "Content-Type: text/html; charset=\"utf-8\"" . PHP_EOL;
 					$str .= "Content-Transfer-Encoding: 7bit" . PHP_EOL;
-					$str .= $this->$message . PHP_EOL;
+					$str .= $this->message . PHP_EOL;
 				}
 				
 				if ($pos > 0) {
@@ -164,16 +170,16 @@ class Mail {
 					$str .= "--PHP-alt-$random_hash" . PHP_EOL;
 					$str .= "Content-Type: text/plain; charset=\"utf-8\"" . PHP_EOL;
 					$str .= "Content-Transfer-Encoding: 7bit";
-					$str .= substr($this->$message, 0, $pos);
+					$str .= substr($this->message, 0, $pos);
 					$str .= PHP_EOL;
 					$str .= "--PHP-alt-$random_hash" . PHP_EOL;
 					$str .= "Content-Type: text/html; charset=\"utf-8\"" . PHP_EOL;
 					$str .= "Content-Transfer-Encoding: 7bit";
-					$str .= substr($this->$message, $pos);
+					$str .= substr($this->message, $pos);
 					$str .= "--PHP-alt-$random_hash--" . PHP_EOL;
 				}
 				
-				foreach ($this->$attachments as $key => $value) {
+				foreach ($this->attachments as $key => $value) {
 					$mime_type = mime_content_type($value);
 					//$mime_type = "image/jpeg";
 					$attachment = chunk_split(base64_encode(file_get_contents($value)));
@@ -188,17 +194,17 @@ class Mail {
 				}
 				$str .= "--PHP-mixed-$random_hash--" . PHP_EOL;
 			} else {
-				$pos = strpos($this->$message, "<html>");
+				$pos = strpos($this->message, "<html>");
 				if ($pos === false) {
 					$headers .= "Content-Type: text/plain; charset=\"utf-8\"" . PHP_EOL;
 					$headers .= "Content-Transfer-Encoding: 7bit";
-					$str .= $this->$message . PHP_EOL;
+					$str .= $this->message . PHP_EOL;
 				}
 				
 				if ($pos === 0) {
 					$headers .= "Content-Type: text/html; charset=\"utf-8\"" . PHP_EOL;
 					$headers .= "Content-Transfer-Encoding: 7bit";
-					$str .= $this->$message . PHP_EOL;
+					$str .= $this->message . PHP_EOL;
 				}
 				
 				if ($pos > 0) {
@@ -207,16 +213,16 @@ class Mail {
 					$str .= "--PHP-alt-$random_hash" . PHP_EOL;
 					$str .= "Content-Type: text/plain; charset=\"utf-8\"" . PHP_EOL;
 					$str .= "Content-Transfer-Encoding: 7bit";
-					$str .= substr($this->$message, 0, $pos);
+					$str .= substr($this->message, 0, $pos);
 					$str .= PHP_EOL;
 					$str .= "--PHP-alt-$random_hash" . PHP_EOL;
 					$str .= "Content-Type: text/html; charset=\"utf-8\"" . PHP_EOL;
 					$str .= "Content-Transfer-Encoding: 7bit";
-					$str .= substr($this->$message, $pos);
+					$str .= substr($this->message, $pos);
 					$str .= "--PHP-alt-$random_hash--" . PHP_EOL;
 				}
 			}
-			$this->$message = $str;
+			$this->message = $str;
 		}
 	}
 
@@ -226,25 +232,25 @@ class Mail {
 	 * Checks everything is right and sends email to destination.
 	 */
 	 	
-	public static function send() 
+	public function send() 
 	{
-		if (is_null($this->$to)) 
+		if (is_null($this->to)) 
 		{
 			trigger_error('No recipient specified.', E_USER_WARNING);
 		}
 		
-		if (is_null($this->$from)) 
+		if (is_null($this->from)) 
 		{
 			trigger_error('No sender specified.', E_USER_WARNING);
 		}
 			
-		if (is_null($this->$message)) 		
+		if (is_null($this->message)) 		
 		{
 			trigger_error('Message is empty.', E_USER_WARNING);
 		}
 		
 		$this->headers();
-		$sent = mail($this->$to, $this->$subject, $this->$message, $this->$headers);
+		$sent = mail($this->to, $this->subject, $this->message, $this->headers);
 		if(!$sent) {
 			trigger_error('Server cannot send the email.', E_USER_WARNING);
 		} else {
