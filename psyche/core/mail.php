@@ -14,14 +14,16 @@ namespace Psyche\Core;
 
 class Mail {
 	
-	protected $from = null;
+	//Necessary
 	protected $to = null;
 	protected $subject = null;
 	protected $message = null;
 	protected $headers = null;
 	
+	//Optional
 	protected $cc = null;
 	protected $bcc = null;
+	protected $from = null;
 	protected $reply_to = null;
 	protected $attachments = array();
 
@@ -30,22 +32,34 @@ class Mail {
 	 * 
 	 * @param string $from Path to the image file
 	 */	
-	public function __construct ($from) 
+	public function __construct ($input) 
 	{
-		$this->from = $from . PHP_EOL;
+ 		$args = func_num_args();
+		if($args = 1) 
+		{
+			if( is_array( $input ) )
+			{
+				$this->to = implode(', ', $input);	
+			}
+			else 
+			{
+				$this->to = $input;
+			}
+		} 
+		elseif($args >= 2)
+		{	
+			$this->to = '';
+			for($i=0; $i < $args; $i++)
+			{
+                $this->to .= func_get_arg($i);
+            }			
+				
+		} 
+		else 
+		{
+			trigger_error('Mail cannot figure out where to send your mail.', E_USER_WARNING);
+		}
 
-	}
-
-	/**
-	 * From address
-	 *
-	 * Can be direct email or in the form of: Sender Name <email@host.com>	 
-	 * @param string
-	 * @return string
-	 */
-	public static function from($from) 
-	{
-		return new static($from);
 	}
 
 	/**
@@ -55,10 +69,9 @@ class Mail {
 	 * @param string
 	 * @return string
 	 */
-	public function to($address) 
+	public static function to($input) 
 	{
-		$this->to = $address;
-		return $this;
+		return new static($input);
 	}
 	
 	/**
@@ -78,7 +91,26 @@ class Mail {
 		$this->bcc = $address;
 		return $this;
 	}
+
+	/**
+	 * From address
+	 *
+	 * Can be direct email or in the form of: Sender Name <email@host.com>
+	 * @param string
+	 * @return string
+	*/
+	public function from($from)
+	{
+		$this->from = $from;
 	
+		if(is_null($this->reply_to)) 
+		{
+			$this->reply_to = $from;
+		}
+	
+		return $this;
+	}
+		
 	/**
 	 * Reply to address
 	 *
@@ -88,7 +120,7 @@ class Mail {
 	 */	
 	public function reply_to($address) 
 	{
-		$this->reply_to = $address . PHP_EOL;
+		$this->reply_to = $address;
 		return $this;
 	}
 
@@ -130,23 +162,24 @@ class Mail {
 	
 	protected function headers() 
 	{
-		if (!$this->headers) {
+		if(!$this->headers) {
 			$this->headers = "MIME-Version: 1.0" . PHP_EOL;
+			$this->headers .= 'Content-type: text/html; charset=iso-8859-1' . PHP_EOL;	
 			$this->headers .= "To: " . $this->to . PHP_EOL;
 			$this->headers .= "From: " . $this->from . PHP_EOL;
 			$this->headers .= "Reply-To: " . $this->reply_to . PHP_EOL;
 			$this->headers .= "Return-Path: " . $this->from . PHP_EOL;
 			
-			if ($this->cc) {
+			if($this->cc) {
 				$this->headers .= "Cc: " . $this->cc . PHP_EOL;
 			}
 			
-			if ($this->bcc) {
+			if($this->bcc) {
 				$this->headers .= "Bcc: " . $this->bcc . PHP_EOL;
 			}
 			
 			$str = "";
-			if ($this->attachments) {
+			if($this->attachments) {
 				$random_hash = md5(date('r', time()));
 				$this->headers .= "Content-Type: multipart/mixed; boundary=\"PHP-mixed-".$random_hash."\"" . PHP_EOL;
 				
