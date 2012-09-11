@@ -87,7 +87,7 @@ class Mold
 			}
 		}
 
-		static::$compiled = 'stash/views/'.md5(static::$filename).'.php';
+		static::$compiled = 'stash/views/'.md5(static::$file).'.php';
 
 		// Will only parse the template if it hasn't expired yet. Otherwise
 		// the existing, compiled file will be used.
