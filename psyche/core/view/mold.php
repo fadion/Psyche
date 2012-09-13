@@ -51,6 +51,11 @@ class Mold
 	protected static $extends;
 
 	/**
+	 * @var array Holds the list of included filenames
+	 */
+	protected static $includes;
+
+	/**
 	 * @var array Holds temporarily contents of raw blocks
 	 */
 	protected static $raw = array();
@@ -85,6 +90,22 @@ class Mold
 			{
 				static::$parent .= config('mold extension');
 			}
+		}
+		
+		// Gets the contents of the actual file and those of the parent's if
+		// there's any. It will be further used to extract included files.
+		$temp_contents = static::$contents;
+		if (isset(static::$parent))
+		{
+			$temp_contents = file_get_contents(static::$parent).$temp_contents;
+		}
+
+		// Any included files found are added to the $includes variable.
+		// This is a neccessery step that will build the list of the included
+		// files, which will be finally checked in expired() for modifications.
+		if (preg_match_all("/\{%\s*include\s+(?:'|".'"'."){0,1}(.+?)(?:'|".'"'."){0,1}\s*%\}/i", $temp_contents, $matches))
+		{
+			static::$includes = $matches[1];
 		}
 
 		static::$compiled = 'stash/views/'.md5(static::$file).'.php';
@@ -240,6 +261,14 @@ class Mold
 	 */
 	protected static function parse_includes ()
 	{
+		// The $includes var is filled with included filenames during
+		// initialization. If it's empty, don't run another regex
+		// when we know there's no included file.
+		if (!isset(static::$includes))
+		{
+			return;
+		}
+
 		if (preg_match_all("/\{%\s*include\s+(?:'|".'"'."){0,1}(.+?)(?:'|".'"'."){0,1}\s*%\}/i", static::$contents, $matches))
 		{
 			$finds = $matches[0];
@@ -349,21 +378,38 @@ class Mold
 	 */
 	protected static function expired ()
 	{
-		$return = false;
-
 		// If the compiled template's modification time is lower then the original's, it
-		// means that it needs to be recompiled. In the elseif() part, the original's
-		// modification time is checked with the parent template (if it exists).
+		// means that it needs to be recompiled.
 		if (filemtime(static::$compiled) < filemtime(static::$file))
 		{
-			$return = true;
+			return true;
 		}
+		// The same is done for the parent template.
 		elseif (isset(static::$parent) and filemtime(static::$compiled) < filemtime(static::$parent))
 		{
-			$return = true;
+			return true;
+		}
+		// Finally included files are checked for modifications.
+		elseif (isset(static::$includes))
+		{
+			$includes = static::$includes;
+
+			foreach ($includes as $include)
+			{
+				$file = config('views path').$include;
+				if (pathinfo($file, PATHINFO_EXTENSION) == '')
+				{
+					$file .= config('mold extension');
+				}
+
+				if (filemtime(static::$compiled) < filemtime($file))
+				{
+					return true;
+				}
+			}
 		}
 
-		return $return;
+		return false;
 	}
 
 	/**
