@@ -1,4 +1,4 @@
-# End of Lie
+# End of Life
 
 Psyche is currently abandoned. We moved on to other projects and started better levering what the PHP community has to offer. There's no point in creating the same thing over and over again.
 
