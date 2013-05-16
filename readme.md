@@ -1,3 +1,7 @@
+# End of Lie
+
+Psyche is currently abandoned. We moved on to other projects and started better levering what the PHP community has to offer. There's no point in creating the same thing over and over again.
+
 # Psyche
 
 A simple, elegant and intuitive PHP 5.3 framework that should be appealing to beginners and advanced programmers. It's still in early alpha stage.

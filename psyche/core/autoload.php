@@ -124,7 +124,7 @@ class Autoload
 	 */
 	protected function maps ()
 	{
-		$file = 'config/maps.php';
+		$file = '../app/config/maps.php';
 
 		if (!isset($this->maps))
 		{
@@ -143,7 +143,7 @@ class Autoload
 	 */
 	protected function aliases ()
 	{
-		$file = 'config/aliases.php';
+		$file = '../app/config/aliases.php';
 
 		if (!isset($this->aliases))
 		{

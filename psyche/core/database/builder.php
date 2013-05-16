@@ -1020,8 +1020,17 @@ class Builder
 	 * @param string $type Order type: ASC or DESC
 	 * @return Query
 	 */
-	public function order ($field, $type)
+	public function order ($field, $type = null)
 	{
+		// If it's a raw input, stop any further proccessing
+		// and reset the $raw var.
+		if (static::$raw)
+		{
+			static::$raw = 0;
+			$this->query['order'] = $field;
+			return $this;
+		}
+
 		$fields = $field;
 
 		if (!is_array($field))
@@ -1189,8 +1198,8 @@ class Builder
 					if ($val != '')
 					{
 						$sql = $val;
-						break;
 					}
+					break;
 				case 'select':
 					if ($val != '')
 					{
@@ -1203,14 +1212,14 @@ class Builder
 							$sql .= 'DISTINCT ';
 						}
 						$sql .= $val;
-						break;
 					}
+					break;
 				case 'from':
 					if ($val != '')
 					{
 						$sql .= " FROM $val";
-						break;
 					}
+					break;
 				case 'join':
 				case 'left_join':
 				case 'right_join':
@@ -1218,26 +1227,25 @@ class Builder
 					{
 						$type = strtoupper(str_replace('_', ' ', $key));
 						
-						$i = 0;
-
 						// Joins are added as sub-arrays to allow multiple
 						// table joins.
-						foreach ($val as $join)
+						for ($i = 0, $count = count($val); $i < $count; $i++)
 						{
 							// ON and USING are added as sub-arrays too,
 							// so the corresponding key is called.
-							if (count($query['on']))
+							if (isset($query['on'][$i]))
 							{
-								$sql .= " $type $join ON {$query['on'][$i]}";
+								$sql .= " $type $val[$i] ON {$query['on'][$i]}";
+								array_shift($query['on']);
 							}
-							elseif (count($query['using']))
+							elseif (isset($query['using'][$i]))
 							{
-								$sql .= " $type $join USING({$query['using'][$i]})";
+								$sql .= " $type $val[$i] USING({$query['using'][$i]})";
+								array_shift($query['using']);
 							}
 							else {
-								$sql .= " $type $join";
+								$sql .= " $type $val[$i]";
 							}
-							$i++;
 						}
 					}
 					break;

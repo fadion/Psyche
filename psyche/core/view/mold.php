@@ -148,7 +148,7 @@ class Mold
 			return;
 		}
 
-		static::$contents = preg_replace("/\{%\s*extends\s+(?:'|".'"'."){0,1}".preg_quote(static::$extends)."(?:'|".'"'."){0,1}\s*%\}\n*/i", file_get_contents(static::$parent), static::$contents);
+		static::$contents = preg_replace("#\{%\s*extends\s+(?:'|".'"'."){0,1}".preg_quote(static::$extends)."(?:'|".'"'."){0,1}\s*%\}\n*#i", file_get_contents(static::$parent), static::$contents);
 	}
 
 	/**
@@ -269,7 +269,7 @@ class Mold
 			return;
 		}
 
-		if (preg_match_all("/\{%\s*include\s+(?:'|".'"'."){0,1}(.+?)(?:'|".'"'."){0,1}\s*%\}/i", static::$contents, $matches))
+		if (preg_match_all("#\{%\s*include\s+(?:'|".'"'."){0,1}(.+?)(?:'|".'"'."){0,1}\s*%\}#i", static::$contents, $matches))
 		{
 			$finds = $matches[0];
 			$includes = $matches[1];

@@ -100,7 +100,7 @@ class Config
 		// open the file again.
 		if (empty(static::$keys[$file]))
 		{
-			$path = 'config/'.$file.'.php';
+			$path = '../app/config/'.$file.'.php';
 
 			if (file_exists($path))
 			{

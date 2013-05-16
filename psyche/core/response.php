@@ -11,6 +11,8 @@ class Response
 	{
 		ob_start();
 
+		header("Content-type: text/html");
+
 		if (is_object($output) and isset($method))
 		{
 			if (!isset($parameters))

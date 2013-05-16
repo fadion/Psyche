@@ -38,10 +38,10 @@ class Relation extends Drill
 
 		$class_name = static::class_name($f_table);
 
-		$method = 'find_one';
+		$method = 'one';
 		if ($many)
 		{
-			$method = 'find_many';
+			$method = 'many';
 		}
 
 		// Builds a call to the model with find_one or find_many.

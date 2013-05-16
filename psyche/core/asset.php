@@ -237,6 +237,8 @@ class Asset
 	/**
 	 * Builds dependencies. This function runs recursively
 	 * to check if a dependency has dependencies of it's own.
+	 * 
+	 * @param string $name
 	 */
 	protected static function build_dependencies ($name)
 	{
@@ -254,6 +256,60 @@ class Asset
 				array_unshift(static::$output[$type], static::build_html(static::$library[$type][$file], $type));
 				static::build_dependencies($file);
 			}
+		}
+	}
+
+	/**
+	 * Combine assets and serve them as a single file.
+	 *
+	 * @param string $type
+	 * @param array $files
+	 */
+	public static function combine ($type = 'css', $files)
+	{
+		// $files should be a non-empty array and type either "css" or "js".
+		if (!is_array($files) or !count($files) or !in_array($type, array('css', 'js')))
+		{
+			return false;
+		}
+
+		$cached = true;
+		$compiled = config('assets path').config($type.' path').md5(implode('-', $files)).'.'.$type;
+		$real_files = array();
+
+		foreach ($files as $file)
+		{
+			$the_file = config('assets path').config($type.' path').$file;
+			$real_files[] = $the_file;
+
+			// If a compiled file exists and the asset file hasn't been modified,
+			// it will serve the compiled file.
+			if (!file_exists($compiled) or filemtime($the_file) > filemtime($compiled))
+			{
+				$cached = false;
+			}
+		}
+
+		// Combine the files if not serving from "cache".
+		if (!$cached)
+		{
+			$output = '';
+
+			foreach ($real_files as $file)
+			{
+				$output .= file_get_contents($file);
+			}
+
+			file_put_contents($compiled, $output);
+		}
+
+		if ($type == 'css')
+		{
+			return '<link rel="stylesheet" href="'.config('path').$compiled.'">';
+		}
+		elseif ($type == 'js')
+		{
+			return '<script src="'.config('path').$compiled.'"></script>';
 		}
 	}
 

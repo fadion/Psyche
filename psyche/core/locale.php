@@ -157,19 +157,19 @@ class Locale
 		// call, as it's used only via the from() method.
 		if (isset(static::$temp_language))
 		{
-			$file = 'locale/'.static::$temp_language.'/'.$this->file.'.php';
+			$file = config('locale path').static::$temp_language.'/'.$this->file.'.php';
 			static::$temp_language = null;
 		}
 		elseif (isset(static::$language))
 		{
-			$file = 'locale/'.static::$language.'/'.$this->file.'.php';
+			$file = config('locale path').static::$language.'/'.$this->file.'.php';
 		}
 		else
 		{
-			$file = 'locale/'.config('base locale').'/'.$this->file.'.php';
+			$file = config('locale path').config('base locale').'/'.$this->file.'.php';
 		}
 
-		$rollback = 'locale/'.config('rollback locale').'/'.$this->file.'.php';
+		$rollback = config('locale path').config('rollback locale').'/'.$this->file.'.php';
 
 		// When the cache isn't set, the file is included and added
 		// to the cache.
